@@ -4,18 +4,14 @@
   "framework": "nextjs",
   "regions": ["fra1"],
   "env": {
-    "NEXTAUTH_URL": "@nextauth_url",
-    "NEXTAUTH_SECRET": "@nextauth_secret",
-    "JWT_SECRET": "@jwt_secret",
-    "DB_HOST": "@db_host",
-    "DB_USER": "@db_user",
-    "DB_PASSWORD": "@db_password",
-    "DB_NAME": "@db_name",
-    "DB_PORT": "@db_port",
-    "EMAIL_HOST": "@email_host",
-    "EMAIL_PORT": "@email_port",
-    "EMAIL_USER": "@email_user",
-    "EMAIL_PASS": "@email_pass"
+    "NEXTAUTH_URL": "https://palacepokerv1.vercel.app",
+    "NEXTAUTH_SECRET": "vfzAA83gJej7JC59nI745GEShYjqO86epVcGhK7KyZA=",
+    "JWT_SECRET": "LoveYniQ7HEekBm4wWQaH15EVRZa9vWHqvvw3TAmCfg=",
+    "DB_HOST": "tmseventyseven.tarhely.eu",
+    "DB_USER": "salamons_poker",
+    "DB_PASSWORD": "Subaru86iok200",
+    "DB_NAME": "salamons_palacepoker",
+    "DB_PORT": "3306"
   },
   "functions": {
     "src/app/api/**/*.ts": {
