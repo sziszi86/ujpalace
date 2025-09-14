@@ -1,11 +1,13 @@
 -- Palace Poker Database Schema
--- Created for Next.js application
+-- For tarhely.eu MySQL: salamons_palacepoker
+-- Import this SQL file via cPanel phpMyAdmin or MySQL command line
 
-CREATE DATABASE IF NOT EXISTS palace_poker 
-  CHARACTER SET utf8mb4 
-  COLLATE utf8mb4_unicode_ci;
+-- Set charset
+SET NAMES utf8mb4;
+SET FOREIGN_KEY_CHECKS = 0;
 
-USE palace_poker;
+-- Database salamons_palacepoker should already exist on tarhely.eu
+-- USE salamons_palacepoker; -- uncomment if running via command line
 
 -- Users table for admin authentication
 CREATE TABLE users (
@@ -180,17 +182,17 @@ CREATE TABLE tournament_registrations (
 );
 
 -- Insert default data
-INSERT INTO tournament_categories (name, description, color) VALUES
+INSERT IGNORE INTO tournament_categories (name, description, color) VALUES
 ('Weekly Tournament', 'Heti rendszeresen megrendezett versenyek', '#228B22'),
 ('Special Event', 'Különleges események és nagyobb versenyek', '#D4AF37'),
 ('Satellite', 'Satellite versenyek nagyobb eseményekre', '#DC143C');
 
-INSERT INTO cash_game_types (name, description, icon, color) VALUES
+INSERT IGNORE INTO cash_game_types (name, description, icon, color) VALUES
 ('Texas Hold\'em', 'Klasszikus Texas Hold\'em póker', '♠', '#228B22'),
 ('Pot Limit Omaha', 'PLO - négy lap, nagyobb akció', '♦', '#DC143C'),
 ('Mixed Games', 'Vegyes játékok haladóknak', '♣', '#4169E1');
 
-INSERT INTO settings (setting_key, setting_value, description, setting_type) VALUES
+INSERT IGNORE INTO settings (setting_key, setting_value, description, setting_type) VALUES
 ('site_name', 'Palace Poker Szombathely', 'Website neve', 'text'),
 ('contact_email', 'info@palace-poker.hu', 'Kapcsolat email cím', 'text'),
 ('contact_phone', '+36 30 971 5832', 'Kapcsolat telefon', 'text'),
@@ -200,11 +202,34 @@ INSERT INTO settings (setting_key, setting_value, description, setting_type) VAL
 ('twitter_url', '#', 'Twitter oldal URL', 'text'),
 ('instagram_url', '#', 'Instagram oldal URL', 'text');
 
--- Create indexes for better performance
-CREATE INDEX idx_tournaments_date_status ON tournaments(tournament_date, status);
-CREATE INDEX idx_news_publish ON news(status, publish_date DESC);
-CREATE INDEX idx_banners_active_order ON banners(active, display_order);
+-- Sample tournaments
+INSERT IGNORE INTO tournaments (id, title, description, category_id, tournament_date, tournament_time, buy_in, guarantee_amount, structure, max_players, status) VALUES
+(1, 'Weekend Main Event', 'Hétvégi főesemény nagy nyereményekkel!', 1, '2025-01-18', '18:00:00', 15000.00, 100000.00, 'Freezeout', 120, 'upcoming'),
+(2, 'Daily Deepstack', 'Napi mély stack verseny türelmes játékosoknak.', 1, '2025-01-19', '20:00:00', 8000.00, 50000.00, 'Freezeout', 80, 'upcoming');
 
--- Create a default admin user (password should be hashed in real application)
-INSERT INTO users (username, email, password_hash, role) VALUES
-('admin', 'admin@palace-poker.hu', '$2b$10$placeholder_hash', 'admin');
+-- Sample cash games
+INSERT IGNORE INTO cash_games (id, name, game_type_id, stakes, min_buy_in, max_buy_in, description, schedule, active) VALUES
+(1, 'Micro Stakes Hold\'em', 1, '25/50', 2500.00, 10000.00, 'Kezdőknek ajánlott alacsony tét', 'Hétfő-Vasárnap 14:00-02:00', 1),
+(2, 'Low Stakes Hold\'em', 1, '50/100', 5000.00, 20000.00, 'Közepes szintű játékosoknak', 'Hétfő-Vasárnap 16:00-02:00', 1);
+
+-- Sample banners
+INSERT IGNORE INTO banners (id, title, description, image_url, display_order, active) VALUES
+(1, 'Üdvözlünk a Palace Pokerben!', 'Szombathely legjobb poker terme', '/images/banner-welcome.jpg', 1, 1),
+(2, 'Weekend Main Event', 'Minden hétvégén nagy verseny!', '/images/banner-tournament.jpg', 2, 1);
+
+-- Sample news
+INSERT IGNORE INTO news (id, title, content, excerpt, status, publish_date) VALUES
+(1, 'Palace Poker megnyitás', 'Üdvözlünk Szombathely új poker termében! Modern környezet, professzionális kiszolgálás.', 'Üdvözlünk Szombathely új poker termében!', 'published', NOW()),
+(2, 'Heti versenyprogram', 'Minden hétfőn új versenyprogram indul. Tekintse meg a részleteket!', 'Minden hétfőn új versenyprogram indul.', 'published', NOW());
+
+-- Create a default admin user (password: admin123 - should be properly hashed in production)
+INSERT IGNORE INTO users (id, username, email, password_hash, role) VALUES
+(1, 'sziszi86', 'salamonszilard@gmail.com', '$2b$10$rXzQqG8QqG8QqG8QqG8QqO', 'admin');
+
+-- Create indexes for better performance (IF NOT EXISTS for safety)
+CREATE INDEX IF NOT EXISTS idx_tournaments_date_status ON tournaments(tournament_date, status);
+CREATE INDEX IF NOT EXISTS idx_news_publish ON news(status, publish_date DESC);
+CREATE INDEX IF NOT EXISTS idx_banners_active_order ON banners(active, display_order);
+
+-- Restore foreign key checks
+SET FOREIGN_KEY_CHECKS = 1;

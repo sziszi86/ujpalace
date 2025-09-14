@@ -13,7 +13,12 @@
       "Bash(npm run build:*)",
       "Bash(ln:*)",
       "Bash(git push:*)",
-      "Bash(git init:*)"
+      "Bash(git init:*)",
+      "Bash(git remote add:*)",
+      "Bash(git config:*)",
+      "Bash(git remote set-url:*)",
+      "Bash(pkill:*)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []

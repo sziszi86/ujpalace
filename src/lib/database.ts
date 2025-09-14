@@ -6,320 +6,326 @@ export interface DatabaseConfig {
   password: string;
   database: string;
   port: number;
+  connectionLimit: number;
+  charset: string;
+  multipleStatements?: boolean;
 }
 
 const dbConfig: DatabaseConfig = {
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || '',
-  database: process.env.DB_NAME || 'palace_poker',
+  host: process.env.DB_HOST || '185.208.225.77',
+  user: process.env.DB_USER || 'salamons_poker',
+  password: process.env.DB_PASSWORD || 'Subaru86iok200',
+  database: process.env.DB_NAME || 'salamons_palacepoker',
   port: parseInt(process.env.DB_PORT || '3306'),
+  connectionLimit: 10,
+  charset: 'utf8mb4',
+  multipleStatements: true,
 };
 
-let connection: mysql.Connection | null = null;
+// Connection pool for better performance
+const pool = mysql.createPool(dbConfig);
 
-export async function getConnection() {
-  if (!connection) {
-    try {
-      connection = await mysql.createConnection(dbConfig);
-      if (process.env.NODE_ENV === 'development') {
-        console.log('Database connected successfully');
-      }
-    } catch (error) {
-      console.error('Database connection failed:', error);
-      throw error;
+// Test connection and log status
+export async function testConnection(): Promise<boolean> {
+  try {
+    const connection = await pool.getConnection();
+    await connection.ping();
+    connection.release();
+    if (process.env.NODE_ENV === 'development') {
+      console.log('✅ Database connected successfully to:', dbConfig.host);
     }
+    return true;
+  } catch (error) {
+    console.error('❌ Database connection failed:', error);
+    return false;
   }
-  return connection;
 }
 
-export async function createTables() {
-  const conn = await getConnection();
+// Execute query with connection pool
+export async function executeQuery<T = any>(query: string, params: any[] = []): Promise<T[]> {
+  try {
+    const [rows] = await pool.execute(query, params);
+    return rows as T[];
+  } catch (error) {
+    console.error('Query execution failed:', error);
+    console.error('Query:', query);
+    console.error('Params:', params);
+    throw error;
+  }
+}
+
+// Execute query and return single result
+export async function executeQuerySingle<T = any>(query: string, params: any[] = []): Promise<T | null> {
+  const rows = await executeQuery<T>(query, params);
+  return rows.length > 0 ? rows[0] : null;
+}
+
+// Execute insert and return insertId
+export async function executeInsert(query: string, params: any[] = []): Promise<{ insertId: number; affectedRows: number }> {
+  try {
+    const [result] = await pool.execute(query, params);
+    const insertResult = result as mysql.ResultSetHeader;
+    return {
+      insertId: insertResult.insertId,
+      affectedRows: insertResult.affectedRows,
+    };
+  } catch (error) {
+    console.error('Insert execution failed:', error);
+    console.error('Query:', query);
+    console.error('Params:', params);
+    throw error;
+  }
+}
+
+// Execute update/delete and return affected rows
+export async function executeUpdate(query: string, params: any[] = []): Promise<number> {
+  try {
+    const [result] = await pool.execute(query, params);
+    const updateResult = result as mysql.ResultSetHeader;
+    return updateResult.affectedRows;
+  } catch (error) {
+    console.error('Update execution failed:', error);
+    console.error('Query:', query);
+    console.error('Params:', params);
+    throw error;
+  }
+}
+
+// Tournament functions
+export async function getAllTournaments(limit?: number, status?: string) {
+  let query = `
+    SELECT t.*, tc.name as category_name, tc.color as category_color 
+    FROM tournaments t 
+    LEFT JOIN tournament_categories tc ON t.category_id = tc.id
+  `;
   
-  // Create admin_users table
-  await conn.execute(`
-    CREATE TABLE IF NOT EXISTS admin_users (
-      id INT PRIMARY KEY AUTO_INCREMENT,
-      username VARCHAR(50) UNIQUE NOT NULL,
-      email VARCHAR(100) UNIQUE NOT NULL,
-      password_hash VARCHAR(255) NOT NULL,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-    )
-  `);
-
-  // Create password_reset_tokens table
-  await conn.execute(`
-    CREATE TABLE IF NOT EXISTS password_reset_tokens (
-      id INT PRIMARY KEY AUTO_INCREMENT,
-      user_id INT NOT NULL,
-      token VARCHAR(255) NOT NULL UNIQUE,
-      expires_at TIMESTAMP NOT NULL,
-      used BOOLEAN DEFAULT FALSE,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (user_id) REFERENCES admin_users(id) ON DELETE CASCADE,
-      INDEX (token),
-      INDEX (expires_at)
-    )
-  `);
-
-  // Create news_categories table
-  await conn.execute(`
-    CREATE TABLE IF NOT EXISTS news_categories (
-      id INT PRIMARY KEY AUTO_INCREMENT,
-      name VARCHAR(100) NOT NULL,
-      slug VARCHAR(100) UNIQUE NOT NULL,
-      description TEXT,
-      color VARCHAR(20) DEFAULT '#007bff',
-      order_index INT DEFAULT 0,
-      active BOOLEAN DEFAULT TRUE,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-      INDEX (active),
-      INDEX (order_index)
-    )
-  `);
-
-  // Create news table
-  await conn.execute(`
-    CREATE TABLE IF NOT EXISTS news (
-      id INT PRIMARY KEY AUTO_INCREMENT,
-      title VARCHAR(255) NOT NULL,
-      slug VARCHAR(255) UNIQUE NOT NULL,
-      content TEXT NOT NULL,
-      excerpt TEXT,
-      image VARCHAR(500),
-      images TEXT,
-      publish_date DATE,
-      status ENUM('draft', 'published', 'archived') DEFAULT 'draft',
-      category VARCHAR(100),
-      tags TEXT,
-      featured BOOLEAN DEFAULT FALSE,
-      author VARCHAR(100),
-      read_time INT DEFAULT 0,
-      visible_from DATETIME NULL,
-      visible_until DATETIME NULL,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-      INDEX (status),
-      INDEX (publish_date),
-      INDEX (visible_from),
-      INDEX (visible_until)
-    )
-  `);
-
-  // Create about_pages table
-  await conn.execute(`
-    CREATE TABLE IF NOT EXISTS about_pages (
-      id INT PRIMARY KEY AUTO_INCREMENT,
-      title VARCHAR(255) NOT NULL,
-      content TEXT NOT NULL,
-      hero_image VARCHAR(500),
-      meta_description TEXT,
-      features TEXT,
-      last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-      active BOOLEAN DEFAULT TRUE,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-      INDEX (active)
-    )
-  `);
-
-  // Create banners table
-  await conn.execute(`
-    CREATE TABLE IF NOT EXISTS banners (
-      id INT PRIMARY KEY AUTO_INCREMENT,
-      title VARCHAR(255) NOT NULL,
-      image_url VARCHAR(500) NOT NULL,
-      link_url VARCHAR(500),
-      alt_text VARCHAR(255),
-      position ENUM('homepage', 'sidebar', 'footer', 'tournaments', 'news') DEFAULT 'homepage',
-      status ENUM('active', 'inactive') DEFAULT 'active',
-      order_index INT DEFAULT 0,
-      start_date DATETIME NULL,
-      end_date DATETIME NULL,
-      author_id INT NOT NULL,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-      FOREIGN KEY (author_id) REFERENCES admin_users(id) ON DELETE CASCADE,
-      INDEX (status),
-      INDEX (position),
-      INDEX (order_index)
-    )
-  `);
-
-  // Create tournaments table
-  await conn.execute(`
-    CREATE TABLE IF NOT EXISTS tournaments (
-      id INT PRIMARY KEY AUTO_INCREMENT,
-      title VARCHAR(255) NOT NULL,
-      description TEXT,
-      tournament_date DATE NOT NULL,
-      tournament_time TIME NOT NULL,
-      buy_in DECIMAL(10,2) NOT NULL,
-      guarantee_amount DECIMAL(10,2),
-      structure VARCHAR(100),
-      status ENUM('upcoming', 'running', 'finished', 'cancelled') DEFAULT 'upcoming',
-      max_players INT,
-      current_players INT DEFAULT 0,
-      prize_structure TEXT,
-      rules TEXT,
-      author_id INT NOT NULL,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-      FOREIGN KEY (author_id) REFERENCES admin_users(id) ON DELETE CASCADE,
-      INDEX (tournament_date),
-      INDEX (status)
-    )
-  `);
-
-  // Create cash_games table
-  await conn.execute(`
-    CREATE TABLE IF NOT EXISTS cash_games (
-      id INT PRIMARY KEY AUTO_INCREMENT,
-      name VARCHAR(255) NOT NULL,
-      stakes VARCHAR(100) NOT NULL,
-      game_type VARCHAR(100) NOT NULL,
-      min_buy_in DECIMAL(10,2) NOT NULL,
-      max_buy_in DECIMAL(10,2),
-      description TEXT,
-      schedule VARCHAR(255),
-      active BOOLEAN DEFAULT TRUE,
-      author_id INT NOT NULL,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-      FOREIGN KEY (author_id) REFERENCES admin_users(id) ON DELETE CASCADE,
-      INDEX (active)
-    )
-  `);
-
-  // Create gallery table
-  await conn.execute(`
-    CREATE TABLE IF NOT EXISTS gallery (
-      id INT PRIMARY KEY AUTO_INCREMENT,
-      title VARCHAR(255) NOT NULL,
-      image_url VARCHAR(500) NOT NULL,
-      thumbnail_url VARCHAR(500),
-      alt_text VARCHAR(255),
-      description TEXT,
-      category VARCHAR(100),
-      tags TEXT,
-      status ENUM('active', 'inactive') DEFAULT 'active',
-      order_index INT DEFAULT 0,
-      author_id INT NOT NULL,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-      FOREIGN KEY (author_id) REFERENCES admin_users(id) ON DELETE CASCADE,
-      INDEX (status),
-      INDEX (category),
-      INDEX (order_index)
-    )
-  `);
+  const params: any[] = [];
+  
+  if (status) {
+    query += ' WHERE t.status = ?';
+    params.push(status);
+  }
+  
+  query += ' ORDER BY t.tournament_date ASC';
+  
+  if (limit) {
+    query += ' LIMIT ?';
+    params.push(limit);
+  }
+  
+  return executeQuery(query, params);
 }
 
-// Mock database functions for development
-export class MockDatabase {
-  static async query(sql: string, params?: any[]): Promise<any[]> {
-    // In development, return mock data
-    console.log('Mock DB Query:', sql, params);
-    
-    if (sql.includes('tournaments')) {
-      return [
-        {
-          id: 1,
-          title: 'Friday Night Tournament',
-          description: 'Heti nagy verseny minden pénteken',
-          tournament_date: '2024-01-12',
-          tournament_time: '20:00',
-          buy_in: 15000,
-          guarantee_amount: 100000,
-          structure: 'Freeze-out',
-          status: 'upcoming',
-          max_players: 50,
-          current_players: 23,
-        },
-        {
-          id: 2,
-          title: 'Saturday Bounty Hunt',
-          description: 'Fejvadász verseny szombat este',
-          tournament_date: '2024-01-13',
-          tournament_time: '19:30',
-          buy_in: 20000,
-          guarantee_amount: 150000,
-          structure: 'Bounty',
-          status: 'upcoming',
-          max_players: 60,
-          current_players: 31,
-        }
-      ];
-    }
-    
-    if (sql.includes('cash_games')) {
-      return [
-        {
-          id: 1,
-          name: 'Texas Hold\'em 25/50',
-          stakes: '25/50 Ft',
-          game_type: 'Texas Hold\'em',
-          min_buy_in: 2500,
-          max_buy_in: 10000,
-          description: 'Alapszintű cash game',
-          schedule: 'Hétfő-Vasárnap 18:00-06:00',
-          active: true,
-        }
-      ];
-    }
-    
-    return [];
-  }
-
-  static async insert(table: string, data: any): Promise<{ insertId: number }> {
-    console.log('Mock DB Insert:', table, data);
-    return { insertId: Math.floor(Math.random() * 1000) };
-  }
-
-  static async update(table: string, data: any, where: any): Promise<{ affectedRows: number }> {
-    console.log('Mock DB Update:', table, data, where);
-    return { affectedRows: 1 };
-  }
-
-  static async delete(table: string, where: any): Promise<{ affectedRows: number }> {
-    console.log('Mock DB Delete:', table, where);
-    return { affectedRows: 1 };
-  }
-}
-
-// Export individual functions for API routes
-export async function getAllTournaments() {
-  return MockDatabase.query('SELECT * FROM tournaments ORDER BY tournament_date ASC');
+export async function getTournamentById(id: number) {
+  const query = `
+    SELECT t.*, tc.name as category_name, tc.color as category_color 
+    FROM tournaments t 
+    LEFT JOIN tournament_categories tc ON t.category_id = tc.id 
+    WHERE t.id = ?
+  `;
+  return executeQuerySingle(query, [id]);
 }
 
 export async function createTournament(data: any) {
-  return MockDatabase.insert('tournaments', data);
+  const query = `
+    INSERT INTO tournaments 
+    (title, description, category_id, tournament_date, tournament_time, buy_in, guarantee_amount, structure, max_players, rules) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+  const params = [
+    data.title,
+    data.description || null,
+    data.category_id || null,
+    data.tournament_date,
+    data.tournament_time,
+    data.buy_in,
+    data.guarantee_amount || null,
+    data.structure || null,
+    data.max_players || null,
+    data.rules || null
+  ];
+  return executeInsert(query, params);
 }
 
 export async function updateTournament(id: number, data: any) {
-  return MockDatabase.update('tournaments', data, { id });
+  const query = `
+    UPDATE tournaments 
+    SET title = ?, description = ?, category_id = ?, tournament_date = ?, tournament_time = ?, 
+        buy_in = ?, guarantee_amount = ?, structure = ?, max_players = ?, rules = ?, updated_at = NOW()
+    WHERE id = ?
+  `;
+  const params = [
+    data.title,
+    data.description || null,
+    data.category_id || null,
+    data.tournament_date,
+    data.tournament_time,
+    data.buy_in,
+    data.guarantee_amount || null,
+    data.structure || null,
+    data.max_players || null,
+    data.rules || null,
+    id
+  ];
+  return executeUpdate(query, params);
 }
 
 export async function deleteTournament(id: number) {
-  return MockDatabase.delete('tournaments', { id });
+  const query = 'DELETE FROM tournaments WHERE id = ?';
+  return executeUpdate(query, [id]);
 }
 
-export async function getAllCashGames() {
-  return MockDatabase.query('SELECT * FROM cash_games WHERE active = 1');
+// Cash game functions
+export async function getAllCashGames(activeOnly: boolean = true) {
+  let query = `
+    SELECT cg.*, cgt.name as game_type_name, cgt.icon as game_type_icon 
+    FROM cash_games cg 
+    LEFT JOIN cash_game_types cgt ON cg.game_type_id = cgt.id
+  `;
+  
+  if (activeOnly) {
+    query += ' WHERE cg.active = 1';
+  }
+  
+  query += ' ORDER BY cg.created_at DESC';
+  
+  return executeQuery(query);
+}
+
+export async function getCashGameById(id: number) {
+  const query = `
+    SELECT cg.*, cgt.name as game_type_name, cgt.icon as game_type_icon 
+    FROM cash_games cg 
+    LEFT JOIN cash_game_types cgt ON cg.game_type_id = cgt.id 
+    WHERE cg.id = ?
+  `;
+  return executeQuerySingle(query, [id]);
 }
 
 export async function createCashGame(data: any) {
-  return MockDatabase.insert('cash_games', data);
+  const query = `
+    INSERT INTO cash_games 
+    (name, game_type_id, stakes, min_buy_in, max_buy_in, description, schedule, active) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+  const params = [
+    data.name,
+    data.game_type_id || null,
+    data.stakes,
+    data.min_buy_in,
+    data.max_buy_in || null,
+    data.description || null,
+    data.schedule || null,
+    data.active !== undefined ? data.active : true
+  ];
+  return executeInsert(query, params);
 }
 
 export async function updateCashGame(id: number, data: any) {
-  return MockDatabase.update('cash_games', data, { id });
+  const query = `
+    UPDATE cash_games 
+    SET name = ?, game_type_id = ?, stakes = ?, min_buy_in = ?, max_buy_in = ?, 
+        description = ?, schedule = ?, active = ?, updated_at = NOW()
+    WHERE id = ?
+  `;
+  const params = [
+    data.name,
+    data.game_type_id || null,
+    data.stakes,
+    data.min_buy_in,
+    data.max_buy_in || null,
+    data.description || null,
+    data.schedule || null,
+    data.active !== undefined ? data.active : true,
+    id
+  ];
+  return executeUpdate(query, params);
 }
 
 export async function deleteCashGame(id: number) {
-  return MockDatabase.delete('cash_games', { id });
+  const query = 'DELETE FROM cash_games WHERE id = ?';
+  return executeUpdate(query, [id]);
 }
 
-export default MockDatabase;
+// Banner functions
+export async function getAllBanners(activeOnly: boolean = true) {
+  let query = 'SELECT * FROM banners';
+  
+  if (activeOnly) {
+    query += ' WHERE active = 1';
+  }
+  
+  query += ' ORDER BY display_order ASC, created_at DESC';
+  
+  return executeQuery(query);
+}
+
+export async function getBannerById(id: number) {
+  const query = 'SELECT * FROM banners WHERE id = ?';
+  return executeQuerySingle(query, [id]);
+}
+
+export async function createBanner(data: any) {
+  const query = `
+    INSERT INTO banners 
+    (title, description, image_url, link_url, display_order, active, start_date, end_date) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+  const params = [
+    data.title,
+    data.description || null,
+    data.image_url,
+    data.link_url || null,
+    data.display_order || 0,
+    data.active !== undefined ? data.active : true,
+    data.start_date || null,
+    data.end_date || null
+  ];
+  return executeInsert(query, params);
+}
+
+export async function updateBanner(id: number, data: any) {
+  const query = `
+    UPDATE banners 
+    SET title = ?, description = ?, image_url = ?, link_url = ?, display_order = ?, 
+        active = ?, start_date = ?, end_date = ?, updated_at = NOW()
+    WHERE id = ?
+  `;
+  const params = [
+    data.title,
+    data.description || null,
+    data.image_url,
+    data.link_url || null,
+    data.display_order || 0,
+    data.active !== undefined ? data.active : true,
+    data.start_date || null,
+    data.end_date || null,
+    id
+  ];
+  return executeUpdate(query, params);
+}
+
+export async function deleteBanner(id: number) {
+  const query = 'DELETE FROM banners WHERE id = ?';
+  return executeUpdate(query, [id]);
+}
+
+// News functions
+export async function getAllNews(limit?: number, status: string = 'published') {
+  let query = 'SELECT * FROM news WHERE status = ?';
+  const params = [status];
+  
+  query += ' ORDER BY publish_date DESC, created_at DESC';
+  
+  if (limit) {
+    query += ' LIMIT ?';
+    params.push(limit);
+  }
+  
+  return executeQuery(query, params);
+}
+
+// Initialize connection pool on import
+testConnection().catch(console.error);
+
+export default pool;
