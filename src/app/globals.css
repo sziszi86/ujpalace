@@ -1,0 +1,429 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Markdown Editor CSS import */
+@import '@uiw/react-md-editor/markdown-editor.css';
+
+/* Markdown Preview styles for article content */
+.wmde-markdown {
+  color: #1f2937 !important; /* gray-800 */
+}
+
+.wmde-markdown h1,
+.wmde-markdown h2,
+.wmde-markdown h3,
+.wmde-markdown h4,
+.wmde-markdown h5,
+.wmde-markdown h6 {
+  color: #111827 !important; /* gray-900 */
+  font-weight: 700 !important;
+}
+
+.wmde-markdown p,
+.wmde-markdown li,
+.wmde-markdown span {
+  color: #1f2937 !important; /* gray-800 */
+  line-height: 1.7 !important;
+}
+
+.wmde-markdown strong,
+.wmde-markdown b {
+  color: #111827 !important; /* gray-900 */
+  font-weight: 600 !important;
+}
+
+.wmde-markdown ul,
+.wmde-markdown ol {
+  color: #1f2937 !important; /* gray-800 */
+}
+
+.wmde-markdown code {
+  background-color: #f3f4f6 !important; /* gray-100 */
+  color: #111827 !important; /* gray-900 */
+  padding: 2px 4px !important;
+  border-radius: 4px !important;
+}
+
+/* Markdown Editor Styles - Erőteljes felülírás minden elemre */
+.w-md-editor {
+  background-color: #fff !important;
+  border: 1px solid #d1d5db !important;
+}
+
+/* Teljesen felülírjuk a markdown editor színeket */
+.w-md-editor,
+.w-md-editor *,
+.w-md-editor textarea,
+.w-md-editor input,
+.w-md-editor .w-md-editor-text-textarea,
+.w-md-editor .w-md-editor-text-input,
+.w-md-editor .w-md-editor-text,
+[data-color-mode="light"] .w-md-editor *,
+[data-color-mode="light"] .w-md-editor textarea,
+[data-color-mode="light"] .w-md-editor input,
+[data-color-mode="light"] .w-md-editor .w-md-editor-text-textarea,
+[data-color-mode="light"] .w-md-editor .w-md-editor-text {
+  color: #000000 !important;
+  background-color: none !important;
+  font-size: 14px !important;
+  font-family: inherit !important;
+  line-height: 1.5 !important;
+}
+.w-md-editor, .w-md-editor *, .w-md-editor textarea, .w-md-editor input, .w-md-editor .w-md-editor-text-textarea, .w-md-editor .w-md-editor-text-input, .w-md-editor .w-md-editor-text, [data-color-mode="light"] .w-md-editor *, [data-color-mode="light"] .w-md-editor textarea, [data-color-mode="light"] .w-md-editor input, [data-color-mode="light"] .w-md-editor .w-md-editor-text-textarea, [data-color-mode="light"] .w-md-editor .w-md-editor-text{
+    background-color: transparent !important;
+}
+
+/* Specifikus markdown editor területek */
+.w-md-editor-text-area,
+.w-md-editor-text-container,
+.w-md-editor-preview {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+.w-md-editor-text-area *,
+.w-md-editor-text-container *,
+.w-md-editor-preview * {
+  color: #000000 !important;
+  background-color: transparent !important;
+}
+
+/* Dark mode felülírás */
+[data-color-mode="dark"] .w-md-editor,
+[data-color-mode="dark"] .w-md-editor *,
+[data-color-mode="dark"] .w-md-editor textarea {
+  color: #000000 !important;
+  background-color: #ffffff !important;
+}
+
+/* Minden textarea elem a markdown editorban */
+.w-md-editor textarea[data-color-mode="light"],
+.w-md-editor textarea {
+  color: #000000 !important;
+  caret-color: #000000 !important;
+}
+
+/* Minden lehetséges selektor a markdown editorhoz */
+div[data-color-mode="light"] .w-md-editor *,
+div[data-color-mode="light"] * {
+  color: #000000 !important;
+}
+
+/* Radikális megoldás minden elemre */
+* {
+  color: inherit;
+}
+
+.w-md-editor *, 
+.w-md-editor textarea, 
+.w-md-editor input {
+  color: #000000 !important;
+  background: #ffffff !important;
+}
+
+.w-md-editor.w-md-editor-focus {
+  border-color: #B91C1C !important;
+  box-shadow: 0 0 0 1px #B91C1C !important;
+}
+
+/* Admin form input styles */
+.admin-input {
+  color: #000000 !important;
+  background-color: #ffffff !important;
+}
+
+.admin-input::placeholder {
+  color: #9ca3af !important;
+}
+
+/* Minden input és textarea fekete szöveg */
+input, textarea, select {
+  color: #000000 !important;
+}
+
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+body {
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Create a specific class for elements that should have black text on white backgrounds */
+  .force-black-text {
+    color: #000000 !important;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-gradient-to-r from-poker-primary to-poker-secondary text-white font-semibold py-3 px-6 rounded-xl 
+           hover:from-poker-secondary hover:to-poker-primary transform hover:scale-105 transition-all duration-300 
+           shadow-lg hover:shadow-xl active:scale-95 relative overflow-hidden;
+  }
+  
+  .btn-secondary {
+    @apply bg-gradient-to-r from-poker-green to-poker-darkgreen text-white font-semibold py-3 px-6 rounded-xl 
+           hover:from-poker-darkgreen hover:to-poker-green transform hover:scale-105 transition-all duration-300 
+           shadow-lg hover:shadow-xl active:scale-95;
+  }
+
+  .btn-outline {
+    @apply border-2 border-poker-primary text-poker-primary font-semibold py-3 px-6 rounded-xl 
+           hover:bg-poker-primary hover:text-white transform hover:scale-105 transition-all duration-300 
+           shadow-lg hover:shadow-xl active:scale-95;
+  }
+
+  .card-modern {
+    @apply bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl hover:shadow-2xl 
+           transform hover:-translate-y-1 transition-all duration-300 border border-gray-100/50;
+  }
+
+  .glass-effect {
+    @apply bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl shadow-xl;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-poker-primary to-poker-gold bg-clip-text text-transparent;
+  }
+
+  .animate-on-scroll {
+    @apply opacity-0 translate-y-8 transition-all duration-700 ease-out;
+  }
+
+  .animate-on-scroll.visible {
+    @apply opacity-100 translate-y-0;
+  }
+}
+
+@layer utilities {
+  /* Enhanced animations for 2025 design trends */
+  .animate-fade-in {
+    animation: fadeIn 0.8s ease-out forwards;
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.8s ease-out forwards;
+  }
+  
+  .animate-scale-in {
+    animation: scaleIn 0.6s ease-out forwards;
+  }
+  
+  .animate-bounce-subtle {
+    animation: bounceSubtle 2s ease-in-out infinite;
+  }
+  
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+  
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite alternate;
+  }
+
+  .animate-fade-in-up {
+    animation: fadeInUp 0.8s ease-out forwards;
+  }
+
+  .poker-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .poker-card:hover {
+    animation: pokerCardHover 0.6s ease-in-out;
+  }
+
+  /* 3D Poker Card Peek Animation */
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+
+  .transform-gpu {
+    transform: translateZ(0);
+  }
+
+  .rotateY-12 {
+    transform: rotateY(12deg);
+  }
+
+  .rotateX-5 {
+    transform: rotateX(5deg);
+  }
+
+  .group:hover .group-hover\:rotateY-12 {
+    transform: rotateY(12deg) rotateX(5deg) translateY(-16px) translateX(8px);
+  }
+
+  .group:hover .group-hover\:rotateX-5 {
+    transform: rotateX(5deg);
+  }
+
+  /* 3D Card Curl Animation */
+  .group:hover .group-hover\:rotate-x-12 {
+    transform: rotateX(12deg) rotateY(6deg) translateY(-8px);
+  }
+
+  .group:hover .group-hover\:rotate-y-6 {
+    transform: rotateY(6deg);
+  }
+
+  .rotate-x-12 {
+    transform: rotateX(12deg);
+  }
+
+  .rotate-y-6 {
+    transform: rotateY(6deg);
+  }
+
+  .origin-bottom-right {
+    transform-origin: bottom right;
+  }
+
+  .backface-hidden {
+    backfaceVisibility: hidden;
+  }
+
+  /* Radial gradient utility */
+  .bg-gradient-radial {
+    background: radial-gradient(circle, var(--tw-gradient-stops));
+  }
+
+  /* Card back shine effect */
+  .poker-card-back {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .poker-card-back::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, 
+      transparent 30%, 
+      rgba(255, 255, 255, 0.2) 50%, 
+      transparent 70%);
+    transform: rotate(45deg);
+    animation: cardShine 3s ease-in-out infinite;
+  }
+
+  @keyframes cardShine {
+    0%, 100% {
+      transform: translateX(-100%) translateY(-100%) rotate(45deg);
+    }
+    50% {
+      transform: translateX(100%) translateY(100%) rotate(45deg);
+    }
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes bounceSubtle {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-5px);
+  }
+  60% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes glow {
+  from {
+    box-shadow: 0 0 20px rgba(185, 28, 28, 0.5);
+  }
+  to {
+    box-shadow: 0 0 30px rgba(185, 28, 28, 0.8);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pokerCardHover {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-8px) scale(1.02);
+  }
+  100% {
+    transform: translateY(-8px) scale(1.02);
+  }
+}

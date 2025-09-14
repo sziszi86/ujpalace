@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:palace-poker.hu)",
+      "Bash(npm install:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(npm run dev:*)",
+      "Bash(git checkout:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git ls-tree:*)",
+      "Bash(git rm:*)",
+      "Bash(npm run build:*)",
+      "Bash(ln:*)",
+      "Bash(git push:*)",
+      "Bash(git init:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

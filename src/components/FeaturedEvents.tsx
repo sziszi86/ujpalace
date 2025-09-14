@@ -1,0 +1,165 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { formatCurrency, formatDate, formatTime } from '@/utils/formatters';
+
+interface Tournament {
+  id: number;
+  title: string;
+  tournament_date: string;
+  tournament_time: string;
+  buy_in: number;
+  guarantee_amount: number;
+  current_players: number;
+  max_players: number | null;
+  image_url?: string;
+}
+
+export default function FeaturedEvents() {
+  const [tournaments, setTournaments] = useState<Tournament[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchTournaments();
+  }, []);
+
+  const fetchTournaments = async () => {
+    try {
+      const response = await fetch('/api/tournaments?featured=true&limit=3');
+      if (response.ok) {
+        const data = await response.json();
+        setTournaments(data);
+      }
+    } catch (error) {
+      console.error('Error fetching featured tournaments:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <section className="py-16 bg-poker-dark">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-white mb-4">
+              Kiemelt Események
+            </h2>
+            <div className="animate-pulse">
+              <div className="h-4 bg-gray-600 rounded w-48 mx-auto"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="py-16 bg-poker-dark">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold text-white mb-4">
+            Kiemelt Események
+          </h2>
+          <p className="text-poker-muted max-w-2xl mx-auto">
+            Ne maradj le a legnagyobb versenyeinkről és eseményeinkről
+          </p>
+        </div>
+
+        {tournaments.length === 0 ? (
+          <div className="text-center text-poker-muted">
+            <p>Jelenleg nincsenek kiemelt események.</p>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-3 gap-8">
+            {tournaments.map((tournament) => (
+              <div
+                key={tournament.id}
+                className="bg-poker-light border border-poker-accent/20 rounded-xl overflow-hidden hover:border-poker-gold/50 transition-all duration-300"
+              >
+                {tournament.image_url && (
+                  <div className="h-48 overflow-hidden">
+                    <img
+                      src={tournament.image_url}
+                      alt={tournament.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+                
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-white mb-3">
+                    {tournament.title}
+                  </h3>
+                  
+                  <div className="space-y-2 mb-4">
+                    <div className="flex items-center text-poker-muted">
+                      <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+                      </svg>
+                      {formatDate(tournament.tournament_date)} {formatTime(tournament.tournament_time)}
+                    </div>
+                    
+                    <div className="flex items-center text-poker-gold">
+                      <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                      </svg>
+                      Buy-in: {formatCurrency(tournament.buy_in)}
+                    </div>
+                    
+                    <div className="flex items-center text-poker-gold">
+                      <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M3.293 9.707a1 1 0 010-1.414l6-6a1 1 0 011.414 0l6 6a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L4.707 9.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                      </svg>
+                      Garancia: {formatCurrency(tournament.guarantee_amount)}
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between items-center mb-4">
+                    <span className="text-sm text-poker-muted">
+                      {tournament.current_players} jelentkező
+                      {tournament.max_players && ` / ${tournament.max_players}`}
+                    </span>
+                    {tournament.max_players && (
+                      <div className="w-24 bg-poker-dark rounded-full h-2">
+                        <div
+                          className="bg-poker-gold h-2 rounded-full transition-all duration-300"
+                          style={{
+                            width: `${Math.min(
+                              (tournament.current_players / tournament.max_players) * 100,
+                              100
+                            )}%`,
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  <Link
+                    href={`/tournaments/${tournament.id}`}
+                    className="block w-full bg-poker-gold text-poker-dark text-center font-bold py-3 rounded-lg hover:bg-poker-gold/90 transition-colors duration-300"
+                  >
+                    Részletek
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="text-center mt-12">
+          <Link
+            href="/tournaments"
+            className="inline-flex items-center bg-transparent border border-poker-gold text-poker-gold px-8 py-3 rounded-lg font-medium hover:bg-poker-gold hover:text-poker-dark transition-all duration-300"
+          >
+            Összes verseny megtekintése
+            <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
