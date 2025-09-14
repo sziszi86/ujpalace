@@ -1,41 +1,12 @@
 import { NextResponse } from 'next/server';
-import { getConnection } from '@/lib/database';
-
-async function getAllCashGames() {
-  const connection = await getConnection();
-  const [rows] = await connection.execute('SELECT * FROM cash_games ORDER BY created_at DESC');
-  return rows;
-}
-
-async function insertCashGame(data) {
-  const connection = await getConnection();
-  const [result] = await connection.execute(
-    'INSERT INTO cash_games (name, stakes, game_type, min_buy_in, max_buy_in, description, schedule, active, author_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-    [data.name, data.stakes, data.game_type, data.min_buy_in, data.max_buy_in, data.description, data.schedule, data.active || true, data.author_id || 1]
-  );
-  return result;
-}
-
-async function updateCashGame(id, data) {
-  const connection = await getConnection();
-  const [result] = await connection.execute(
-    'UPDATE cash_games SET name = ?, stakes = ?, game_type = ?, min_buy_in = ?, max_buy_in = ?, description = ?, schedule = ?, active = ? WHERE id = ?',
-    [data.name, data.stakes, data.game_type, data.min_buy_in, data.max_buy_in, data.description, data.schedule, data.active, id]
-  );
-  return result;
-}
-
-async function deleteCashGame(id) {
-  const connection = await getConnection();
-  const [result] = await connection.execute('DELETE FROM cash_games WHERE id = ?', [id]);
-  return result;
-}
+import { getAllCashGames, createCashGame, updateCashGame, deleteCashGame } from '@/lib/database';
 
 export async function GET() {
   try {
     const cashGames = await getAllCashGames();
     return NextResponse.json(cashGames);
   } catch (error) {
+    console.error('Error fetching cash games:', error);
     return NextResponse.json(
       { error: 'Failed to fetch cash games' },
       { status: 500 }
@@ -46,12 +17,13 @@ export async function GET() {
 export async function POST(request) {
   try {
     const data = await request.json();
-    const result = await insertCashGame(data);
+    const result = await createCashGame(data);
     return NextResponse.json(
       { message: 'Cash game created successfully', id: result.insertId },
       { status: 201 }
     );
   } catch (error) {
+    console.error('Error creating cash game:', error);
     return NextResponse.json(
       { error: 'Failed to create cash game' },
       { status: 500 }
@@ -71,9 +43,14 @@ export async function PUT(request) {
       );
     }
 
-    await updateCashGame(id, cashGameData);
+    const affectedRows = await updateCashGame(id, cashGameData);
+    if (affectedRows === 0) {
+      return NextResponse.json({ error: 'Cash game not found' }, { status: 404 });
+    }
+    
     return NextResponse.json({ message: 'Cash game updated successfully' });
   } catch (error) {
+    console.error('Error updating cash game:', error);
     return NextResponse.json(
       { error: 'Failed to update cash game' },
       { status: 500 }
@@ -93,9 +70,14 @@ export async function DELETE(request) {
       );
     }
 
-    await deleteCashGame(id);
+    const affectedRows = await deleteCashGame(parseInt(id));
+    if (affectedRows === 0) {
+      return NextResponse.json({ error: 'Cash game not found' }, { status: 404 });
+    }
+    
     return NextResponse.json({ message: 'Cash game deleted successfully' });
   } catch (error) {
+    console.error('Error deleting cash game:', error);
     return NextResponse.json(
       { error: 'Failed to delete cash game' },
       { status: 500 }

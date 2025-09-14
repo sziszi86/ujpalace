@@ -110,7 +110,7 @@ export async function getAllTournaments(limit?: number, status?: string) {
   
   if (limit) {
     query += ' LIMIT ?';
-    params.push(limit);
+    params.push(limit.toString());
   }
   
   return executeQuery(query, params);
@@ -319,7 +319,7 @@ export async function getAllNews(limit?: number, status: string = 'published') {
   
   if (limit) {
     query += ' LIMIT ?';
-    params.push(limit);
+    params.push(limit.toString());
   }
   
   return executeQuery(query, params);

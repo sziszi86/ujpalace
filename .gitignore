@@ -52,3 +52,4 @@ temp/
 
 # Runtime uploads (do not commit user-uploaded files)
 public/uploads/
+.vercel
