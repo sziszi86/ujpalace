@@ -19,7 +19,13 @@ export default function TournamentCard({ tournament }: TournamentCardProps) {
 
   useEffect(() => {
     const updateCountdown = () => {
-      const tournamentDateTime = new Date(`${tournament.date}T${tournament.time}`);
+      // Handle both possible field names from API
+      const dateField = tournament.tournament_date || tournament.date;
+      const timeField = tournament.tournament_time || tournament.time;
+      
+      if (!dateField || !timeField) return;
+      
+      const tournamentDateTime = new Date(`${dateField.split('T')[0]}T${timeField}`);
       const now = new Date();
       const difference = tournamentDateTime.getTime() - now.getTime();
 
@@ -39,7 +45,7 @@ export default function TournamentCard({ tournament }: TournamentCardProps) {
     const timer = setInterval(updateCountdown, 1000);
 
     return () => clearInterval(timer);
-  }, [tournament.date, tournament.time]);
+  }, [tournament.date, tournament.time, tournament.tournament_date, tournament.tournament_time]);
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const year = date.getFullYear();
@@ -79,6 +85,43 @@ export default function TournamentCard({ tournament }: TournamentCardProps) {
       default:
         return 'Ismeretlen';
     }
+  };
+
+  const addToCalendar = () => {
+    const dateField = tournament.tournament_date || tournament.date;
+    const timeField = tournament.tournament_time || tournament.time;
+    const startDate = new Date(`${dateField.split('T')[0]}T${timeField}`);
+    const endDate = new Date(startDate);
+    endDate.setHours(endDate.getHours() + 6); // Assume tournament lasts 6 hours
+
+    const formatDate = (date: Date) => {
+      return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    };
+
+    const eventTitle = `Palace Poker - ${tournament.title}`;
+    const eventDescription = `${tournament.description}\\n\\nBuy-in: ${formatCurrency(Number(tournament.buy_in || tournament.buyIn || 0))}\\nHelyszín: Palace Poker Szombathely, Semmelweis u. 2.\\nTel: +36 30 971 5832`;
+    const eventLocation = 'Palace Poker Szombathely, Semmelweis u. 2., 9700 Szombathely';
+
+    const icsContent = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//Palace Poker//Tournament Calendar//EN',
+      'BEGIN:VEVENT',
+      `DTSTART:${formatDate(startDate)}`,
+      `DTEND:${formatDate(endDate)}`,
+      `SUMMARY:${eventTitle}`,
+      `DESCRIPTION:${eventDescription}`,
+      `LOCATION:${eventLocation}`,
+      `UID:tournament-${tournament.id}-${Date.now()}@palace-poker.hu`,
+      'END:VEVENT',
+      'END:VCALENDAR'
+    ].join('\n');
+
+    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `palace-poker-${tournament.title.toLowerCase().replace(/[^a-z0-9]/g, '-')}.ics`;
+    link.click();
   };
 
   return (
@@ -123,45 +166,116 @@ export default function TournamentCard({ tournament }: TournamentCardProps) {
 
       {/* Content */}
       <div className="p-6">
-        {/* Date and Basic Info */}
+        {/* Tournament Date - Prominently Featured */}
+        <div className="mb-6">
+          <div className="bg-gradient-to-r from-poker-primary to-poker-secondary p-6 rounded-xl text-white text-center shadow-lg">
+            <div className="mb-2">
+              <h4 className="text-lg font-bold">Verseny időpontja</h4>
+            </div>
+            <div className="text-3xl font-bold mb-1">
+              {formatDate(tournament.tournament_date || tournament.date)}
+            </div>
+            <div className="text-xl font-semibold text-poker-accent">
+              {tournament.tournament_time || tournament.time}
+            </div>
+          </div>
+        </div>
+
+        {/* Modern Countdown Timer */}
+        <div className="mb-6">
+          <div className="bg-gradient-to-r from-slate-50 to-slate-100 p-4 rounded-2xl border border-slate-200 shadow-inner">
+            <div className="flex items-center justify-center mb-4">
+              <div className="flex items-center bg-gradient-to-r from-red-500 to-orange-500 text-white px-4 py-2 rounded-full shadow-md">
+                <div className="w-3 h-3 bg-white rounded-full mr-3 animate-pulse"></div>
+                <span className="font-bold text-sm">Kezdésig hátralevő idő</span>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-4 gap-2 sm:gap-3">
+              <div className="bg-white rounded-xl p-2 sm:p-3 shadow-lg border border-slate-100 hover:shadow-xl transition-all duration-300 hover:scale-105 group">
+                <div className="text-center">
+                  <div className="text-lg sm:text-2xl font-bold text-slate-800 mb-1 group-hover:text-poker-primary transition-colors">
+                    {timeLeft.days}
+                  </div>
+                  <div className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+                    nap
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-xl p-2 sm:p-3 shadow-lg border border-slate-100 hover:shadow-xl transition-all duration-300 hover:scale-105 group">
+                <div className="text-center">
+                  <div className="text-lg sm:text-2xl font-bold text-slate-800 mb-1 group-hover:text-poker-primary transition-colors">
+                    {timeLeft.hours}
+                  </div>
+                  <div className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+                    óra
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-xl p-2 sm:p-3 shadow-lg border border-slate-100 hover:shadow-xl transition-all duration-300 hover:scale-105 group">
+                <div className="text-center">
+                  <div className="text-lg sm:text-2xl font-bold text-slate-800 mb-1 group-hover:text-poker-primary transition-colors">
+                    {timeLeft.minutes}
+                  </div>
+                  <div className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+                    perc
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-xl p-2 sm:p-3 shadow-lg border border-slate-100 hover:shadow-xl transition-all duration-300 hover:scale-105 group">
+                <div className="text-center">
+                  <div className="text-lg sm:text-2xl font-bold text-slate-800 mb-1 group-hover:text-poker-primary transition-colors animate-pulse">
+                    {timeLeft.seconds}
+                  </div>
+                  <div className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+                    mp
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Tournament Info */}
         <div className="mb-6 space-y-3">
-          {/* Countdown Timer */}
-          <div className="p-3 bg-gradient-to-r from-red-500/10 to-orange-500/10 rounded-lg border border-red-200">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center">
-                <span className="w-2 h-2 bg-red-500 rounded-full mr-3 animate-pulse"></span>
-                <span className="text-poker-dark font-medium">Kezdésig:</span>
-              </div>
-              <span className="text-xs text-poker-muted">{formatDate(tournament.date)} • {tournament.time}</span>
-            </div>
-            <div className="grid grid-cols-4 gap-2 text-center">
-              <div className="bg-white/70 rounded-lg p-2 min-h-[60px] flex flex-col justify-center hover:bg-white/90 transition-all duration-300 hover:scale-105">
-                <div className="font-bold text-base text-poker-dark countdown-number">{timeLeft.days}</div>
-                <div className="text-xs text-poker-muted">nap</div>
-              </div>
-              <div className="bg-white/70 rounded-lg p-2 min-h-[60px] flex flex-col justify-center hover:bg-white/90 transition-all duration-300 hover:scale-105">
-                <div className="font-bold text-base text-poker-dark countdown-number">{timeLeft.hours}</div>
-                <div className="text-xs text-poker-muted">óra</div>
-              </div>
-              <div className="bg-white/70 rounded-lg p-2 min-h-[60px] flex flex-col justify-center hover:bg-white/90 transition-all duration-300 hover:scale-105">
-                <div className="font-bold text-base text-poker-dark countdown-number">{timeLeft.minutes}</div>
-                <div className="text-xs text-poker-muted">perc</div>
-              </div>
-              <div className="bg-white/70 rounded-lg p-2 min-h-[60px] flex flex-col justify-center hover:bg-white/90 transition-all duration-300 hover:scale-105">
-                <div className="font-bold text-base text-poker-dark countdown-number">{timeLeft.seconds}</div>
-                <div className="text-xs text-poker-muted">mp</div>
-              </div>
-            </div>
-          </div>
           
-          {/* Category */}
-          <div className="flex items-center justify-between p-3 bg-poker-light/50 rounded-lg">
-            <div className="flex items-center">
-              <span className="w-2 h-2 bg-poker-gold rounded-full mr-3"></span>
-              <span className="text-poker-dark/80 font-medium">Kategória:</span>
+          {/* Rebuy/Addon Info */}
+          {(tournament.rebuyPrice || tournament.addonPrice) && (
+            <div className="space-y-2">
+              {tournament.rebuyPrice && (
+                <div className="flex items-center justify-between p-3 bg-poker-light/50 rounded-lg">
+                  <div className="flex items-center">
+                    <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+                    <span className="text-poker-dark/80 font-medium">Rebuy:</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="font-bold text-poker-dark">{formatCurrency(tournament.rebuyPrice)}</span>
+                    {tournament.rebuyChips && (
+                      <div className="text-xs text-poker-muted">{formatChips(tournament.rebuyChips)}</div>
+                    )}
+                  </div>
+                </div>
+              )}
+              
+              {tournament.addonPrice && (
+                <div className="flex items-center justify-between p-3 bg-poker-light/50 rounded-lg">
+                  <div className="flex items-center">
+                    <span className="w-2 h-2 bg-purple-500 rounded-full mr-3"></span>
+                    <span className="text-poker-dark/80 font-medium">Add-on:</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="font-bold text-poker-dark">{formatCurrency(tournament.addonPrice)}</span>
+                    {tournament.addonChips && (
+                      <div className="text-xs text-poker-muted">{formatChips(tournament.addonChips)}</div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
-            <span className="font-bold text-poker-dark">Verseny</span>
-          </div>
+          )}
           
           {/* Starting Chips */}
           {tournament.startingChips && (
@@ -178,44 +292,34 @@ export default function TournamentCard({ tournament }: TournamentCardProps) {
         {/* Registration Fee */}
         <div className="mb-6 p-4 bg-gradient-to-br from-poker-primary to-poker-secondary text-white rounded-xl shadow-lg text-center">
           <p className="text-white/90 text-sm mb-1 font-medium">Nevezési díj</p>
-          <p className="font-bold text-2xl">{formatCurrency(tournament.buyIn)}</p>
+          <p className="font-bold text-2xl">
+            {formatCurrency(Number(tournament.buy_in || tournament.buyIn || 0))}
+          </p>
         </div>
 
-        {/* Rebuy and Addon Info */}
-        {(tournament.rebuyPrice || tournament.addonPrice) && (
-          <div className="mb-6 space-y-3">
-            {tournament.rebuyPrice && (
-              <div className="flex items-center justify-between p-3 bg-poker-light/50 rounded-lg">
-                <div className="flex items-center">
-                  <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
-                  <span className="text-poker-dark/80 font-medium">Rebuy:</span>
-                </div>
-                <span className="font-bold text-poker-dark">{formatCurrency(tournament.rebuyPrice)}</span>
-              </div>
-            )}
-            
-            {tournament.addonPrice && (
-              <div className="flex items-center justify-between p-3 bg-poker-light/50 rounded-lg">
-                <div className="flex items-center">
-                  <span className="w-2 h-2 bg-purple-500 rounded-full mr-3"></span>
-                  <span className="text-poker-dark/80 font-medium">Add-on:</span>
-                </div>
-                <span className="font-bold text-poker-dark">{formatCurrency(tournament.addonPrice)}</span>
-              </div>
-            )}
-          </div>
-        )}
 
 
-        {/* Action Button */}
-        <Link href={`/tournaments/${tournament.id}`}>
-          <button className="w-full btn-primary group relative overflow-hidden">
-            <span className="relative z-10 flex items-center justify-center">
-              <span className="mr-2">📋</span>
-              <span>Részletek</span>
+        {/* Action Buttons */}
+        <div className="space-y-3">
+          <Link href={`/tournaments/${tournament.id}`}>
+            <button className="w-full btn-primary group relative overflow-hidden">
+              <span className="relative z-10 flex items-center justify-center">
+                <span className="mr-2">📋</span>
+                <span>Részletek</span>
+              </span>
+            </button>
+          </Link>
+          
+          <button 
+            onClick={addToCalendar}
+            className="w-full bg-poker-gold/10 border border-poker-gold text-poker-dark hover:bg-poker-gold hover:text-poker-dark font-semibold py-2 px-4 rounded-lg transition-all duration-300 group"
+          >
+            <span className="flex items-center justify-center">
+              <span className="mr-2">📅</span>
+              <span>Naptárhoz adás</span>
             </span>
           </button>
-        </Link>
+        </div>
         
       </div>
     </div>

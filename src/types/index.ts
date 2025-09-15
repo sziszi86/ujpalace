@@ -5,7 +5,11 @@ export interface Tournament {
   longDescription?: string; // For admin editor
   date: string;
   time: string;
+  // API also returns these fields
+  tournament_date?: string;
+  tournament_time?: string;
   buyIn: number;
+  buy_in?: string; // API returns as string
   rebuyPrice?: number;
   rebuyChips?: number;
   addonPrice?: number;

@@ -32,14 +32,17 @@ export default function TournamentDetailPage() {
       
       try {
         setLoading(true);
-        const response = await fetch(`/api/tournaments`);
+        const response = await fetch(`/api/tournaments/${tournamentId}`);
         
         if (!response.ok) {
+          if (response.status === 404) {
+            setError('Tournament not found');
+            return;
+          }
           throw new Error('Failed to fetch tournament');
         }
         
-        const tournaments = await response.json();
-        const foundTournament = tournaments.find((t: Tournament) => t.id.toString() === tournamentId);
+        const foundTournament = await response.json();
         
         if (!foundTournament) {
           setError('Tournament not found');
@@ -167,25 +170,23 @@ export default function TournamentDetailPage() {
               </div>
 
               {/* Tournament Image */}
-              {tournament.image && (
+              {tournament.image_url && (
                 <div className="relative h-64 md:h-80 rounded-lg overflow-hidden mb-6">
-                  <Image
-                    src={tournament.image}
+                  <img
+                    src={tournament.image_url}
                     alt={tournament.title}
-                    fill
-                    className="object-cover"
-                    priority
+                    className="w-full h-full object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
                   <div className="absolute bottom-4 left-4 right-4">
                     <div className="flex items-center justify-between text-white">
                       <div>
-                        <p className="text-sm opacity-90 drop-shadow-lg">{formatDate(tournament.date)}</p>
-                        <p className="text-2xl font-bold drop-shadow-lg">{tournament.time}</p>
+                        <p className="text-sm opacity-90 drop-shadow-lg">{formatDate(tournament.tournament_date)}</p>
+                        <p className="text-2xl font-bold drop-shadow-lg">{tournament.tournament_time}</p>
                       </div>
                       <div className="text-right">
                         <p className="text-sm opacity-90 drop-shadow-lg">Buy-in</p>
-                        <p className="text-2xl font-bold drop-shadow-lg">{formatCurrency(tournament.buyIn)}</p>
+                        <p className="text-2xl font-bold drop-shadow-lg">{formatCurrency(Number(tournament.buy_in))}</p>
                       </div>
                     </div>
                   </div>
@@ -193,11 +194,11 @@ export default function TournamentDetailPage() {
               )}
 
               {/* Long Description */}
-              {tournament.longDescription && (
+              {tournament.long_description && (
                 <div className="prose max-w-none">
                   <h2 className="text-2xl font-bold text-poker-dark mb-4">Részletek</h2>
                   <div className="text-poker-muted whitespace-pre-line">
-                    {tournament.longDescription}
+                    {tournament.long_description}
                   </div>
                 </div>
               )}
@@ -216,15 +217,15 @@ export default function TournamentDetailPage() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-poker-muted">Max. játékosok:</span>
-                      <span className="font-medium">{tournament.maxPlayers || 'Nincs limit'}</span>
+                      <span className="font-medium">{tournament.max_players || 'Nincs limit'}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-poker-muted">Kezdő chipek:</span>
-                      <span className="font-medium">{tournament.startingChips ? formatChips(tournament.startingChips) : 'N/A'}</span>
+                      <span className="font-medium">{tournament.starting_chips ? formatChips(tournament.starting_chips) : 'N/A'}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-poker-muted">Blind struktúra:</span>
-                      <span className="font-medium">{tournament.blindStructure || 'Standard'}</span>
+                      <span className="font-medium">{tournament.blind_structure || 'Standard'}</span>
                     </div>
                   </div>
                 </div>
@@ -315,7 +316,7 @@ export default function TournamentDetailPage() {
             </div>
 
             {/* Special Notes */}
-            {tournament.specialNotes && (
+            {tournament.special_notes && (
               <div className="card-modern p-8">
                 <h2 className="text-2xl font-bold text-poker-dark mb-4">Fontos tudnivalók</h2>
                 <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
@@ -327,7 +328,7 @@ export default function TournamentDetailPage() {
                     </div>
                     <div className="ml-3">
                       <p className="text-sm text-yellow-700 whitespace-pre-line">
-                        {tournament.specialNotes}
+                        {tournament.special_notes}
                       </p>
                     </div>
                   </div>
@@ -361,8 +362,8 @@ export default function TournamentDetailPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                   <div>
-                    <p className="font-semibold text-poker-dark">{formatDate(tournament.date)}</p>
-                    <p className="text-sm text-poker-muted">{tournament.time}</p>
+                    <p className="font-semibold text-poker-dark">{formatDate(tournament.tournament_date)}</p>
+                    <p className="text-sm text-poker-muted">{tournament.tournament_time}</p>
                   </div>
                 </div>
 
@@ -373,19 +374,19 @@ export default function TournamentDetailPage() {
                   </svg>
                   <div>
                     <p className="font-semibold text-poker-dark">Buy-in</p>
-                    <p className="text-lg font-bold text-poker-primary">{formatCurrency(tournament.buyIn)}</p>
+                    <p className="text-lg font-bold text-poker-primary">{formatCurrency(Number(tournament.buy_in))}</p>
                   </div>
                 </div>
 
                 {/* Guarantee */}
-                {tournament.guarantee && (
+                {tournament.guarantee_amount && (
                   <div className="flex items-center p-3 bg-poker-light/50 rounded-lg">
                     <svg className="w-5 h-5 text-poker-green mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
                     </svg>
                     <div>
                       <p className="font-semibold text-poker-dark">Garantált díjalap</p>
-                      <p className="text-lg font-bold text-poker-gold">{formatCurrency(tournament.guarantee)}</p>
+                      <p className="text-lg font-bold text-poker-gold">{formatCurrency(Number(tournament.guarantee_amount))}</p>
                     </div>
                   </div>
                 )}
@@ -404,14 +405,14 @@ export default function TournamentDetailPage() {
 
 
                 {/* Late Registration */}
-                {tournament.lateRegistration && tournament.lateRegistrationUntil && (
+                {tournament.late_registration && tournament.late_registration_until && (
                   <div className="flex items-center p-3 bg-poker-light/50 rounded-lg">
                     <svg className="w-5 h-5 text-orange-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <div>
                       <p className="font-semibold text-poker-dark">Utólagos nevezés</p>
-                      <p className="text-sm text-poker-muted">{tournament.lateRegistrationUntil}-ig</p>
+                      <p className="text-sm text-poker-muted">{tournament.late_registration_until}-ig</p>
                     </div>
                   </div>
                 )}
@@ -419,14 +420,14 @@ export default function TournamentDetailPage() {
                 {/* Contact */}
                 <div className="border-t pt-4">
                   <h4 className="font-semibold text-poker-dark mb-2">Kapcsolat</h4>
-                  {tournament.contactPhone && (
+                  {tournament.contact_phone && (
                     <p className="text-sm text-poker-muted mb-1">
-                      📞 {tournament.contactPhone}
+                      📞 {tournament.contact_phone}
                     </p>
                   )}
-                  {tournament.contactEmail && (
+                  {tournament.contact_email && (
                     <p className="text-sm text-poker-muted">
-                      ✉️ {tournament.contactEmail}
+                      ✉️ {tournament.contact_email}
                     </p>
                   )}
                 </div>

@@ -1,7 +1,6 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
 
 interface User {
   id: number;
@@ -22,36 +21,48 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
 
   useEffect(() => {
     checkAuth();
   }, []);
 
   const checkAuth = async () => {
+    console.log('🔍 AuthContext: checkAuth started');
     try {
       const token = localStorage.getItem('authToken');
+      console.log('🔍 AuthContext: token exists?', !!token);
+      
       if (!token) {
+        console.log('🔍 AuthContext: no token, setting user null');
+        setUser(null);
         setLoading(false);
         return;
       }
 
+      console.log('🔍 AuthContext: calling /api/auth/me');
       const response = await fetch('/api/auth/me', {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
       });
-
+      
+      console.log('🔍 AuthContext: /api/auth/me response ok?', response.ok);
+      
       if (response.ok) {
         const userData = await response.json();
+        console.log('🔍 AuthContext: user data received', userData);
         setUser(userData);
       } else {
+        console.log('🔍 AuthContext: removing invalid token');
         localStorage.removeItem('authToken');
+        setUser(null);
       }
     } catch (error) {
-      console.error('Auth check failed:', error);
+      console.error('🔍 Auth check failed:', error);
       localStorage.removeItem('authToken');
+      setUser(null);
     } finally {
+      console.log('🔍 AuthContext: setting loading false');
       setLoading(false);
     }
   };
@@ -82,7 +93,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     localStorage.removeItem('authToken');
     setUser(null);
-    router.push('/admin/login');
   };
 
   return (

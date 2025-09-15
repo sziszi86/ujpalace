@@ -1,26 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "WebFetch(domain:palace-poker.hu)",
-      "Bash(npm install:*)",
-      "Bash(npm uninstall:*)",
-      "Bash(npm run dev:*)",
-      "Bash(git checkout:*)",
-      "Bash(git add:*)",
-      "Bash(git commit:*)",
-      "Bash(git ls-tree:*)",
-      "Bash(git rm:*)",
-      "Bash(npm run build:*)",
-      "Bash(ln:*)",
-      "Bash(git push:*)",
-      "Bash(git init:*)",
-      "Bash(git remote add:*)",
-      "Bash(git config:*)",
-      "Bash(git remote set-url:*)",
-      "Bash(pkill:*)",
-      "Bash(curl:*)",
-      "Bash(openssl rand:*)",
-      "Bash(vercel:*)"
+      "Bash(DB_HOST=localhost DB_USER=root DB_PASSWORD=\"\" DB_NAME=palace_poker DB_PORT=3306 mysql -h localhost -u root palace_poker -e \"SELECT id, filename, original_name, mime_type, size_bytes, created_at FROM images;\")",
+      "Bash(DB_HOST=localhost DB_USER=root DB_PASSWORD=\"\" DB_NAME=palace_poker DB_PORT=3306 mysql -h localhost -u root palace_poker -e \"SELECT id, filename, original_name, mime_type, size_bytes, created_at FROM banner_images;\")",
+      "Bash(DB_HOST=localhost DB_USER=root DB_PASSWORD=\"\" DB_NAME=palace_poker DB_PORT=3306 mysql -h localhost -u root palace_poker -e \"SELECT id, title, image_url, status, featured FROM tournaments WHERE image_url IS NOT NULL AND image_url != '''' ORDER BY date ASC LIMIT 10;\")",
+      "Bash(DB_HOST=localhost DB_USER=root DB_PASSWORD=\"\" DB_NAME=palace_poker DB_PORT=3306 mysql -h localhost -u root palace_poker -e \"SELECT id, title, image_url, status, featured FROM tournaments LIMIT 10;\")",
+      "Bash(DB_HOST=localhost DB_USER=root DB_PASSWORD=\"\" DB_NAME=palace_poker DB_PORT=3306 mysql -h localhost -u root palace_poker -e \"SELECT id, filename, original_name FROM images WHERE id IN (7, 12);\")",
+      "Bash(DB_HOST=localhost DB_USER=root DB_PASSWORD=\"\" DB_NAME=palace_poker DB_PORT=3306 mysql -h localhost -u root palace_poker -e \"SELECT id, title, rebuy_price, rebuy_chips, addon_price, addon_chips, starting_chips FROM tournaments WHERE status = ''upcoming'' LIMIT 5;\")"
     ],
     "deny": [],
     "ask": []

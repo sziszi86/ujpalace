@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAllCashGames, createCashGame, updateCashGame, deleteCashGame } from '@/lib/db';
+import { getAllCashGames, createCashGame, updateCashGame, deleteCashGame } from '@/lib/database';
 import { CashGame } from '@/types';
 
 export async function GET() {

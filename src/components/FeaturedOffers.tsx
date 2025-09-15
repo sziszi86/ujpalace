@@ -151,12 +151,53 @@ export default function FeaturedOffers() {
   const [cashGames, setCashGames] = useState<CashGame[]>([]);
   const [currentTournamentPage, setCurrentTournamentPage] = useState(0);
   const [currentCashGamePage, setCurrentCashGamePage] = useState(0);
+  const [touchStart, setTouchStart] = useState<{x: number; y: number} | null>(null);
+  const [touchEnd, setTouchEnd] = useState<{x: number; y: number} | null>(null);
 
   useEffect(() => {
     // Load tournaments from API
+    console.log('Fetching tournaments from /api/tournaments...');
     fetch('/api/tournaments')
-      .then(res => res.json())
-      .then(data => setTournaments(data))
+      .then(res => {
+        console.log('API response status:', res.status, res.statusText);
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return res.json();
+      })
+      .then(data => {
+        console.log('API tournaments loaded:', data);
+        console.log('Number of tournaments:', data.length);
+        console.log('First tournament:', data[0]);
+        
+        if (!Array.isArray(data)) {
+          console.error('API did not return an array:', typeof data, data);
+          setTournaments(mockTournaments);
+          return;
+        }
+        
+        // Transform API data to match Tournament interface
+        const transformedTournaments = data.map((tournament: any) => ({
+          ...tournament,
+          date: tournament.tournament_date || tournament.date,
+          time: tournament.tournament_time || tournament.time,
+          buyIn: Number(tournament.buy_in || tournament.buyIn || 0),
+          image: tournament.image_url || tournament.image,
+          // Transform rebuy/addon fields
+          rebuyPrice: tournament.rebuy_price || tournament.rebuyPrice,
+          rebuyChips: tournament.rebuy_chips || tournament.rebuyChips,
+          addonPrice: tournament.addon_price || tournament.addonPrice,
+          addonChips: tournament.addon_chips || tournament.addonChips,
+          startingChips: tournament.starting_chips || tournament.startingChips,
+          // Keep both field names for backward compatibility
+          tournament_date: tournament.tournament_date,
+          tournament_time: tournament.tournament_time,
+          buy_in: tournament.buy_in
+        }));
+        console.log('Transformed tournaments:', transformedTournaments);
+        console.log('First transformed tournament:', transformedTournaments[0]);
+        setTournaments(transformedTournaments);
+      })
       .catch(err => {
         console.error('Failed to load tournaments:', err);
         setTournaments(mockTournaments);
@@ -189,14 +230,17 @@ export default function FeaturedOffers() {
       });
   }, []);
 
-  // Filter tournaments to only show upcoming ones (not past) - limit to 12
+  // Show all upcoming tournaments for now to test - limit to 10
   const upcomingTournaments = tournaments.filter(tournament => {
-    const tournamentDateTime = new Date(`${tournament.date}T${tournament.time}`);
-    const now = new Date();
-    return tournamentDateTime > now && tournament.status === 'upcoming';
-  }).slice(0, 12);
+    console.log('Tournament:', tournament.id, tournament.title, 'Status:', tournament.status);
+    // Just show all upcoming tournaments regardless of date for debugging
+    return tournament.status === 'upcoming';
+  }).slice(0, 10);
+  
+  console.log('Total tournaments loaded:', tournaments.length);
+  console.log('Filtered upcoming tournaments:', upcomingTournaments.length);
 
-  // Pagination logic - 3 tournaments per page
+  // Pagination logic - 3 tournaments per page  
   const tournamentsPerPage = 3;
   const totalPages = Math.ceil(upcomingTournaments.length / tournamentsPerPage);
   const currentTournaments = upcomingTournaments.slice(
@@ -233,6 +277,51 @@ export default function FeaturedOffers() {
   const prevCashGamePage = () => {
     if (currentCashGamePage > 0) {
       setCurrentCashGamePage(currentCashGamePage - 1);
+    }
+  };
+
+  // Touch handlers
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart({
+      x: e.targetTouches[0].clientX,
+      y: e.targetTouches[0].clientY
+    });
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd({
+      x: e.targetTouches[0].clientX,
+      y: e.targetTouches[0].clientY
+    });
+  };
+
+  const handleTouchEnd = (type: 'tournament' | 'cashgame') => {
+    if (!touchStart || !touchEnd) return;
+
+    const distanceX = touchStart.x - touchEnd.x;
+    const distanceY = touchStart.y - touchEnd.y;
+    const isLeftSwipe = distanceX > 50;
+    const isRightSwipe = distanceX < -50;
+    const isVerticalSwipe = Math.abs(distanceY) > Math.abs(distanceX);
+
+    // Only handle horizontal swipes
+    if (!isVerticalSwipe) {
+      if (type === 'tournament') {
+        if (isLeftSwipe && currentTournamentPage < Math.ceil(upcomingTournaments.length / tournamentsPerPage) - 1) {
+          setCurrentTournamentPage(currentTournamentPage + 1);
+        }
+        if (isRightSwipe && currentTournamentPage > 0) {
+          setCurrentTournamentPage(currentTournamentPage - 1);
+        }
+      } else if (type === 'cashgame') {
+        if (isLeftSwipe && currentCashGamePage < Math.ceil(cashGames.length / cashGamesPerPage) - 1) {
+          setCurrentCashGamePage(currentCashGamePage + 1);
+        }
+        if (isRightSwipe && currentCashGamePage > 0) {
+          setCurrentCashGamePage(currentCashGamePage - 1);
+        }
+      }
     }
   };
 
@@ -284,14 +373,28 @@ export default function FeaturedOffers() {
             </a>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div 
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 touch-pan-y"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={() => handleTouchEnd('tournament')}
+          >
             {currentTournaments.map((tournament, index) => (
-              <div key={tournament.id} className="animate-scale-in" style={{animationDelay: `${index * 0.2}s`}}>
+              <div key={tournament.id} className="animate-scale-in" style={{animationDelay: `${index * 0.15}s`}}>
                 <TournamentCard tournament={tournament} />
               </div>
             ))}
           </div>
           
+          {/* Mobile Swipe Indicator */}
+          <div className="md:hidden text-center mt-6 text-sm text-poker-muted">
+            <span className="flex items-center justify-center">
+              <span className="mr-2">👈</span>
+              Húzd ujjal jobbra vagy balra
+              <span className="ml-2">👉</span>
+            </span>
+          </div>
+
           {/* Tournament Pagination */}
           {totalPages > 1 && (
             <div className="flex justify-center items-center mt-8 space-x-4">
@@ -371,7 +474,12 @@ export default function FeaturedOffers() {
             </a>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div 
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 touch-pan-y"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={() => handleTouchEnd('cashgame')}
+          >
             {currentCashGames.map((cashGame, index) => (
               <div key={cashGame.id} className="animate-scale-in" style={{animationDelay: `${(index + 3) * 0.2}s`}}>
                 <a href={`/cash-games/${cashGame.id}`} className="block group">
@@ -424,6 +532,15 @@ export default function FeaturedOffers() {
             ))}
           </div>
           
+          {/* Mobile Swipe Indicator */}
+          <div className="md:hidden text-center mt-6 text-sm text-poker-muted">
+            <span className="flex items-center justify-center">
+              <span className="mr-2">👈</span>
+              Húzd ujjal jobbra vagy balra
+              <span className="ml-2">👉</span>
+            </span>
+          </div>
+
           {/* Cash Games Pagination */}
           {totalCashGamePages > 1 && (
             <div className="flex justify-center items-center mt-8 space-x-4">

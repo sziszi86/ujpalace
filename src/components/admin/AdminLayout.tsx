@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import { useAlert, AlertProvider } from './Alert';
+import { useRouter, usePathname } from 'next/navigation';
+import { useAlert } from './Alert';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface AdminLayoutProps {
@@ -20,11 +20,23 @@ interface MenuItem {
 function AdminLayoutContent({ children }: AdminLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [expandedMenus, setExpandedMenus] = useState<string[]>(['Hírek']); // Default expand Hírek
-  const pathname = usePathname();
   const router = useRouter();
+  const pathname = usePathname();
   const { user, logout, loading } = useAuth();
-  const isAuthenticated = !!user;
-  const isLoading = loading;
+
+  // Egyszerű loading ellenőrzés - nincs redirect, nincs pathname
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  // Ha nincs user, csak üres div - a layout fogja kezelni a redirect-et
+  if (!user) {
+    return <div></div>;
+  }
 
   const menuItems: MenuItem[] = [
     { name: 'Dashboard', href: '/admin', icon: '📊' },
@@ -66,11 +78,10 @@ function AdminLayoutContent({ children }: AdminLayoutProps) {
     return pathname === href;
   };
 
-  const handleLogout = async () => {
-    await logout();
+  const handleLogout = () => {
+    logout();
+    router.push('/admin/login');
   };
-
-  // Don't redirect here - let the middleware handle authentication redirects
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -159,7 +170,7 @@ function AdminLayoutContent({ children }: AdminLayoutProps) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            {isAuthenticated && user && (
+            {user && (
               <div className="flex items-center space-x-4">
                 <span className="text-sm text-gray-600">
                   Üdv, <strong>{user.username}</strong>!
@@ -198,10 +209,8 @@ function AdminLayoutContent({ children }: AdminLayoutProps) {
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
   return (
-    <AlertProvider>
-      <AdminLayoutContent>
-        {children}
-      </AdminLayoutContent>
-    </AlertProvider>
+    <AdminLayoutContent>
+      {children}
+    </AdminLayoutContent>
   );
 }

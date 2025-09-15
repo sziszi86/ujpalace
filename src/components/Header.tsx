@@ -25,14 +25,7 @@ const menuItems: MenuItem[] = [
       { id: 'cash-list', label: 'Lista nézet', href: '/cash-games/list' },
     ],
   },
-  {
-    id: 'about',
-    label: 'Rólunk',
-    children: [
-      { id: 'introduction', label: 'Bemutatkozás', href: '/about' },
-      { id: 'offers', label: 'Kiemelt ajánlatok', href: '/about/offers' },
-    ],
-  },
+  { id: 'about', label: 'Rólunk', href: '/rolunk' },
   { id: 'gallery', label: 'Galéria', href: '/gallery' },
   { id: 'blog', label: 'Hírek', href: '/blog' },
   { id: 'contact', label: 'Kapcsolat', href: '/contact' },

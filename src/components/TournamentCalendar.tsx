@@ -12,12 +12,13 @@ interface TournamentCalendarProps {
 }
 
 export default function TournamentCalendar({ showCashGames = true, onlyShowCashGames = false }: TournamentCalendarProps) {
-  const [selectedView, setSelectedView] = useState<'calendar' | 'list'>('calendar');
+  const [selectedView, setSelectedView] = useState<'calendar' | 'list' | 'week'>('calendar');
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'tournaments' | 'cash-games'>('all');
   const [currentDate, setCurrentDate] = useState(new Date());
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [cashGames, setCashGames] = useState<CashGame[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -40,8 +41,24 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
         if (cashGamesResponse.ok) {
           const cashGameData = await cashGamesResponse.json();
           // Only show active cash games
-          const activeCashGames = cashGameData.filter((cashGame: CashGame) => cashGame.active === true);
-          setCashGames(activeCashGames);
+          const activeCashGames = cashGameData.filter((cashGame: CashGame) => Boolean(cashGame.active));
+          
+          // Add test cash game to verify display logic
+          const testCashGame = {
+            id: 999,
+            name: 'Test Cash Game',
+            stakes: '100/200',
+            game: 'Texas Hold\'em',
+            minBuyIn: 20000,
+            maxBuyIn: 40000,
+            description: 'Test game',
+            schedule: 'Daily 18:00-06:00',
+            scheduledDates: ['2025-09-16', '2025-09-17', '2025-09-18'],
+            active: true,
+            featured: false
+          };
+          
+          setCashGames([...activeCashGames, testCashGame as any]);
         }
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -51,7 +68,21 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
     };
 
     fetchData();
-  }, [showCashGames]);
+  }, [showCashGames, onlyShowCashGames]);
+
+  useEffect(() => {
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+      // Auto-set to week view on mobile
+      if (window.innerWidth < 768 && selectedView === 'calendar') {
+        setSelectedView('week');
+      }
+    };
+    
+    checkIfMobile();
+    window.addEventListener('resize', checkIfMobile);
+    return () => window.removeEventListener('resize', checkIfMobile);
+  }, [selectedView]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -93,7 +124,8 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
       return cashGames
         .filter(cashGame => {
           // Check if cash game is scheduled for this specific date
-          const scheduledDates = cashGame.scheduledDates;
+          // Handle both camelCase and snake_case property names
+          const scheduledDates = cashGame.scheduledDates || (cashGame as any).scheduled_dates;
           if (scheduledDates && Array.isArray(scheduledDates)) {
             return scheduledDates.includes(dateStr);
           }
@@ -108,9 +140,11 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
         }));
     }
     
-    return tournaments.filter(tournament => 
-      tournament.date === dateStr && tournament.status !== 'inactive'
-    );
+    return tournaments.filter(tournament => {
+      // Convert tournament date to YYYY-MM-DD format for comparison
+      const tournamentDateStr = tournament.date ? new Date(tournament.date).toISOString().split('T')[0] : null;
+      return tournamentDateStr === dateStr && tournament.status !== 'inactive';
+    });
   };
 
   const getDayOfWeek = (date: Date) => {
@@ -134,6 +168,29 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
     });
   };
 
+  const navigateWeek = (direction: 'prev' | 'next') => {
+    setCurrentDate(prev => {
+      const newDate = new Date(prev);
+      newDate.setDate(newDate.getDate() + (direction === 'next' ? 7 : -7));
+      return newDate;
+    });
+  };
+
+  const generateWeekDays = () => {
+    const startOfWeek = new Date(currentDate);
+    const dayOfWeek = startOfWeek.getDay();
+    const startDate = new Date(startOfWeek);
+    startDate.setDate(startDate.getDate() - dayOfWeek);
+    
+    const days = [];
+    for (let i = 0; i < 7; i++) {
+      const day = new Date(startDate);
+      day.setDate(startDate.getDate() + i);
+      days.push(day);
+    }
+    return days;
+  };
+
   const calendarDays = generateCalendarDays();
   const monthYear = (() => {
     const year = currentDate.getFullYear();
@@ -151,25 +208,37 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center space-y-4 lg:space-y-0">
         {/* View Toggle */}
         <div className="flex bg-white rounded-xl p-1 shadow-lg">
+          {!isMobile && (
+            <button
+              className={`px-4 py-3 rounded-lg font-semibold transition-all duration-300 text-sm ${
+                selectedView === 'calendar'
+                  ? 'bg-poker-primary text-white shadow-lg'
+                  : 'text-poker-muted hover:text-poker-dark'
+              }`}
+              onClick={() => setSelectedView('calendar')}
+            >
+              📅 Havi
+            </button>
+          )}
           <button
-            className={`px-6 py-3 rounded-lg font-semibold transition-all duration-300 ${
-              selectedView === 'calendar'
+            className={`px-4 py-3 rounded-lg font-semibold transition-all duration-300 text-sm ${
+              selectedView === 'week'
                 ? 'bg-poker-primary text-white shadow-lg'
                 : 'text-poker-muted hover:text-poker-dark'
             }`}
-            onClick={() => setSelectedView('calendar')}
+            onClick={() => setSelectedView('week')}
           >
-            📅 Naptár nézet
+            📅 {isMobile ? 'Naptár' : 'Heti'}
           </button>
           <button
-            className={`px-6 py-3 rounded-lg font-semibold transition-all duration-300 ${
+            className={`px-4 py-3 rounded-lg font-semibold transition-all duration-300 text-sm ${
               selectedView === 'list'
                 ? 'bg-poker-primary text-white shadow-lg'
                 : 'text-poker-muted hover:text-poker-dark'
             }`}
             onClick={() => setSelectedView('list')}
           >
-            📋 Lista nézet
+            📋 Lista
           </button>
         </div>
 
@@ -210,13 +279,13 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
         )}
       </div>
 
-      {selectedView === 'calendar' ? (
-        /* Calendar View */
-        <div className="card-modern p-8">
+      {selectedView === 'calendar' || selectedView === 'week' ? (
+        /* Calendar/Week View */
+        <div className="card-modern p-4 lg:p-8">
           {/* Calendar Header */}
           <div className="flex items-center justify-between mb-8">
             <button
-              onClick={() => navigateMonth('prev')}
+              onClick={() => selectedView === 'week' ? navigateWeek('prev') : navigateMonth('prev')}
               className="p-3 rounded-xl bg-poker-light hover:bg-poker-accent/20 transition-colors"
             >
               <svg className="w-6 h-6 text-poker-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -224,12 +293,16 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
               </svg>
             </button>
             
-            <h2 className="text-3xl font-bold text-poker-dark capitalize">
-              {monthYear}
+            <h2 className="text-2xl lg:text-3xl font-bold text-poker-dark capitalize text-center">
+              {selectedView === 'week' ? 
+                `${currentDate.toLocaleDateString('hu-HU', { year: 'numeric', month: 'long' })}` :
+                monthYear
+              }
+              {onlyShowCashGames && <span className="text-sm text-blue-500 ml-2">({cashGames.length} cash games)</span>}
             </h2>
             
             <button
-              onClick={() => navigateMonth('next')}
+              onClick={() => selectedView === 'week' ? navigateWeek('next') : navigateMonth('next')}
               className="p-3 rounded-xl bg-poker-light hover:bg-poker-accent/20 transition-colors"
             >
               <svg className="w-6 h-6 text-poker-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -239,24 +312,24 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
           </div>
 
           {/* Calendar Grid */}
-          <div className="grid grid-cols-7 gap-2">
+          <div className={`grid grid-cols-7 ${selectedView === 'week' ? 'gap-1' : 'gap-2'}`}>
             {/* Day Headers */}
             {['Vas', 'Hét', 'Ked', 'Sze', 'Csü', 'Pén', 'Szo'].map(day => (
-              <div key={day} className="p-4 text-center font-semibold text-poker-muted">
+              <div key={day} className={`${selectedView === 'week' ? 'p-2 text-sm' : 'p-4'} text-center font-semibold text-poker-muted`}>
                 {day}
               </div>
             ))}
 
             {/* Calendar Days */}
-            {calendarDays.map((day, index) => {
+            {(selectedView === 'week' ? generateWeekDays() : calendarDays).map((day, index) => {
               const events = getEventsForDate(day);
               const hasEvents = events.length > 0;
               
               return (
                 <div
                   key={index}
-                  className={`min-h-24 p-2 border border-gray-100 rounded-lg transition-all duration-200 ${
-                    isCurrentMonth(day)
+                  className={`${selectedView === 'week' ? 'min-h-32' : 'min-h-24'} p-2 border border-gray-100 rounded-lg transition-all duration-200 ${
+                    selectedView === 'week' || isCurrentMonth(day)
                       ? hasEvents
                         ? 'bg-poker-light/30 hover:bg-poker-light/50'
                         : 'bg-white hover:bg-poker-light/20'
@@ -267,15 +340,18 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
                       : ''
                   }`}
                 >
-                  <div className={`text-sm font-semibold mb-1 ${
+                  <div className={`text-sm font-semibold mb-1 text-center ${
                     isToday(day) ? 'text-poker-primary' : 'text-poker-dark'
                   }`}>
-                    {day.getDate()}
+                    {selectedView === 'week' ? 
+                      `${day.getMonth() + 1}/${day.getDate()}` :
+                      day.getDate()
+                    }
                   </div>
                   
                   {/* Events */}
                   <div className="space-y-1">
-                    {events.slice(0, 2).map(event => (
+                    {events.slice(0, selectedView === 'week' ? 4 : 2).map(event => (
                       <Link
                         key={event.id}
                         href={(event as any).type === 'cash-game' ? `/cash-games/${event.id}` : `/tournaments/${event.id}`}
@@ -286,9 +362,9 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
                         {(event as any).type === 'cash-game' && <div className="text-xs text-poker-muted">{(event as any).stakes}</div>}
                       </Link>
                     ))}
-                    {events.length > 2 && (
+                    {events.length > (selectedView === 'week' ? 4 : 2) && (
                       <div className="text-xs text-poker-muted text-center">
-                        +{events.length - 2} több
+                        +{events.length - (selectedView === 'week' ? 4 : 2)} több
                       </div>
                     )}
                   </div>

@@ -9,7 +9,7 @@ interface NewsItem {
   title: string;
   content: string;
   excerpt?: string;
-  image_url?: string;
+  image?: string;
   category: string;
   publish_date: string;
   created_at: string;
@@ -82,10 +82,10 @@ export default function BlogSection() {
                 key={item.id}
                 className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300"
               >
-                {item.image_url ? (
+                {item.image ? (
                   <div className="h-48 overflow-hidden">
                     <img
-                      src={item.image_url}
+                      src={item.image}
                       alt={item.title}
                       className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                     />

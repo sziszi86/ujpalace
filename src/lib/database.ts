@@ -12,10 +12,10 @@ export interface DatabaseConfig {
 }
 
 const dbConfig: DatabaseConfig = {
-  host: process.env.DB_HOST || '185.208.225.77',
-  user: process.env.DB_USER || 'salamons_poker',
-  password: process.env.DB_PASSWORD || 'Subaru86iok200',
-  database: process.env.DB_NAME || 'salamons_palacepoker',
+  host: process.env.DB_HOST || 'localhost',
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || '',
+  database: process.env.DB_NAME || 'palace_poker',
   port: parseInt(process.env.DB_PORT || '3306'),
   connectionLimit: 10,
   charset: 'utf8mb4',
@@ -92,21 +92,34 @@ export async function executeUpdate(query: string, params: any[] = []): Promise<
 }
 
 // Tournament functions
-export async function getAllTournaments(limit?: number, status?: string) {
+export async function getAllTournaments(limit?: number, status?: string, featured?: boolean) {
   let query = `
-    SELECT t.*, tc.name as category_name, tc.color as category_color 
-    FROM tournaments t 
-    LEFT JOIN tournament_categories tc ON t.category_id = tc.id
+    SELECT t.*, t.date as tournament_date, t.time as tournament_time,
+           t.category as category_name, null as category_color,
+           t.current_players, t.max_players
+    FROM tournaments t
   `;
   
   const params: any[] = [];
+  const conditions: string[] = [];
   
+  // Always exclude inactive tournaments unless specifically requested
   if (status) {
-    query += ' WHERE t.status = ?';
+    conditions.push('t.status = ?');
     params.push(status);
+  } else {
+    conditions.push("t.status != 'inactive'");
   }
   
-  query += ' ORDER BY t.tournament_date ASC';
+  if (featured) {
+    conditions.push('t.featured = 1');
+  }
+  
+  if (conditions.length > 0) {
+    query += ' WHERE ' + conditions.join(' AND ');
+  }
+  
+  query += ' ORDER BY t.date ASC, t.time ASC';
   
   if (limit) {
     query += ' LIMIT ?';
@@ -118,9 +131,9 @@ export async function getAllTournaments(limit?: number, status?: string) {
 
 export async function getTournamentById(id: number) {
   const query = `
-    SELECT t.*, tc.name as category_name, tc.color as category_color 
-    FROM tournaments t 
-    LEFT JOIN tournament_categories tc ON t.category_id = tc.id 
+    SELECT t.*, t.date as tournament_date, t.time as tournament_time,
+           t.category as category_name, null as category_color
+    FROM tournaments t
     WHERE t.id = ?
   `;
   return executeQuerySingle(query, [id]);
@@ -178,9 +191,8 @@ export async function deleteTournament(id: number) {
 // Cash game functions
 export async function getAllCashGames(activeOnly: boolean = true) {
   let query = `
-    SELECT cg.*, cgt.name as game_type_name, cgt.icon as game_type_icon 
+    SELECT cg.*, cg.game as game_type_name, null as game_type_icon 
     FROM cash_games cg 
-    LEFT JOIN cash_game_types cgt ON cg.game_type_id = cgt.id
   `;
   
   if (activeOnly) {
@@ -194,9 +206,8 @@ export async function getAllCashGames(activeOnly: boolean = true) {
 
 export async function getCashGameById(id: number) {
   const query = `
-    SELECT cg.*, cgt.name as game_type_name, cgt.icon as game_type_icon 
+    SELECT cg.*, cg.game as game_type_name, null as game_type_icon 
     FROM cash_games cg 
-    LEFT JOIN cash_game_types cgt ON cg.game_type_id = cgt.id 
     WHERE cg.id = ?
   `;
   return executeQuerySingle(query, [id]);

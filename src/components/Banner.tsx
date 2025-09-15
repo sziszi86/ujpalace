@@ -68,19 +68,31 @@ export default function Banner() {
           const apiBanners = await response.json();
           const today = new Date().toISOString().split('T')[0];
           
-          const visibleBanners = apiBanners.filter((banner: BannerData) => {
+          const visibleBanners = apiBanners.filter((banner: any) => {
             if (!banner.active) return false;
             
             // Ha nincs visibleFrom dátum, akkor mindig látható
-            const fromDate = banner.visibleFrom;
+            const fromDate = banner.visible_from;
             if (fromDate && fromDate > today) return false;
             
             // Ha nincs visibleUntil dátum, akkor nincs lejárat
-            const untilDate = banner.visibleUntil;
+            const untilDate = banner.visible_until;
             if (untilDate && untilDate < today) return false;
             
             return true;
-          }).sort((a: BannerData, b: BannerData) => a.order - b.order);
+          }).map((banner: any) => ({
+            id: banner.id,
+            title: banner.title,
+            description: banner.description,
+            image: banner.image_url,
+            active: banner.active,
+            visibleFrom: banner.visible_from,
+            visibleUntil: banner.visible_until,
+            order: banner.order_position,
+            url: banner.url,
+            customUrl: banner.custom_url,
+            openInNewTab: banner.open_in_new_tab
+          })).sort((a: BannerData, b: BannerData) => a.order - b.order);
           
           if (visibleBanners.length > 0) {
             loadedBanners = visibleBanners;

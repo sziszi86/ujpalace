@@ -8,11 +8,11 @@ interface Banner {
   id: number;
   title: string;
   description: string;
-  image: string;
-  active: boolean;
-  visibleFrom: string;
-  visibleUntil: string;
-  order: number;
+  image_url: string;
+  active: number;
+  visible_from: string;
+  visible_until: string;
+  order_position: number;
 }
 
 export default function BannersAdmin() {
@@ -23,7 +23,19 @@ export default function BannersAdmin() {
   useEffect(() => {
     const loadBanners = async () => {
       try {
-        const response = await fetch('/api/banners');
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+          // Redirect to login if no token
+          window.location.href = '/admin/login';
+          return;
+        }
+
+        const response = await fetch('/api/admin/banners', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        
         if (response.ok) {
           const data = await response.json();
           setBanners(data);
@@ -44,7 +56,18 @@ export default function BannersAdmin() {
 
   const reloadBanners = async () => {
     try {
-      const response = await fetch('/api/banners');
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        console.error('No auth token found');
+        return;
+      }
+
+      const response = await fetch('/api/admin/banners', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      
       if (response.ok) {
         const data = await response.json();
         setBanners(data);
@@ -59,8 +82,17 @@ export default function BannersAdmin() {
   const handleDelete = async (id: number) => {
     if (confirm('Biztosan törölni szeretnéd ezt a bannert?')) {
       try {
-        const response = await fetch(`/api/banners?id=${id}`, {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+          showAlert('Nem vagy bejelentkezve!', 'error');
+          return;
+        }
+
+        const response = await fetch(`/api/admin/banners?id=${id}`, {
           method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
         });
         
         if (response.ok) {
@@ -81,20 +113,27 @@ export default function BannersAdmin() {
     if (!banner) return;
 
     try {
-      const response = await fetch('/api/banners', {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        showAlert('Nem vagy bejelentkezve!', 'error');
+        return;
+      }
+
+      const response = await fetch('/api/admin/banners', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
           id: banner.id,
           title: banner.title,
           description: banner.description,
-          image: banner.image,
-          active: !banner.active,
-          visibleFrom: banner.visibleFrom,
-          visibleUntil: banner.visibleUntil,
-          order: banner.order,
+          image_url: banner.image_url,
+          active: banner.active === 1 ? 0 : 1,
+          visible_from: banner.visible_from,
+          visible_until: banner.visible_until,
+          order_position: banner.order_position,
         }),
       });
 
@@ -111,19 +150,26 @@ export default function BannersAdmin() {
 
   const handleDuplicate = async (banner: Banner) => {
     try {
-      const response = await fetch('/api/banners', {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        showAlert('Nem vagy bejelentkezve!', 'error');
+        return;
+      }
+
+      const response = await fetch('/api/admin/banners', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
           title: `${banner.title} (másolat)`,
           description: banner.description,
-          image: banner.image,
+          image_url: banner.image_url,
           active: banner.active,
-          visibleFrom: banner.visibleFrom,
-          visibleUntil: banner.visibleUntil,
-          order: Math.max(...banners.map(b => b.order)) + 1,
+          visible_from: banner.visible_from,
+          visible_until: banner.visible_until,
+          order_position: Math.max(...banners.map(b => b.order_position)) + 1,
         }),
       });
 
@@ -191,7 +237,7 @@ export default function BannersAdmin() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Aktív</p>
-              <p className="text-2xl font-bold text-gray-900">{banners.filter(b => b.active).length}</p>
+              <p className="text-2xl font-bold text-gray-900">{banners.filter(b => b.active === 1).length}</p>
             </div>
           </div>
         </div>
@@ -205,7 +251,7 @@ export default function BannersAdmin() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Inaktív</p>
-              <p className="text-2xl font-bold text-gray-900">{banners.filter(b => !b.active).length}</p>
+              <p className="text-2xl font-bold text-gray-900">{banners.filter(b => b.active === 0).length}</p>
             </div>
           </div>
         </div>
@@ -239,16 +285,16 @@ export default function BannersAdmin() {
         ) : (
           <div className="divide-y divide-gray-200">
             {banners
-              .sort((a, b) => a.order - b.order)
+              .sort((a, b) => a.order_position - b.order_position)
               .map((banner) => (
               <div key={banner.id} className="p-6 hover:bg-gray-50">
                 <div className="flex items-center space-x-4">
                   {/* Banner Image */}
                   <div className="flex-shrink-0">
-                    {banner.image ? (
+                    {banner.image_url ? (
                       <img
                         className="h-20 w-32 object-cover rounded-lg border"
-                        src={banner.image}
+                        src={banner.image_url}
                         alt={banner.title}
                       />
                     ) : (
@@ -271,8 +317,8 @@ export default function BannersAdmin() {
                           {banner.description}
                         </p>
                         <div className="flex items-center text-xs text-gray-400 mt-2 space-x-4">
-                          <span>Sorrend: {banner.order}</span>
-                          <span>{banner.visibleFrom} - {banner.visibleUntil}</span>
+                          <span>Sorrend: {banner.order_position}</span>
+                          <span>{banner.visible_from} - {banner.visible_until || 'Nincs határidő'}</span>
                         </div>
                       </div>
                     </div>
@@ -283,12 +329,12 @@ export default function BannersAdmin() {
                     <button
                       onClick={() => handleToggleActive(banner.id)}
                       className={`px-3 py-1 text-xs font-medium rounded-full ${
-                        banner.active
+                        banner.active === 1
                           ? 'bg-green-100 text-green-800 hover:bg-green-200'
                           : 'bg-red-100 text-red-800 hover:bg-red-200'
                       }`}
                     >
-                      {banner.active ? 'Aktív' : 'Inaktív'}
+                      {banner.active === 1 ? 'Aktív' : 'Inaktív'}
                     </button>
                   </div>
 

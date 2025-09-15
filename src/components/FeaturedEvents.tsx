@@ -9,8 +9,8 @@ interface Tournament {
   title: string;
   tournament_date: string;
   tournament_time: string;
-  buy_in: number;
-  guarantee_amount: number;
+  buy_in: string | number; // API returns string
+  guarantee_amount: string | number; // API returns string
   current_players: number;
   max_players: number | null;
   image_url?: string;
@@ -30,6 +30,8 @@ export default function FeaturedEvents() {
       if (response.ok) {
         const data = await response.json();
         setTournaments(data);
+      } else {
+        console.error('Failed to fetch tournaments:', response.status, response.statusText);
       }
     } catch (error) {
       console.error('Error fetching featured tournaments:', error);
@@ -105,14 +107,14 @@ export default function FeaturedEvents() {
                       <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                       </svg>
-                      Buy-in: {formatCurrency(tournament.buy_in)}
+                      Buy-in: {formatCurrency(Number(tournament.buy_in))}
                     </div>
                     
                     <div className="flex items-center text-poker-gold">
                       <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M3.293 9.707a1 1 0 010-1.414l6-6a1 1 0 011.414 0l6 6a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L4.707 9.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
                       </svg>
-                      Garancia: {formatCurrency(tournament.guarantee_amount)}
+                      Garancia: {formatCurrency(Number(tournament.guarantee_amount))}
                     </div>
                   </div>
 

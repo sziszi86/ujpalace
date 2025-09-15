@@ -12,7 +12,7 @@ export default function CashGamesAdmin() {
   useEffect(() => {
     const loadCashGames = async () => {
       try {
-        const response = await fetch('/api/cash-games');
+        const response = await fetch('/api/admin/cash-games');
         if (response.ok) {
           const cashGamesData = await response.json();
           // Convert database format to admin format

@@ -78,10 +78,11 @@ export default function AdminDashboard() {
       const response = await fetch('/api/admin/backup');
       if (response.ok) {
         const data = await response.json();
-        setBackups(data.backups);
+        setBackups(data.backups || []);
       }
     } catch (error) {
       console.error('Failed to fetch backups:', error);
+      setBackups([]);
     }
   };
 
@@ -473,7 +474,7 @@ export default function AdminDashboard() {
               <div className="space-y-2">
                 <h4 className="text-sm font-medium text-gray-900">Elérhető mentések:</h4>
                 <div className="max-h-48 overflow-y-auto space-y-2">
-                  {backups.slice(0, 3).map((backup) => (
+                  {(backups || []).slice(0, 3).map((backup) => (
                     <div key={backup.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                       <div className="flex-1">
                         <p className="text-sm font-medium text-gray-900">{backup.name}</p>

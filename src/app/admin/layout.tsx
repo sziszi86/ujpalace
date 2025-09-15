@@ -1,6 +1,7 @@
 
-import AdminLayout from '@/components/admin/AdminLayout';
+import SimpleAdminLayout from '@/components/admin/SimpleAdminLayout';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { AlertProvider } from '@/components/admin/Alert';
 
 export default function AdminRootLayout({
   children,
@@ -9,7 +10,9 @@ export default function AdminRootLayout({
 }) {
   return (
     <AuthProvider>
-      <AdminLayout>{children}</AdminLayout>
+      <AlertProvider>
+        <SimpleAdminLayout>{children}</SimpleAdminLayout>
+      </AlertProvider>
     </AuthProvider>
   );
 }

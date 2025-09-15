@@ -1,9 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAllTournaments, createTournament, updateTournament, deleteTournament } from '@/lib/database';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const tournaments = await getAllTournaments();
+    const { searchParams } = new URL(request.url);
+    const limit = searchParams.get('limit');
+    const featured = searchParams.get('featured');
+    const status = searchParams.get('status');
+    
+    const tournaments = await getAllTournaments(
+      limit ? parseInt(limit) : undefined,
+      status || undefined,
+      featured === 'true'
+    );
     return NextResponse.json(tournaments);
   } catch (error) {
     console.error('Error fetching tournaments:', error);
