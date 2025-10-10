@@ -6,7 +6,17 @@
       "Bash(DB_HOST=localhost DB_USER=root DB_PASSWORD=\"\" DB_NAME=palace_poker DB_PORT=3306 mysql -h localhost -u root palace_poker -e \"SELECT id, title, image_url, status, featured FROM tournaments WHERE image_url IS NOT NULL AND image_url != '''' ORDER BY date ASC LIMIT 10;\")",
       "Bash(DB_HOST=localhost DB_USER=root DB_PASSWORD=\"\" DB_NAME=palace_poker DB_PORT=3306 mysql -h localhost -u root palace_poker -e \"SELECT id, title, image_url, status, featured FROM tournaments LIMIT 10;\")",
       "Bash(DB_HOST=localhost DB_USER=root DB_PASSWORD=\"\" DB_NAME=palace_poker DB_PORT=3306 mysql -h localhost -u root palace_poker -e \"SELECT id, filename, original_name FROM images WHERE id IN (7, 12);\")",
-      "Bash(DB_HOST=localhost DB_USER=root DB_PASSWORD=\"\" DB_NAME=palace_poker DB_PORT=3306 mysql -h localhost -u root palace_poker -e \"SELECT id, title, rebuy_price, rebuy_chips, addon_price, addon_chips, starting_chips FROM tournaments WHERE status = ''upcoming'' LIMIT 5;\")"
+      "Bash(DB_HOST=localhost DB_USER=root DB_PASSWORD=\"\" DB_NAME=palace_poker DB_PORT=3306 mysql -h localhost -u root palace_poker -e \"SELECT id, title, rebuy_price, rebuy_chips, addon_price, addon_chips, starting_chips FROM tournaments WHERE status = ''upcoming'' LIMIT 5;\")",
+      "Bash(npm run build:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run deploy:*)",
+      "Bash(node:*)",
+      "Bash(nslookup:*)",
+      "Bash(curl:*)",
+      "WebFetch(domain:palacepoker.hu)",
+      "Bash(DB_HOST=localhost DB_USER=root DB_PASSWORD=\"\" DB_NAME=palace_poker DB_PORT=3306 mysql -h localhost -u root palace_poker -e \"SHOW TABLES;\")",
+      "Bash(npx @railway/cli:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []

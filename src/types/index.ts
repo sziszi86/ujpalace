@@ -3,6 +3,7 @@ export interface Tournament {
   title: string;
   description: string;
   longDescription?: string; // For admin editor
+  long_description?: string; // API field compatibility
   date: string;
   time: string;
   // API also returns these fields
@@ -15,26 +16,37 @@ export interface Tournament {
   addonPrice?: number;
   addonChips?: number;
   guarantee: number;
+  guarantee_amount?: number; // API field compatibility
   structure: string;
   status: 'upcoming' | 'ongoing' | 'completed' | 'cancelled' | 'inactive';
   maxPlayers?: number;
+  max_players?: number; // API field compatibility
   currentPlayers?: number;
+  current_players?: number; // API field compatibility
   image?: string;
+  image_url?: string; // API field for compatibility
   images?: string[]; // Multiple images for gallery
   category?: string;
   featured?: boolean;
   venue?: string;
   lateRegistration?: boolean;
+  late_registration?: boolean; // API field compatibility
   lateRegistrationUntil?: string;
+  late_registration_until?: string; // API field compatibility
   blindStructure?: string;
+  blind_structure?: string; // API field compatibility
   startingChips?: number;
+  starting_chips?: number; // API field compatibility
   prize1st?: number;
   totalPlayers?: number;
   registrationDeadline?: string;
   // Live event specific
   contactPhone?: string;
+  contact_phone?: string; // API field compatibility
   contactEmail?: string;
+  contact_email?: string; // API field compatibility
   specialNotes?: string;
+  special_notes?: string; // API field compatibility
   // Admin visibility fields
   visibleFrom?: string;
   visibleUntil?: string;

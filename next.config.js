@@ -8,7 +8,15 @@ const nextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'palacepoker.hu',
+      },
+      {
+        protocol: 'https',
         hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.palacepoker.hu',
       },
       {
         protocol: 'http',

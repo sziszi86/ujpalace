@@ -181,7 +181,7 @@ export default function TournamentDetailPage() {
                   <div className="absolute bottom-4 left-4 right-4">
                     <div className="flex items-center justify-between text-white">
                       <div>
-                        <p className="text-sm opacity-90 drop-shadow-lg">{formatDate(tournament.tournament_date)}</p>
+                        <p className="text-sm opacity-90 drop-shadow-lg">{tournament.tournament_date ? formatDate(tournament.tournament_date) : ''}</p>
                         <p className="text-2xl font-bold drop-shadow-lg">{tournament.tournament_time}</p>
                       </div>
                       <div className="text-right">
@@ -362,7 +362,7 @@ export default function TournamentDetailPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                   <div>
-                    <p className="font-semibold text-poker-dark">{formatDate(tournament.tournament_date)}</p>
+                    <p className="font-semibold text-poker-dark">{tournament.tournament_date ? formatDate(tournament.tournament_date) : ''}</p>
                     <p className="text-sm text-poker-muted">{tournament.tournament_time}</p>
                   </div>
                 </div>

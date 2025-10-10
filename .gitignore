@@ -53,3 +53,30 @@ temp/
 # Runtime uploads (do not commit user-uploaded files)
 public/uploads/
 .vercel
+
+# Deployment cache (for incremental deployments)
+.deploy-cache.json
+
+# Development and debugging files
+debug*.js
+test*.js
+minimal*.js
+ultra*.js
+check*.js
+fresh*.js
+*-simple.js
+
+# Apache/server configuration files
+.htaccess*
+*.htaccess
+
+# Database exports and maintenance files
+*.sql
+!migrate-to-postgresql.sql
+!Railway-Setup-Guide.md
+maintenance.html
+import-database.php
+server.js
+
+# Deployment files (keep deploy.js for deployment script)
+!deploy.js
