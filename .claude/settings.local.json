@@ -16,7 +16,10 @@
       "WebFetch(domain:palacepoker.hu)",
       "Bash(DB_HOST=localhost DB_USER=root DB_PASSWORD=\"\" DB_NAME=palace_poker DB_PORT=3306 mysql -h localhost -u root palace_poker -e \"SHOW TABLES;\")",
       "Bash(npx @railway/cli:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(npm run:*)",
+      "Bash(zip:*)"
     ],
     "deny": [],
     "ask": []
