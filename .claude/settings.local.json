@@ -22,7 +22,8 @@
       "Bash(zip:*)",
       "Bash(railway --version)",
       "Bash(brew install:*)",
-      "Bash(railway login:*)"
+      "Bash(railway login:*)",
+      "Bash(/opt/homebrew/opt/postgresql@14/bin/pg_dump --help)"
     ],
     "deny": [],
     "ask": []
