@@ -92,9 +92,13 @@ export async function executeUpdate(query: string, params: any[] = []): Promise<
 // Tournament functions (PostgreSQL compatible)
 export async function getAllTournaments(limit?: number, status?: string, featured?: boolean) {
   let query = `
-    SELECT t.*, t.date as tournament_date, t.time as tournament_time,
-           t.category as category_name, null as category_color,
-           t.current_players, t.max_players
+    SELECT t.*, 
+           t.date as tournament_date,
+           EXTRACT(HOUR FROM t.date) || ':' || LPAD(EXTRACT(MINUTE FROM t.date)::text, 2, '0') as tournament_time,
+           'Tournament' as category_name, 
+           null as category_color,
+           0 as current_players,
+           t.max_players
     FROM tournaments t
   `;
   
@@ -119,7 +123,7 @@ export async function getAllTournaments(limit?: number, status?: string, feature
     query += ' WHERE ' + conditions.join(' AND ');
   }
   
-  query += ' ORDER BY t.date ASC, t.time ASC';
+  query += ' ORDER BY t.date ASC';
   
   if (limit) {
     query += ` LIMIT $${paramIndex++}`;
@@ -131,8 +135,11 @@ export async function getAllTournaments(limit?: number, status?: string, feature
 
 export async function getTournamentById(id: number) {
   const query = `
-    SELECT t.*, t.date as tournament_date, t.time as tournament_time,
-           t.category as category_name, null as category_color
+    SELECT t.*, 
+           t.date as tournament_date,
+           EXTRACT(HOUR FROM t.date) || ':' || LPAD(EXTRACT(MINUTE FROM t.date)::text, 2, '0') as tournament_time,
+           'Tournament' as category_name, 
+           null as category_color
     FROM tournaments t
     WHERE t.id = $1
   `;
@@ -191,8 +198,15 @@ export async function deleteTournament(id: number) {
 // Cash game functions (PostgreSQL compatible)
 export async function getAllCashGames(activeOnly: boolean = true) {
   let query = `
-    SELECT cg.*, cg.game as game_type_name, null as game_type_icon 
+    SELECT cg.*, 
+           COALESCE(cgt.name, 'Texas Hold''em') as game_type_name, 
+           null as game_type_icon,
+           cg.small_blind || '/' || cg.big_blind as stakes,
+           cg.min_buyin as min_buy_in,
+           cg.max_buyin as max_buy_in,
+           'Cash Game' as name
     FROM cash_games cg 
+    LEFT JOIN cash_game_types cgt ON cg.game_type_id = cgt.id
   `;
   
   if (activeOnly) {
@@ -206,8 +220,14 @@ export async function getAllCashGames(activeOnly: boolean = true) {
 
 export async function getCashGameById(id: number) {
   const query = `
-    SELECT cg.*, cg.game as game_type_name, null as game_type_icon 
+    SELECT cg.*, 
+           COALESCE(cgt.name, 'Texas Hold''em') as game_type_name, 
+           null as game_type_icon,
+           cg.small_blind || '/' || cg.big_blind as stakes,
+           cg.min_buyin as min_buy_in,
+           cg.max_buyin as max_buy_in
     FROM cash_games cg 
+    LEFT JOIN cash_game_types cgt ON cg.game_type_id = cgt.id
     WHERE cg.id = $1
   `;
   return executeQuerySingle(query, [id]);
