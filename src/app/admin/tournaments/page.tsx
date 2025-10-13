@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { generateUniqueId } from '@/utils/idGenerator';
 import { formatCurrency } from '@/utils/formatters';
 import { Tournament } from '@/types';
 
 export default function AdminTournamentsPage() {
+  const router = useRouter();
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>('all');
@@ -118,8 +120,17 @@ export default function AdminTournamentsPage() {
   const handleDelete = async (id: number) => {
     if (window.confirm('Biztosan törölni szeretnéd ezt a versenyt?')) {
       try {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+          router.push('/admin/login');
+          return;
+        }
+
         const response = await fetch(`/api/admin/tournaments?id=${id}`, {
-          method: 'DELETE'
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
         });
         
         if (response.ok) {
@@ -142,9 +153,18 @@ export default function AdminTournamentsPage() {
 
       const updatedTournament = { ...tournament, featured: !tournament.featured };
       
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        router.push('/admin/login');
+        return;
+      }
+
       const response = await fetch('/api/admin/tournaments', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
         body: JSON.stringify(updatedTournament)
       });
 
@@ -197,9 +217,18 @@ export default function AdminTournamentsPage() {
         visibleUntil: tournament.visibleUntil || new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0]
       };
       
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        router.push('/admin/login');
+        return;
+      }
+
       const response = await fetch('/api/admin/tournaments', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
         body: JSON.stringify(duplicateData)
       });
 

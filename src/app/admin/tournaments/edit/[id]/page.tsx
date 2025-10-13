@@ -78,7 +78,27 @@ export default function EditTournamentPage() {
   useEffect(() => {
     const loadTournament = async () => {
       try {
-        const response = await fetch('/api/admin/tournaments');
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+          router.push('/admin/login');
+          return;
+        }
+
+        const response = await fetch('/api/admin/tournaments', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        
+        if (!response.ok) {
+          if (response.status === 401) {
+            localStorage.removeItem('authToken');
+            router.push('/admin/login');
+            return;
+          }
+          throw new Error('Failed to load tournaments');
+        }
+        
         const tournaments = await response.json();
         
         // Find tournament by ID - convert both to string for comparison
