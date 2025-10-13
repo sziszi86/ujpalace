@@ -18,7 +18,7 @@ export default function AdminTournamentsPage() {
   useEffect(() => {
     const loadTournaments = async () => {
       try {
-        const response = await fetch('/api/admin/tournaments');
+        const response = await fetch('/api/tournaments');
         let tournaments: Tournament[] = [];
         
         if (response.ok) {
@@ -58,7 +58,7 @@ export default function AdminTournamentsPage() {
           // API-val frissítjük az adatbázist
           for (const tournament of updatedTournaments) {
             if (tournaments.some((t, index) => t.status !== tournament.status && tournaments[index].id === tournament.id)) {
-              await fetch('/api/admin/tournaments', {
+              await fetch('/api/tournaments', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(tournament)

@@ -22,7 +22,7 @@ export async function GET(request: Request) {
       query += ' WHERE active = true';
     }
 
-    query += ' ORDER BY order_position ASC, created_at DESC';
+    query += ' ORDER BY order_index ASC, created_at DESC';
 
     const banners = await executeQuery(query, params);
     return NextResponse.json(banners);
@@ -52,7 +52,7 @@ export async function POST(request: Request) {
       description,
       image_url,
       url,
-      order_position = 0,
+      order_index = 0,
       active = true,
       visible_from,
       visible_until
@@ -67,17 +67,15 @@ export async function POST(request: Request) {
 
     const result = await executeInsert(`
       INSERT INTO banners 
-      (title, description, image_url, url, order_position, active, visible_from, visible_until)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      (title, description, image_url, link_url, order_index, active)
+      VALUES ($1, $2, $3, $4, $5, $6)
     `, [
       title,
       description,
       image_url || null,
       url || null,
-      order_position,
-      active ? 1 : 0,
-      visible_from || null,
-      visible_until || null
+      order_index,
+      active ? true : false
     ]);
 
     return NextResponse.json({
@@ -111,7 +109,7 @@ export async function PUT(request: Request) {
       description,
       image_url,
       url,
-      order_position,
+      order_index,
       active,
       visible_from,
       visible_until
@@ -126,18 +124,16 @@ export async function PUT(request: Request) {
 
     await executeUpdate(`
       UPDATE banners 
-      SET title = $1, description = $1, image_url = $1, url = $1, order_position = $1, 
-          active = $1, visible_from = $1, visible_until = $1, updated_at = NOW()
-      WHERE id = $1
+      SET title = $1, description = $2, image_url = $3, link_url = $4, order_index = $5, 
+          active = $6, updated_at = CURRENT_TIMESTAMP
+      WHERE id = $7
     `, [
       title,
       description,
       image_url || null,
       url || null,
-      order_position || 0,
-      active ? 1 : 0,
-      visible_from || null,
-      visible_until || null,
+      order_index || 0,
+      active ? true : false,
       id
     ]);
 

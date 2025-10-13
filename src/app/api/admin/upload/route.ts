@@ -103,14 +103,15 @@ export async function POST(request: NextRequest) {
       
       const result = await executeInsert(`
         INSERT INTO gallery_images 
-        (title, filename, alt_text, category, size, active, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, 1, NOW(), NOW())
+        (title, filename, alt_text, category, size, active)
+        VALUES ($1, $2, $3, $4, $5, $6)
       `, [
         title,
         filename,
         `${title} - Palace Poker Szombathely`,
         category,
-        optimizedSize
+        optimizedSize,
+        true
       ]);
 
       const uploadResult: UploadResult = {
@@ -141,14 +142,15 @@ export async function POST(request: NextRequest) {
       
       const result = await executeInsert(`
         INSERT INTO gallery_images 
-        (title, filename, alt_text, category, size, active, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, 1, NOW(), NOW())
+        (title, filename, alt_text, category, size, active)
+        VALUES ($1, $2, $3, $4, $5, $6)
       `, [
         title,
         filename,
         `${title} - Palace Poker Szombathely`,
         category,
-        file.size
+        file.size,
+        true
       ]);
 
       return NextResponse.json({

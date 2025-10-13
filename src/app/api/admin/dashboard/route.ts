@@ -7,8 +7,8 @@ export async function GET() {
     const [tournamentStats] = await executeQuery(`
       SELECT 
         COUNT(*) as total,
-        COUNT(CASE WHEN date >= CURDATE() THEN 1 END) as upcoming,
-        COUNT(CASE WHEN date = CURDATE() THEN 1 END) as active,
+        COUNT(CASE WHEN date >= CURRENT_DATE THEN 1 END) as upcoming,
+        COUNT(CASE WHEN date = CURRENT_DATE THEN 1 END) as active,
         COUNT(CASE WHEN featured = true THEN 1 END) as featured
       FROM tournaments
     `);
@@ -69,7 +69,7 @@ export async function GET() {
         COALESCE(t.category, 'Egyéb') as category,
         'tournament' as type
       FROM tournaments t
-      WHERE t.date >= CURDATE()
+      WHERE t.date >= CURRENT_DATE
       ORDER BY t.date ASC, t.time ASC
       LIMIT 10
     `);
