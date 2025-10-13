@@ -330,7 +330,7 @@ export async function getAllNews(limit?: number, status: string = 'published') {
   
   if (limit) {
     query += ' LIMIT $2';
-    params.push(limit);
+    params.push(limit.toString());
   }
   
   return executeQuery(query, params);
