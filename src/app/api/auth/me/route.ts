@@ -31,7 +31,7 @@ export async function GET(request: Request) {
       const user = await executeQuerySingle(`
         SELECT id, username, email 
         FROM admin_users 
-        WHERE id = ?
+        WHERE id = $1
       `, [decoded.id]);
 
       if (!user) {

@@ -51,7 +51,7 @@ export async function POST(request: Request) {
 
     // Check if user already exists
     const existingUser = await executeQuery(`
-      SELECT id FROM admin_users WHERE username = ? OR email = ?
+      SELECT id FROM admin_users WHERE username = $1 OR email = $1
     `, [username, email]);
 
     if (existingUser.length > 0) {

@@ -25,7 +25,7 @@ export async function GET(
         notes,
         created_at
       FROM player_transactions 
-      WHERE player_id = ?
+      WHERE player_id = $1
       ORDER BY transaction_date DESC, created_at DESC
     `, [playerId]);
 

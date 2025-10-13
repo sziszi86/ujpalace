@@ -26,7 +26,7 @@ export async function POST(request: Request) {
     `, [player_id, transaction_type, amount, transaction_date, notes || null]);
 
     const newTransaction = await executeQuery(`
-      SELECT * FROM player_transactions WHERE id = ?
+      SELECT * FROM player_transactions WHERE id = $1
     `, [result.insertId]);
 
     return NextResponse.json(newTransaction[0], { status: 201 });

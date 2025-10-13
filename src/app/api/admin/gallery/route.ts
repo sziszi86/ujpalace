@@ -120,26 +120,26 @@ export async function PUT(request: Request) {
     const params: any[] = [];
 
     if (title !== undefined) {
-      updateQuery += ', title = ?';
+      updateQuery += ', title = $1';
       params.push(title);
     }
 
     if (alt_text !== undefined) {
-      updateQuery += ', alt_text = ?';
+      updateQuery += ', alt_text = $1';
       params.push(alt_text);
     }
 
     if (category !== undefined) {
-      updateQuery += ', category = ?';
+      updateQuery += ', category = $1';
       params.push(category);
     }
 
     if (active !== undefined) {
-      updateQuery += ', active = ?';
+      updateQuery += ', active = $1';
       params.push(active ? 1 : 0);
     }
 
-    updateQuery += ' WHERE id = ?';
+    updateQuery += ' WHERE id = $1';
     params.push(id);
 
     await executeUpdate(updateQuery, params);
@@ -178,9 +178,9 @@ export async function DELETE(request: Request) {
     }
 
     // Get image info before deletion for file cleanup
-    const image = await executeQuery('SELECT filename FROM gallery_images WHERE id = ?', [parseInt(id)]);
+    const image = await executeQuery('SELECT filename FROM gallery_images WHERE id = $1', [parseInt(id)]);
     
-    await executeUpdate('DELETE FROM gallery_images WHERE id = ?', [parseInt(id)]);
+    await executeUpdate('DELETE FROM gallery_images WHERE id = $1', [parseInt(id)]);
 
     // TODO: Delete physical file from /public/images/gallery/ directory
     // This could be implemented later with fs operations

@@ -11,7 +11,7 @@ export async function POST(
 
     // Get original structure
     const originalStructure = await executeQuerySingle(`
-      SELECT * FROM structures WHERE id = ?
+      SELECT * FROM structures WHERE id = $1
     `, [structureId]);
 
     if (!originalStructure) {
@@ -23,7 +23,7 @@ export async function POST(
 
     // Get original levels
     const originalLevels = await executeQuery(`
-      SELECT * FROM structure_levels WHERE structure_id = ? ORDER BY level
+      SELECT * FROM structure_levels WHERE structure_id = $1 ORDER BY level
     `, [structureId]);
 
     // Create new structure

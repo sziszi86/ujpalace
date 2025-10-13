@@ -23,7 +23,7 @@ export async function GET(
         t.time as tournament_time,
         t.category as category_name
       FROM tournaments t
-      WHERE t.id = ? AND t.status != 'inactive'
+      WHERE t.id = $1 AND t.status != 'inactive'
     `, [tournamentId]);
 
     if (!tournament) {

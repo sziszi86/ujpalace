@@ -6,27 +6,36 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const limit = searchParams.get('limit');
-    const status = searchParams.get('status') || 'published';
+    const published = searchParams.get('status') === 'published' ? true : false;
     const featured = searchParams.get('featured');
 
     let query = `
-      SELECT id, title, slug, content, excerpt, image, publish_date, 
-             status, category, tags, featured, author, read_time, 
+      SELECT id, title, 
+             LOWER(REPLACE(title, ' ', '-')) as slug,
+             content, excerpt, 
+             featured_image as image, 
+             created_at as publish_date,
+             CASE WHEN published = true THEN 'published' ELSE 'draft' END as status,
+             'general' as category, 
+             '' as tags, 
+             featured, author, 
+             CEIL(LENGTH(content) / 1000.0) as read_time,
              created_at, updated_at
       FROM news 
-      WHERE status = ?
+      WHERE published = $1
     `;
-    const params = [status];
+    const params: any[] = [published];
+    let paramIndex = 2;
 
     if (featured === 'true') {
       query += ' AND featured = true';
     }
 
-    query += ' ORDER BY publish_date DESC, created_at DESC';
+    query += ' ORDER BY created_at DESC';
 
     if (limit) {
-      query += ' LIMIT ?';
-      params.push(limit);
+      query += ` LIMIT $${paramIndex++}`;
+      params.push(parseInt(limit));
     }
 
     const news = await executeQuery(query, params);

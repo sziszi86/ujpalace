@@ -29,7 +29,7 @@ export async function GET(
         COUNT(pt.id) as transaction_count
       FROM players p
       LEFT JOIN player_transactions pt ON p.id = pt.player_id
-      WHERE p.id = ?
+      WHERE p.id = $1
       GROUP BY p.id, p.name, p.phone, p.email, p.other_notes, p.active, p.created_at, p.updated_at
     `, [playerId]);
 
@@ -77,8 +77,8 @@ export async function PUT(
 
     await executeQuery(`
       UPDATE players 
-      SET name = ?, phone = ?, email = ?, other_notes = ?, active = ?
-      WHERE id = ?
+      SET name = $1, phone = $1, email = $1, other_notes = $1, active = $1
+      WHERE id = $1
     `, [name, phone || null, email || null, other_notes || null, active !== false, playerId]);
 
     const updatedPlayer = await executeQuery(`
@@ -94,7 +94,7 @@ export async function PUT(
         COUNT(pt.id) as transaction_count
       FROM players p
       LEFT JOIN player_transactions pt ON p.id = pt.player_id
-      WHERE p.id = ?
+      WHERE p.id = $1
       GROUP BY p.id, p.name, p.phone, p.email, p.other_notes, p.active, p.created_at, p.updated_at
     `, [playerId]);
 
@@ -125,7 +125,7 @@ export async function DELETE(
 
     // Check if player exists
     const player = await executeQuery(`
-      SELECT id FROM players WHERE id = ?
+      SELECT id FROM players WHERE id = $1
     `, [playerId]);
 
     if (player.length === 0) {
@@ -137,12 +137,12 @@ export async function DELETE(
 
     // First delete all transactions for this player
     await executeQuery(`
-      DELETE FROM player_transactions WHERE player_id = ?
+      DELETE FROM player_transactions WHERE player_id = $1
     `, [playerId]);
 
     // Then delete the player
     await executeQuery(`
-      DELETE FROM players WHERE id = ?
+      DELETE FROM players WHERE id = $1
     `, [playerId]);
 
     return NextResponse.json({ message: 'Játékos sikeresen törölve' });

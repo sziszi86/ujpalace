@@ -19,7 +19,7 @@ export async function GET(
     // Fetch image data from database
     const image = await executeQuerySingle(`
       SELECT filename, original_name, mime_type, size_bytes, data
-      FROM images WHERE id = ?
+      FROM images WHERE id = $1
     `, [imageId]);
 
     if (!image) {
@@ -68,7 +68,7 @@ export async function DELETE(
 
     // Check if image exists
     const image = await executeQuerySingle(`
-      SELECT * FROM images WHERE id = ?
+      SELECT * FROM images WHERE id = $1
     `, [imageId]);
 
     if (!image) {
@@ -80,7 +80,7 @@ export async function DELETE(
 
     // Delete from database
     const affectedRows = await executeUpdate(`
-      DELETE FROM images WHERE id = ?
+      DELETE FROM images WHERE id = $1
     `, [imageId]);
     
     if (affectedRows === 0) {
@@ -128,8 +128,8 @@ export async function PUT(
     // Update image metadata
     const result = await executeQuerySingle(`
       UPDATE images 
-      SET title = ?, alt = ?, updated_at = NOW()
-      WHERE id = ?
+      SET title = $1, alt = $1, updated_at = NOW()
+      WHERE id = $1
     `, [title || null, alt || null, imageId]);
 
     if (result.affectedRows === 0) {
@@ -141,7 +141,7 @@ export async function PUT(
 
     // Return updated image
     const updatedImage = await executeQuerySingle(`
-      SELECT * FROM images WHERE id = ?
+      SELECT * FROM images WHERE id = $1
     `, [imageId]);
 
     return NextResponse.json(updatedImage);

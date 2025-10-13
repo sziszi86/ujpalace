@@ -126,9 +126,9 @@ export async function PUT(request: Request) {
 
     await executeUpdate(`
       UPDATE banners 
-      SET title = ?, description = ?, image_url = ?, url = ?, order_position = ?, 
-          active = ?, visible_from = ?, visible_until = ?, updated_at = NOW()
-      WHERE id = ?
+      SET title = $1, description = $1, image_url = $1, url = $1, order_position = $1, 
+          active = $1, visible_from = $1, visible_until = $1, updated_at = NOW()
+      WHERE id = $1
     `, [
       title,
       description,
@@ -174,7 +174,7 @@ export async function DELETE(request: Request) {
       );
     }
 
-    await executeUpdate('DELETE FROM banners WHERE id = ?', [parseInt(id)]);
+    await executeUpdate('DELETE FROM banners WHERE id = $1', [parseInt(id)]);
 
     return NextResponse.json({
       message: 'Banner sikeresen törölve!'

@@ -9,7 +9,7 @@ export async function GET(
     const { id } = await params;
 
     const aboutPage = await executeQuerySingle(`
-      SELECT * FROM about_pages WHERE id = ?
+      SELECT * FROM about_pages WHERE id = $1
     `, [id]);
 
     if (!aboutPage) {
@@ -49,7 +49,7 @@ export async function PUT(
     }
 
     await executeQuery(
-      'UPDATE about_pages SET title = ?, content = ?, features = ?, image = ?, active = ? WHERE id = ?',
+      'UPDATE about_pages SET title = $1, content = $1, features = $1, image = $1, active = $1 WHERE id = $1',
       [title, content, JSON.stringify(features), image, active, id]
     );
 
@@ -78,7 +78,7 @@ export async function DELETE(
   try {
     const { id } = await params;
 
-    await executeQuery('DELETE FROM about_pages WHERE id = ?', [id]);
+    await executeQuery('DELETE FROM about_pages WHERE id = $1', [id]);
 
     return NextResponse.json({ success: true });
   } catch (error) {

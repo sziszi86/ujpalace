@@ -19,7 +19,7 @@ export async function GET(
     // Fetch image data from banner_images table
     const image = await executeQuerySingle(`
       SELECT filename, original_name, mime_type, size_bytes, data
-      FROM banner_images WHERE id = ?
+      FROM banner_images WHERE id = $1
     `, [imageId]);
 
     if (!image) {

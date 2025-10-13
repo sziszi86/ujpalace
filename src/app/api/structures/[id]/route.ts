@@ -10,7 +10,7 @@ export async function GET(
     const structureId = resolvedParams.id;
 
     const structure = await executeQuerySingle(`
-      SELECT * FROM structures WHERE id = ?
+      SELECT * FROM structures WHERE id = $1
     `, [structureId]);
 
     if (!structure) {
@@ -25,7 +25,7 @@ export async function GET(
              ante, duration_minutes as durationMinutes, break_after as breakAfter, 
              break_duration_minutes as breakDurationMinutes
       FROM structure_levels 
-      WHERE structure_id = ? 
+      WHERE structure_id = $1 
       ORDER BY level
     `, [structureId]);
 
@@ -61,12 +61,12 @@ export async function PUT(
 
     // Update structure
     await executeQuery(
-      'UPDATE structures SET name = ?, description = ?, starting_chips = ?, is_active = ? WHERE id = ?',
+      'UPDATE structures SET name = $1, description = $1, starting_chips = $1, is_active = $1 WHERE id = $1',
       [name, description, starting_chips, is_active, structureId]
     );
 
     // Delete existing levels
-    await executeQuery('DELETE FROM structure_levels WHERE structure_id = ?', [structureId]);
+    await executeQuery('DELETE FROM structure_levels WHERE structure_id = $1', [structureId]);
 
     // Insert new levels
     if (levels && levels.length > 0) {
@@ -116,10 +116,10 @@ export async function DELETE(
     const structureId = resolvedParams.id;
 
     // Delete levels first (foreign key constraint)
-    await executeQuery('DELETE FROM structure_levels WHERE structure_id = ?', [structureId]);
+    await executeQuery('DELETE FROM structure_levels WHERE structure_id = $1', [structureId]);
     
     // Delete structure
-    await executeQuery('DELETE FROM structures WHERE id = ?', [structureId]);
+    await executeQuery('DELETE FROM structures WHERE id = $1', [structureId]);
 
     return NextResponse.json({ success: true });
   } catch (error) {

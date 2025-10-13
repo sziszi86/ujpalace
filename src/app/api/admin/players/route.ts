@@ -28,7 +28,7 @@ export async function GET() {
           transaction_date,
           notes
         FROM player_transactions 
-        WHERE player_id = ?
+        WHERE player_id = $1
         ORDER BY transaction_date DESC, created_at DESC 
         LIMIT 5
       `, [player.id]);
@@ -71,7 +71,7 @@ export async function POST(request: Request) {
         0 as balance,
         0 as transaction_count
       FROM players p 
-      WHERE p.id = ?
+      WHERE p.id = $1
     `, [result[0].insertId]);
 
     return NextResponse.json(newPlayer[0], { status: 201 });
