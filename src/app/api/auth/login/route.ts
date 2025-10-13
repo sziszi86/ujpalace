@@ -29,7 +29,7 @@ export async function POST(request: Request) {
           email: 'admin@palace-poker.hu',
           role: 'admin'
         },
-        process.env.JWT_SECRET || 'default-secret-key',
+        process.env.JWT_SECRET || process.env.NEXTAUTH_SECRET || 'palace-poker-secret-key-2025',
         { expiresIn: '24h' }
       );
 
@@ -84,7 +84,7 @@ export async function POST(request: Request) {
         email: user.email,
         role: user.role || 'admin'
       },
-      process.env.JWT_SECRET || 'default-secret-key',
+      process.env.JWT_SECRET || process.env.NEXTAUTH_SECRET || 'palace-poker-secret-key-2025',
       { expiresIn: '24h' }
     );
 

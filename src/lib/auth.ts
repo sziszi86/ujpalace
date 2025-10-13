@@ -20,7 +20,8 @@ export async function verifyAuth(request: Request): Promise<AuthResult> {
     const token = authHeader.substring(7);
     
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'default-secret-key') as any;
+      const jwtSecret = process.env.JWT_SECRET || process.env.NEXTAUTH_SECRET || 'palace-poker-secret-key-2025';
+      const decoded = jwt.verify(token, jwtSecret) as any;
       
       // Test admin esetén
       if (decoded.email === 'admin@palace-poker.hu') {

@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
     // Save to database
     const result = await executeInsert(`
       INSERT INTO images (filename, original_name, mime_type, size_bytes, data)
-      VALUES (?, ?, ?, ?, ?)
+      VALUES ($1, $2, $3, $4, $5)
     `, [filename, file.name, mimeType, processedBuffer.length, processedBuffer]);
     
     return NextResponse.json({
