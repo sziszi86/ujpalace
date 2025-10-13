@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { executeQuerySingle } from '@/lib/database';
+import { executeQuerySingle } from '@/lib/database-postgresql';
 
 interface AuthResult {
   success: boolean;
@@ -39,7 +39,7 @@ export async function verifyAuth(request: Request): Promise<AuthResult> {
       const user = await executeQuerySingle(`
         SELECT id, username, email 
         FROM admin_users 
-        WHERE id = ?
+        WHERE id = $1
       `, [decoded.id]);
 
       if (!user) {

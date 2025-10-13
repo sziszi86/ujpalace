@@ -10,15 +10,43 @@ export interface DatabaseConfig {
   ssl?: boolean | { rejectUnauthorized: boolean };
 }
 
-const dbConfig: DatabaseConfig = {
-  host: process.env.DATABASE_HOST || process.env.DB_HOST || 'localhost',
-  user: process.env.DATABASE_USER || process.env.DB_USER || 'postgres',
-  password: process.env.DATABASE_PASSWORD || process.env.DB_PASSWORD || '',
-  database: process.env.DATABASE_NAME || process.env.DB_NAME || 'palace_poker',
-  port: parseInt(process.env.DATABASE_PORT || process.env.DB_PORT || '5432'),
-  max: 20,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-};
+// Function to parse DATABASE_URL for Railway
+function parseDatabaseUrl(databaseUrl: string): DatabaseConfig {
+  try {
+    const url = new URL(databaseUrl);
+    return {
+      host: url.hostname,
+      user: url.username,
+      password: url.password,
+      database: url.pathname.slice(1), // Remove leading slash
+      port: parseInt(url.port || '5432'),
+      max: 20,
+      ssl: { rejectUnauthorized: false },
+    };
+  } catch (error) {
+    console.warn('Invalid DATABASE_URL format, falling back to individual env vars');
+    throw error;
+  }
+}
+
+// Check if DATABASE_URL is valid and not a Railway template
+const databaseUrl = process.env.DATABASE_URL;
+const isValidDatabaseUrl = databaseUrl && 
+  !databaseUrl.includes('{{') && 
+  !databaseUrl.includes('}}') && 
+  databaseUrl.startsWith('postgresql://');
+
+const dbConfig: DatabaseConfig = isValidDatabaseUrl
+  ? parseDatabaseUrl(databaseUrl)
+  : {
+      host: process.env.DATABASE_HOST || process.env.DB_HOST || 'localhost',
+      user: process.env.DATABASE_USER || process.env.DB_USER || 'postgres',
+      password: process.env.DATABASE_PASSWORD || process.env.DB_PASSWORD || '',
+      database: process.env.DATABASE_NAME || process.env.DB_NAME || 'palace_poker',
+      port: parseInt(process.env.DATABASE_PORT || process.env.DB_PORT || '5432'),
+      max: 20,
+      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+    };
 
 // Connection pool for better performance
 const pool = new Pool(dbConfig);
