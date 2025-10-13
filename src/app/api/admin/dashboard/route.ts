@@ -9,28 +9,28 @@ export async function GET() {
         COUNT(*) as total,
         COUNT(CASE WHEN date >= CURDATE() THEN 1 END) as upcoming,
         COUNT(CASE WHEN date = CURDATE() THEN 1 END) as active,
-        COUNT(CASE WHEN featured = 1 THEN 1 END) as featured
+        COUNT(CASE WHEN featured = true THEN 1 END) as featured
       FROM tournaments
     `);
 
     const [cashGameStats] = await executeQuery(`
       SELECT 
         COUNT(*) as total,
-        COUNT(CASE WHEN active = 1 THEN 1 END) as active
+        COUNT(CASE WHEN active = true THEN 1 END) as active
       FROM cash_games
     `);
 
     const [structureStats] = await executeQuery(`
       SELECT 
         COUNT(*) as total,
-        COUNT(CASE WHEN is_active = 1 THEN 1 END) as active
+        COUNT(CASE WHEN is_active = true THEN 1 END) as active
       FROM structures
     `);
 
     const [bannerStats] = await executeQuery(`
       SELECT 
         COUNT(*) as total,
-        COUNT(CASE WHEN active = 1 THEN 1 END) as active
+        COUNT(CASE WHEN active = true THEN 1 END) as active
       FROM banners
     `);
 
@@ -53,7 +53,7 @@ export async function GET() {
         COUNT(*) as count,
         AVG(min_buy_in) as avgMinBuyIn
       FROM cash_games
-      WHERE active = 1
+      WHERE active = true
       GROUP BY stakes
       ORDER BY count DESC
       LIMIT 5
@@ -84,7 +84,7 @@ export async function GET() {
           SUM(CASE WHEN pt.transaction_type = 'deposit' THEN pt.amount ELSE 0 END) as total_deposits
         FROM players p
         LEFT JOIN player_transactions pt ON p.id = pt.player_id
-        WHERE p.active = 1
+        WHERE p.active = true
         GROUP BY p.id, p.name
         HAVING total_deposits > 0
         ORDER BY total_deposits DESC

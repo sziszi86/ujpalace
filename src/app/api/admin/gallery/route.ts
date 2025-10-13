@@ -19,7 +19,7 @@ export async function GET(request: Request) {
     const params: any[] = [];
 
     if (activeOnly) {
-      query += ' WHERE active = 1';
+      query += ' WHERE active = true';
     }
 
     query += ' ORDER BY created_at DESC';

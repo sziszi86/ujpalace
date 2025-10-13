@@ -5,7 +5,7 @@ export async function GET() {
   try {
     const aboutPages = await executeQuery(`
       SELECT * FROM about_pages 
-      WHERE active = 1 
+      WHERE active = true 
       ORDER BY created_at DESC
     `);
 

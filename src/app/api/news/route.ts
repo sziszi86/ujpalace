@@ -19,7 +19,7 @@ export async function GET(request: Request) {
     const params = [status];
 
     if (featured === 'true') {
-      query += ' AND featured = 1';
+      query += ' AND featured = true';
     }
 
     query += ' ORDER BY publish_date DESC, created_at DESC';
