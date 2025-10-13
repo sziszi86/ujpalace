@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { executeQuery, executeQuerySingle } from '@/lib/database-postgresql';
+import { verifyAuth } from '@/lib/auth';
 
 export async function GET(
   request: Request,
@@ -37,6 +38,14 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const authResult = await verifyAuth(request);
+    if (!authResult.success) {
+      return NextResponse.json(
+        { error: authResult.error },
+        { status: 401 }
+      );
+    }
+
     const { id } = await params;
     const body = await request.json();
     const { title, content, features = [], image = '', active = true } = body;
@@ -49,7 +58,7 @@ export async function PUT(
     }
 
     await executeQuery(
-      'UPDATE about_pages SET title = $1, content = $1, features = $1, image = $1, active = $1 WHERE id = $1',
+      'UPDATE about_pages SET title = $1, content = $2, features = $3, image = $4, active = $5 WHERE id = $6',
       [title, content, JSON.stringify(features), image, active, id]
     );
 

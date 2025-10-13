@@ -59,19 +59,25 @@ export default function CreateBanner() {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/banners', {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        router.push('/admin/login');
+        return;
+      }
+
+      const response = await fetch('/api/admin/banners', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
           title: formData.title,
           description: formData.description,
-          image: formData.image,
+          image_url: formData.image,
+          url: null,
+          order_index: parseInt(formData.order),
           active: formData.active,
-          visibleFrom: formData.visibleFrom,
-          visibleUntil: formData.visibleUntil,
-          order: parseInt(formData.order),
         }),
       });
 

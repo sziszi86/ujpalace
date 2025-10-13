@@ -20,8 +20,10 @@ export async function GET(
       SELECT 
         t.*,
         t.date as tournament_date,
-        t.time as tournament_time,
-        t.category as category_name
+        EXTRACT(HOUR FROM t.date) || ':' || LPAD(EXTRACT(MINUTE FROM t.date)::text, 2, '0') as tournament_time,
+        t.buyin_amount as buy_in,
+        t.starting_chips,
+        'Tournament' as category_name
       FROM tournaments t
       WHERE t.id = $1 AND t.status != 'inactive'
     `, [tournamentId]);

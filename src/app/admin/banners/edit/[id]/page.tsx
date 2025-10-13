@@ -60,7 +60,17 @@ export default function EditBanner() {
 
     const loadBanner = async () => {
       try {
-        const response = await fetch('/api/banners');
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+          router.push('/admin/login');
+          return;
+        }
+
+        const response = await fetch('/api/admin/banners', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
         if (response.ok) {
           const banners = await response.json();
           const banner = banners.find((b: any) => b.id === parseInt(bannerId));
@@ -154,12 +164,27 @@ export default function EditBanner() {
       
       console.log('Final submit data:', submitData);
       
-      const response = await fetch('/api/banners', {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        router.push('/admin/login');
+        return;
+      }
+
+      const response = await fetch('/api/admin/banners', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify(submitData),
+        body: JSON.stringify({
+          id: parseInt(bannerId),
+          title: formData.title,
+          description: formData.description,
+          image_url: finalImageUrl,
+          url: formData.customUrl || null,
+          order_index: parseInt(formData.order),
+          active: formData.active,
+        }),
       });
 
       if (!response.ok) {

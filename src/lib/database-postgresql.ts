@@ -123,10 +123,12 @@ export async function getAllTournaments(limit?: number, status?: string, feature
     SELECT t.*, 
            t.date as tournament_date,
            EXTRACT(HOUR FROM t.date) || ':' || LPAD(EXTRACT(MINUTE FROM t.date)::text, 2, '0') as tournament_time,
+           t.buyin_amount as buy_in,
            'Tournament' as category_name, 
            null as category_color,
            0 as current_players,
-           t.max_players
+           t.max_players,
+           t.starting_chips
     FROM tournaments t
   `;
   
