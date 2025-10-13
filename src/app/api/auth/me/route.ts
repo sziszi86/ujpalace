@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { executeQuerySingle } from '@/lib/database';
+import { executeQuerySingle } from '@/lib/database-postgresql';
 import jwt from 'jsonwebtoken';
 
 export async function GET(request: Request) {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAllTournaments, createTournament, updateTournament, deleteTournament } from '@/lib/database';
+import { getAllTournaments, createTournament, updateTournament, deleteTournament } from '@/lib/database-postgresql';
 
 export async function GET(request: NextRequest) {
   try {

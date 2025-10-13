@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { executeQuery, executeQuerySingle } from '@/lib/database';
+import { executeQuery, executeQuerySingle } from '@/lib/database-postgresql';
 
 export async function GET(
   request: Request,

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { executeQuerySingle } from '@/lib/database';
+import { executeQuerySingle } from '@/lib/database-postgresql';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     // Keressük meg a felhasználót az admin_users táblában
     const user = await executeQuerySingle(`
       SELECT * FROM admin_users 
-      WHERE email = ?
+      WHERE email = $1
     `, [email]);
 
     // Teszt admin esetén (mielőtt ellenőrizzük az adatbázis felhasználót)

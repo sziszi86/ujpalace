@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { executeQuery, executeInsert, executeUpdate } from '@/lib/database';
+import { executeQuery, executeInsert, executeUpdate } from '@/lib/database-postgresql';
 import { verifyAuth } from '@/lib/auth';
 
 export async function GET(request: Request) {

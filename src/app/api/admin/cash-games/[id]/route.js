@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getCashGameById, updateCashGame, deleteCashGame, executeUpdate } from '@/lib/database';
+import { getCashGameById, updateCashGame, deleteCashGame, executeUpdate } from '@/lib/database-postgresql';
 
 export async function GET(request, { params }) {
   try {

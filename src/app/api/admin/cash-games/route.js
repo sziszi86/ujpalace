@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getAllCashGames, createCashGame, updateCashGame, deleteCashGame } from '@/lib/database';
+import { getAllCashGames, createCashGame, updateCashGame, deleteCashGame } from '@/lib/database-postgresql';
 
 export async function GET() {
   try {

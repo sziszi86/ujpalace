@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { executeQuery, executeInsert } from '@/lib/database';
+import { executeQuery, executeInsert } from '@/lib/database-postgresql';
 import sharp from 'sharp';
 
 // GET - List all images for gallery
