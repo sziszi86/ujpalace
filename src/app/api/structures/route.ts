@@ -3,33 +3,38 @@ import { executeQuery, executeInsert } from '@/lib/database-postgresql';
 
 export async function GET() {
   try {
+    // First get all structures
     const structures = await executeQuery(`
-      SELECT s.*, 
-             GROUP_CONCAT(
-               JSON_OBJECT(
-                 'id', sl.id,
-                 'level', sl.level,
-                 'smallBlind', sl.small_blind,
-                 'bigBlind', sl.big_blind,
-                 'ante', sl.ante,
-                 'durationMinutes', sl.duration_minutes,
-                 'breakAfter', sl.break_after,
-                 'breakDurationMinutes', sl.break_duration_minutes
-               ) ORDER BY sl.level
-             ) as levels_json
-      FROM structures s
-      LEFT JOIN structure_levels sl ON s.id = sl.structure_id
-      GROUP BY s.id
-      ORDER BY s.created_at DESC
+      SELECT * FROM structures 
+      ORDER BY created_at DESC
     `);
 
-    const processedStructures = structures.map(structure => ({
-      ...structure,
-      levels: structure.levels_json ? 
-        JSON.parse(`[${structure.levels_json}]`) : []
-    }));
+    // Then get levels for each structure
+    const structuresWithLevels = await Promise.all(
+      structures.map(async (structure) => {
+        const levels = await executeQuery(`
+          SELECT 
+            id,
+            level,
+            small_blind as "smallBlind",
+            big_blind as "bigBlind",
+            ante,
+            duration_minutes as "durationMinutes",
+            break_after as "breakAfter",
+            break_duration_minutes as "breakDurationMinutes"
+          FROM structure_levels 
+          WHERE structure_id = $1 
+          ORDER BY level
+        `, [structure.id]);
 
-    return NextResponse.json(processedStructures);
+        return {
+          ...structure,
+          levels: levels || []
+        };
+      })
+    );
+
+    return NextResponse.json(structuresWithLevels);
   } catch (error) {
     console.error('Error fetching structures:', error);
     return NextResponse.json(
@@ -53,7 +58,7 @@ export async function POST(request: Request) {
 
     // Insert structure
     const structureResult = await executeInsert(
-      'INSERT INTO structures (name, description, starting_chips, is_active) VALUES (?, ?, ?, ?)',
+      'INSERT INTO structures (name, description, starting_chips, is_active) VALUES ($1, $2, $3, $4)',
       [name, description, starting_chips, is_active]
     );
 
@@ -76,7 +81,7 @@ export async function POST(request: Request) {
         await executeQuery(
           `INSERT INTO structure_levels 
            (structure_id, level, small_blind, big_blind, ante, duration_minutes, break_after, break_duration_minutes) 
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
           levelData
         );
       }
