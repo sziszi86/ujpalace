@@ -25,7 +25,8 @@
       "Bash(railway login:*)",
       "Bash(/opt/homebrew/opt/postgresql@14/bin/pg_dump --help)",
       "Bash(PGPASSWORD=omxEYrIRruGJUuVONphKwkmtIBfVsbrq psql -h hopper.proxy.rlwy.net -U postgres -p 55757 -d railway -c \"\\d tournaments\")",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "WebFetch(domain:www.palacepoker.hu)"
     ],
     "deny": [],
     "ask": []
