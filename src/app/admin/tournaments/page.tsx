@@ -203,7 +203,7 @@ export default function AdminTournamentsPage() {
         category: tournament.category || null,
         venue: tournament.venue || 'Palace Poker Szombathely',
         startingChips: tournament.startingChips || 0,
-        image: tournament.image || null,
+        image: tournament.image_url || null,
         specialNotes: tournament.specialNotes || null,
         featured: false,
         status: 'upcoming',
@@ -400,10 +400,10 @@ export default function AdminTournamentsPage() {
                     <div className="flex items-center">
                       {/* Tournament Image */}
                       <div className="flex-shrink-0 mr-4">
-                        {tournament.image ? (
+                        {tournament.image_url_url ? (
                           <img
                             className="h-12 w-16 object-cover rounded-lg border"
-                            src={tournament.image}
+                            src={tournament.image_url_url}
                             alt={tournament.title}
                             onError={(e) => {
                               const target = e.target as HTMLImageElement;
@@ -412,14 +412,14 @@ export default function AdminTournamentsPage() {
                             }}
                           />
                         ) : null}
-                        {!tournament.image && (
+                        {!tournament.image_url && (
                           <div className="h-12 w-16 bg-gray-200 rounded-lg border flex items-center justify-center">
                             <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
                           </div>
                         )}
-                        {tournament.image && (
+                        {tournament.image_url && (
                           <div className="h-12 w-16 bg-gray-200 rounded-lg border flex items-center justify-center hidden">
                             <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2 2v12a2 2 0 002 2z" />

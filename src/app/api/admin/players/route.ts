@@ -16,7 +16,7 @@ export async function GET() {
         COUNT(pt.id) as transaction_count
       FROM players p
       LEFT JOIN player_transactions pt ON p.id = pt.player_id
-      GROUP BY p.id, p.name, p.phone, p.email, p.other_notes, p.active, p.created_at, p.updated_at
+      GROUP BY p.id, p.name, p.phone, p.email, p.notes, p.active, p.created_at, p.updated_at, p.registration_date
       ORDER BY p.created_at DESC
     `);
 
@@ -25,11 +25,11 @@ export async function GET() {
         SELECT 
           transaction_type,
           amount,
-          transaction_date,
-          notes
+          created_at as transaction_date,
+          description as notes
         FROM player_transactions 
         WHERE player_id = $1
-        ORDER BY transaction_date DESC, created_at DESC 
+        ORDER BY created_at DESC 
         LIMIT 5
       `, [player.id]);
       
@@ -49,7 +49,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { name, phone, email, other_notes, active } = body;
+    const { name, phone, email, notes, active } = body;
 
     if (!name) {
       return NextResponse.json(
@@ -59,9 +59,10 @@ export async function POST(request: Request) {
     }
 
     const result = await executeQuery(`
-      INSERT INTO players (name, phone, email, other_notes, active)
-      VALUES (?, ?, ?, ?, ?)
-    `, [name, phone || null, email || null, other_notes || null, active !== false]);
+      INSERT INTO players (name, phone, email, notes, active)
+      VALUES ($1, $2, $3, $4, $5)
+      RETURNING id
+    `, [name, phone || null, email || null, notes || null, active !== false]);
 
     const newPlayer = await executeQuery(`
       SELECT 
@@ -72,7 +73,7 @@ export async function POST(request: Request) {
         0 as transaction_count
       FROM players p 
       WHERE p.id = $1
-    `, [result[0].insertId]);
+    `, [result[0].id]);
 
     return NextResponse.json(newPlayer[0], { status: 201 });
   } catch (error) {

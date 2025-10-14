@@ -738,11 +738,11 @@ export default function EditTournamentPage() {
                 required
               >
                 <option value="">Válassz struktúrát...</option>
-                <option value="Freeze-out Deep Stack">Freeze-out Deep Stack</option>
-                <option value="Progressive Bounty">Progressive Bounty</option>
-                <option value="High Roller Freeze-out">High Roller Freeze-out</option>
-                <option value="Turbo">Turbo</option>
-                <option value="Rebuy">Rebuy</option>
+                {structures.map((structure) => (
+                  <option key={structure.id} value={structure.name}>
+                    {structure.name} - {structure.description}
+                  </option>
+                ))}
               </select>
               <p className="text-xs text-gray-500 mt-1">
                 A struktúrákat a <Link href="/admin/structures" className="text-poker-primary hover:underline">Struktúrák</Link> menüpontban kezelheted.

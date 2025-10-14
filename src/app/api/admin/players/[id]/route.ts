@@ -30,7 +30,7 @@ export async function GET(
       FROM players p
       LEFT JOIN player_transactions pt ON p.id = pt.player_id
       WHERE p.id = $1
-      GROUP BY p.id, p.name, p.phone, p.email, p.other_notes, p.active, p.created_at, p.updated_at
+      GROUP BY p.id, p.name, p.phone, p.email, p.notes, p.active, p.created_at, p.updated_at
     `, [playerId]);
 
     if (players.length === 0) {
@@ -66,7 +66,7 @@ export async function PUT(
     }
 
     const body = await request.json();
-    const { name, phone, email, other_notes, active } = body;
+    const { name, phone, email, notes, active } = body;
 
     if (!name) {
       return NextResponse.json(
@@ -77,9 +77,9 @@ export async function PUT(
 
     await executeQuery(`
       UPDATE players 
-      SET name = $1, phone = $1, email = $1, other_notes = $1, active = $1
-      WHERE id = $1
-    `, [name, phone || null, email || null, other_notes || null, active !== false, playerId]);
+      SET name = $1, phone = $2, email = $3, notes = $4, active = $5
+      WHERE id = $6
+    `, [name, phone || null, email || null, notes || null, active !== false, playerId]);
 
     const updatedPlayer = await executeQuery(`
       SELECT 
@@ -95,7 +95,7 @@ export async function PUT(
       FROM players p
       LEFT JOIN player_transactions pt ON p.id = pt.player_id
       WHERE p.id = $1
-      GROUP BY p.id, p.name, p.phone, p.email, p.other_notes, p.active, p.created_at, p.updated_at
+      GROUP BY p.id, p.name, p.phone, p.email, p.notes, p.active, p.created_at, p.updated_at
     `, [playerId]);
 
     return NextResponse.json(updatedPlayer[0]);

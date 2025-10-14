@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
@@ -13,6 +13,13 @@ const MDEditor = dynamic(() => import('@uiw/react-md-editor'), {
   ssr: false,
   loading: () => <div className="border rounded-lg h-32 flex items-center justify-center">Editor betöltése...</div>
 });
+
+interface Structure {
+  id: number;
+  name: string;
+  description: string;
+  is_active: boolean;
+}
 
 interface TournamentFormData {
   title: string;
@@ -42,6 +49,7 @@ export default function NewTournamentPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const { showAlert } = useAlert();
+  const [structures, setStructures] = useState<Structure[]>([]);
   const [formData, setFormData] = useState<TournamentFormData>({
     title: '',
     description: '',
@@ -65,6 +73,25 @@ export default function NewTournamentPage() {
     visibleUntil: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0], // másnap
     featured: false,
   });
+
+  // Load structures from API
+  useEffect(() => {
+    const fetchStructures = async () => {
+      try {
+        const response = await fetch('/api/structures');
+        if (response.ok) {
+          const data = await response.json();
+          setStructures(data.filter((structure: Structure) => structure.is_active));
+        } else {
+          console.error('Failed to fetch structures');
+        }
+      } catch (error) {
+        console.error('Error fetching structures:', error);
+      }
+    };
+    
+    fetchStructures();
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -453,11 +480,11 @@ export default function NewTournamentPage() {
                 required
               >
                 <option value="">Válassz struktúrát...</option>
-                <option value="Freeze-out Deep Stack">Freeze-out Deep Stack</option>
-                <option value="Progressive Bounty">Progressive Bounty</option>
-                <option value="High Roller Freeze-out">High Roller Freeze-out</option>
-                <option value="Turbo">Turbo</option>
-                <option value="Rebuy">Rebuy</option>
+                {structures.map((structure) => (
+                  <option key={structure.id} value={structure.name}>
+                    {structure.name} - {structure.description}
+                  </option>
+                ))}
               </select>
               <p className="text-xs text-gray-500 mt-1">
                 A struktúrákat a <Link href="/admin/structures" className="text-poker-primary hover:underline">Struktúrák</Link> menüpontban kezelheted.

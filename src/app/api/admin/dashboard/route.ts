@@ -100,7 +100,7 @@ export async function GET() {
           pt.transaction_type as type,
           p.name as playerName,
           pt.amount,
-          pt.transaction_date as date
+          pt.created_at as date
         FROM player_transactions pt
         JOIN players p ON pt.player_id = p.id
         ORDER BY pt.created_at DESC
