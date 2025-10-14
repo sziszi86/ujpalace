@@ -401,6 +401,28 @@ export default function TournamentDetailPage() {
               </div>
               
               <div className="space-y-4">
+                {/* Date & Time */}
+                <div className="flex items-center p-3 bg-poker-light/50 rounded-lg">
+                  <svg className="w-5 h-5 text-poker-primary mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <div>
+                    <p className="font-semibold text-poker-dark">{tournament.tournament_date ? formatDate(tournament.tournament_date) : ''}</p>
+                    <p className="text-sm text-poker-muted">{tournament.tournament_time}</p>
+                  </div>
+                </div>
+
+                {/* Buy-in */}
+                <div className="flex items-center p-3 bg-poker-light/50 rounded-lg">
+                  <svg className="w-5 h-5 text-poker-gold mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                  </svg>
+                  <div>
+                    <p className="font-semibold text-poker-dark">Buy-in</p>
+                    <p className="text-lg font-bold text-poker-primary">{formatCurrency(Number(tournament.buy_in))}</p>
+                  </div>
+                </div>
+
                 {/* Countdown Timer */}
                 {timeLeft && tournament.status === 'upcoming' && (
                   <div className="bg-gradient-to-r from-poker-primary to-poker-secondary p-4 rounded-lg text-white">
@@ -426,28 +448,6 @@ export default function TournamentDetailPage() {
                   </div>
                 )}
 
-                {/* Date & Time */}
-                <div className="flex items-center p-3 bg-poker-light/50 rounded-lg">
-                  <svg className="w-5 h-5 text-poker-primary mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  <div>
-                    <p className="font-semibold text-poker-dark">{tournament.tournament_date ? formatDate(tournament.tournament_date) : ''}</p>
-                    <p className="text-sm text-poker-muted">{tournament.tournament_time}</p>
-                  </div>
-                </div>
-
-                {/* Buy-in */}
-                <div className="flex items-center p-3 bg-poker-light/50 rounded-lg">
-                  <svg className="w-5 h-5 text-poker-gold mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                  </svg>
-                  <div>
-                    <p className="font-semibold text-poker-dark">Buy-in</p>
-                    <p className="text-lg font-bold text-poker-primary">{formatCurrency(Number(tournament.buy_in))}</p>
-                  </div>
-                </div>
-
                 {/* Guarantee */}
                 {tournament.guarantee_amount && (
                   <div className="flex items-center p-3 bg-poker-light/50 rounded-lg">
@@ -460,19 +460,6 @@ export default function TournamentDetailPage() {
                     </div>
                   </div>
                 )}
-
-                {/* Venue */}
-                <div className="flex items-center p-3 bg-poker-light/50 rounded-lg">
-                  <svg className="w-5 h-5 text-poker-accent mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  <div>
-                    <p className="font-semibold text-poker-dark">Helyszín</p>
-                    <p className="text-sm text-poker-muted">{tournament.venue}</p>
-                  </div>
-                </div>
-
 
                 {/* Late Registration */}
                 {tournament.late_registration && tournament.late_registration_until && (

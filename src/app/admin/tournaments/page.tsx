@@ -20,14 +20,32 @@ export default function AdminTournamentsPage() {
   useEffect(() => {
     const loadTournaments = async () => {
       try {
-        const response = await fetch('/api/tournaments');
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+          router.push('/admin/login');
+          return;
+        }
+
+        const response = await fetch('/api/admin/tournaments', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        
         let tournaments: Tournament[] = [];
         
         if (response.ok) {
           tournaments = await response.json();
         } else {
+          if (response.status === 401) {
+            localStorage.removeItem('authToken');
+            router.push('/admin/login');
+            return;
+          }
           // Ha az API nem elérhető, üres lista
-          console.error('API nem elérhető');
+          console.error('API nem elérhető - Status:', response.status, 'Status Text:', response.statusText);
+          const errorText = await response.text();
+          console.error('API Error Response:', errorText);
           tournaments = [];
         }
         
@@ -60,9 +78,12 @@ export default function AdminTournamentsPage() {
           // API-val frissítjük az adatbázist
           for (const tournament of updatedTournaments) {
             if (tournaments.some((t, index) => t.status !== tournament.status && tournaments[index].id === tournament.id)) {
-              await fetch('/api/tournaments', {
+              await fetch('/api/admin/tournaments', {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`,
+                },
                 body: JSON.stringify(tournament)
               });
             }

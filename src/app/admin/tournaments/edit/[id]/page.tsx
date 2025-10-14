@@ -93,7 +93,7 @@ export default function EditTournamentPage() {
           return;
         }
 
-        const response = await fetch('/api/admin/tournaments', {
+        const response = await fetch(`/api/admin/tournaments/${params.id}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
@@ -105,13 +105,10 @@ export default function EditTournamentPage() {
             router.push('/admin/login');
             return;
           }
-          throw new Error('Failed to load tournaments');
+          throw new Error('Failed to load tournament');
         }
         
-        const tournaments = await response.json();
-        
-        // Find tournament by ID - convert both to string for comparison
-        const tournament = tournaments.find((t: any) => t.id.toString() === params.id);
+        const tournament = await response.json();
         
         if (tournament) {
           // Convert API format to form format
@@ -176,7 +173,7 @@ export default function EditTournamentPage() {
         if (response.ok) {
           const structuresData = await response.json();
           // Only show active structures
-          setStructures(structuresData.filter((s: Structure) => s.is_active));
+          setStructures(structuresData.filter((s: Structure) => s.is_active !== false));
         }
       } catch (error) {
         console.error('Error loading structures:', error);
@@ -677,18 +674,20 @@ export default function EditTournamentPage() {
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Rebuy ár (Ft)
-              </label>
-              <input
-                type="number"
-                name="rebuyPrice"
-                value={formData.rebuyPrice}
-                onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-poker-primary admin-input"
-              />
-            </div>
+            {parseInt(formData.rebuyCount) === 1 && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Rebuy ár (Ft)
+                </label>
+                <input
+                  type="number"
+                  name="rebuyPrice"
+                  value={formData.rebuyPrice}
+                  onChange={handleInputChange}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-poker-primary admin-input"
+                />
+              </div>
+            )}
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">

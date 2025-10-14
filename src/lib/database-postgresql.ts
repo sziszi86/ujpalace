@@ -119,18 +119,24 @@ export async function executeUpdate(query: string, params: any[] = []): Promise<
 
 // Tournament functions (PostgreSQL compatible)
 export async function getAllTournaments(limit?: number, status?: string, featured?: boolean) {
-  let query = `
-    SELECT t.*, 
-           t.date as tournament_date,
-           EXTRACT(HOUR FROM t.date) || ':' || LPAD(EXTRACT(MINUTE FROM t.date)::text, 2, '0') as tournament_time,
-           t.buyin_amount as buy_in,
-           'Tournament' as category_name, 
-           null as category_color,
-           0 as current_players,
-           t.max_players,
-           t.starting_chips
-    FROM tournaments t
-  `;
+  try {
+    console.log('getAllTournaments called with params:', { limit, status, featured });
+    
+    let query = `
+      SELECT t.id, t.title, t.description, t.date, t.buyin_amount, t.starting_chips, 
+             t.max_players, t.status, t.featured, t.image_url, t.structure_id,
+             t.date as tournament_date,
+             EXTRACT(HOUR FROM t.date) || ':' || LPAD(EXTRACT(MINUTE FROM t.date)::text, 2, '0') as tournament_time,
+             t.buyin_amount as buy_in,
+             'Tournament' as category_name, 
+             null as category_color,
+             0 as current_players,
+             s.name as structure
+      FROM tournaments t
+      LEFT JOIN structures s ON t.structure_id = s.id
+    `;
+    
+    console.log('Base query constructed');
   
   const params: any[] = [];
   const conditions: string[] = [];
@@ -148,32 +154,62 @@ export async function getAllTournaments(limit?: number, status?: string, feature
     conditions.push(`t.featured = $${paramIndex++}`);
     params.push(true);
   }
-  
-  if (conditions.length > 0) {
-    query += ' WHERE ' + conditions.join(' AND ');
+    
+    if (conditions.length > 0) {
+      query += ' WHERE ' + conditions.join(' AND ');
+    }
+    
+    query += ' ORDER BY t.date ASC';
+    
+    if (limit) {
+      query += ` LIMIT $${paramIndex++}`;
+      params.push(limit);
+    }
+    
+    console.log('Final query:', query);
+    console.log('Query params:', params);
+    
+    const result = await executeQuery(query, params);
+    console.log('Query executed successfully, rows:', result.length);
+    return result;
+    
+  } catch (error) {
+    console.error('Error in getAllTournaments:', error);
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+    throw error;
   }
-  
-  query += ' ORDER BY t.date ASC';
-  
-  if (limit) {
-    query += ` LIMIT $${paramIndex++}`;
-    params.push(limit);
-  }
-  
-  return executeQuery(query, params);
 }
 
 export async function getTournamentById(id: number) {
-  const query = `
-    SELECT t.*, 
-           t.date as tournament_date,
-           EXTRACT(HOUR FROM t.date) || ':' || LPAD(EXTRACT(MINUTE FROM t.date)::text, 2, '0') as tournament_time,
-           'Tournament' as category_name, 
-           null as category_color
-    FROM tournaments t
-    WHERE t.id = $1
-  `;
-  return executeQuerySingle(query, [id]);
+  try {
+    console.log('getTournamentById called with id:', id);
+    
+    const query = `
+      SELECT t.id, t.title, t.description, t.date, t.buyin_amount, t.starting_chips, 
+             t.max_players, t.status, t.featured, t.image_url, t.structure_id,
+             t.date as tournament_date,
+             EXTRACT(HOUR FROM t.date) || ':' || LPAD(EXTRACT(MINUTE FROM t.date)::text, 2, '0') as tournament_time,
+             t.buyin_amount as buy_in,
+             'Tournament' as category_name, 
+             null as category_color,
+             s.name as structure
+      FROM tournaments t
+      LEFT JOIN structures s ON t.structure_id = s.id
+      WHERE t.id = $1
+    `;
+    
+    console.log('Executing query:', query);
+    console.log('With params:', [id]);
+    
+    const result = await executeQuerySingle(query, [id]);
+    console.log('Tournament found:', result ? 'Yes' : 'No');
+    
+    return result;
+  } catch (error) {
+    console.error('Error in getTournamentById:', error);
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+    throw error;
+  }
 }
 
 export async function createTournament(data: any) {
@@ -191,6 +227,16 @@ export async function createTournament(data: any) {
     tournamentTimestamp = new Date().toISOString();
   }
   
+  // Map structure name to structure_id if needed
+  let structureId = data.structure_id;
+  if (data.structure && !structureId) {
+    const structureResult = await executeQuerySingle(
+      'SELECT id FROM structures WHERE name = $1',
+      [data.structure]
+    );
+    structureId = structureResult?.id || null;
+  }
+  
   const query = `
     INSERT INTO tournaments 
     (title, description, date, buyin_amount, starting_chips, structure_id, max_players, status, featured, image_url) 
@@ -203,7 +249,7 @@ export async function createTournament(data: any) {
     tournamentTimestamp,
     data.buyin_amount || data.buy_in || data.buyIn || 0,
     data.starting_chips || data.startingChips || 15000,
-    data.structure_id || null,
+    structureId,
     data.max_players || data.maxPlayers || 80,
     data.status || 'upcoming',
     data.featured || false,
@@ -227,22 +273,41 @@ export async function updateTournament(id: number, data: any) {
   console.log('updateTournament called with ID:', id);
   console.log('updateTournament data:', JSON.stringify(data, null, 2));
   
-  // Try a simpler approach first - only update basic fields
+  // Map structure name to structure_id if needed
+  let structureId = data.structure_id;
+  if (data.structure && !structureId) {
+    const structureResult = await executeQuerySingle(
+      'SELECT id FROM structures WHERE name = $1',
+      [data.structure]
+    );
+    structureId = structureResult?.id || null;
+  }
+  
+  // Combine date and time if provided separately
+  let tournamentDateTime = data.date || data.tournament_date;
+  if (data.date && data.time) {
+    tournamentDateTime = `${data.date} ${data.time}:00`;
+  }
+
+  // Update only basic tournament fields that definitely exist
   const query = `
     UPDATE tournaments 
-    SET title = $1, description = $2, date = $3, buyin_amount = $4, starting_chips = $5,
-        max_players = $6, status = $7, featured = $8, updated_at = CURRENT_TIMESTAMP
-    WHERE id = $9
+    SET title = $1, description = $2, date = $3, buyin_amount = $4, 
+        starting_chips = $5, max_players = $6, status = $7, featured = $8, 
+        structure_id = $9, image_url = $10, updated_at = CURRENT_TIMESTAMP
+    WHERE id = $11
   `;
   const params = [
     data.title,
     data.description || null,
-    data.date || data.tournament_date,
-    data.buyin_amount || data.buy_in || data.buyIn,
+    tournamentDateTime,
+    data.buyin_amount || data.buy_in || data.buyIn || 0,
     data.starting_chips || data.startingChips || 15000,
     data.max_players || data.maxPlayers || null,
     data.status || 'upcoming',
     data.featured || false,
+    structureId,
+    data.image_url || data.image || null,
     id
   ];
   

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { executeQuerySingle, executeUpdate } from '@/lib/database-postgresql';
+import { getTournamentById, updateTournament, deleteTournament } from '@/lib/database-postgresql';
 import { verifyAuth } from '@/lib/auth';
 
 export async function GET(
@@ -25,15 +25,9 @@ export async function GET(
       );
     }
 
-    const tournament = await executeQuerySingle(`
-      SELECT 
-        t.*,
-        t.date as tournament_date,
-        t.time as tournament_time,
-        t.category as category_name
-      FROM tournaments t
-      WHERE t.id = $1
-    `, [tournamentId]);
+    console.log('GET /api/admin/tournaments/[id] called with ID:', tournamentId);
+    
+    const tournament = await getTournamentById(tournamentId);
 
     if (!tournament) {
       return NextResponse.json(

@@ -1,25 +1,41 @@
 import { NextResponse } from 'next/server';
-import { getAllTournaments, createTournament, updateTournament, deleteTournament } from '@/lib/database-postgresql';
+import { getAllTournaments, createTournament, updateTournament, deleteTournament, executeQuery } from '@/lib/database-postgresql';
 import { verifyAuth } from '@/lib/auth';
 
 export async function GET(request: Request) {
   try {
+    console.log('GET /api/admin/tournaments called');
+    
     const authResult = await verifyAuth(request);
     if (!authResult.success) {
+      console.log('Auth failed:', authResult.error);
       return NextResponse.json(
         { error: authResult.error },
         { status: 401 }
       );
     }
 
-    // Get all tournaments (including inactive ones for admin)
-    const tournaments = await getAllTournaments(undefined, undefined, undefined);
+    console.log('Auth successful, fetching tournaments...');
     
-    return NextResponse.json(tournaments);
+    try {
+      // Simple test query first
+      const testResult = await executeQuery('SELECT COUNT(*) as count FROM tournaments');
+      console.log('Tournament count test:', testResult);
+      
+      // Get all tournaments (including inactive ones for admin)
+      const tournaments = await getAllTournaments(undefined, undefined, undefined);
+      
+      console.log('Tournaments fetched:', tournaments.length);
+      return NextResponse.json(tournaments);
+    } catch (dbError) {
+      console.error('Database error:', dbError);
+      throw dbError;
+    }
   } catch (error) {
     console.error('Error fetching tournaments for admin:', error);
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
     return NextResponse.json(
-      { error: 'Failed to fetch tournaments' },
+      { error: 'Failed to fetch tournaments', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }

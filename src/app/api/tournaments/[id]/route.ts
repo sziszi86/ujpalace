@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { executeQuerySingle } from '@/lib/database-postgresql';
+import { getTournamentById } from '@/lib/database-postgresql';
 
 export async function GET(
   request: Request,
@@ -16,19 +16,9 @@ export async function GET(
       );
     }
 
-    const tournament = await executeQuerySingle(`
-      SELECT 
-        t.*,
-        DATE(t.date) as tournament_date,
-        TO_CHAR(t.date, 'HH24:MI') as tournament_time,
-        t.buyin_amount as buy_in,
-        t.starting_chips,
-        'Tournament' as category_name
-      FROM tournaments t
-      WHERE t.id = $1 AND t.status != 'inactive'
-    `, [tournamentId]);
+    const tournament = await getTournamentById(tournamentId);
 
-    if (!tournament) {
+    if (!tournament || tournament.status === 'inactive') {
       return NextResponse.json(
         { error: 'Tournament not found' },
         { status: 404 }
