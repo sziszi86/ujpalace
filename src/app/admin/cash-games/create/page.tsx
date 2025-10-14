@@ -27,9 +27,17 @@ interface CashGameFormData {
   weekDays: string[];
 }
 
+interface DayInfo {
+  key: string;
+  label: string;
+  date: Date;
+  formattedDate: string;
+}
+
 export default function CreateCashGame() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [currentWeek, setCurrentWeek] = useState(0); // 0 = current week, 1 = next week, etc.
   const [formData, setFormData] = useState<CashGameFormData>({
     name: '',
     stakes: '',
@@ -68,6 +76,42 @@ export default function CreateCashGame() {
     });
   };
 
+  // Helper function to get the start of the week (Monday)
+  const getStartOfWeek = (date: Date, weekOffset: number = 0): Date => {
+    const d = new Date(date);
+    d.setDate(d.getDate() + (weekOffset * 7));
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
+    return new Date(d.setDate(diff));
+  };
+
+  // Helper function to format date in Hungarian format
+  const formatHungarianDate = (date: Date): string => {
+    const months = [
+      'jan', 'feb', 'már', 'ápr', 'máj', 'jún',
+      'júl', 'aug', 'szep', 'okt', 'nov', 'dec'
+    ];
+    return `${months[date.getMonth()]}.${date.getDate()}`;
+  };
+
+  // Get days for the current selected week
+  const getWeekDays = (): DayInfo[] => {
+    const startOfWeek = getStartOfWeek(new Date(), currentWeek);
+    const dayKeys = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    const dayLabels = ['Hétfő', 'Kedd', 'Szerda', 'Csütörtök', 'Péntek', 'Szombat', 'Vasárnap'];
+
+    return dayKeys.map((key, index) => {
+      const date = new Date(startOfWeek);
+      date.setDate(startOfWeek.getDate() + index);
+      return {
+        key,
+        label: dayLabels[index],
+        date,
+        formattedDate: formatHungarianDate(date)
+      };
+    });
+  };
+
   const handleWeekDayToggle = (day: string) => {
     const currentDays = [...formData.weekDays];
     const index = currentDays.indexOf(day);
@@ -82,6 +126,14 @@ export default function CreateCashGame() {
       ...formData,
       weekDays: currentDays
     });
+  };
+
+  const handleWeekChange = (direction: 'prev' | 'next') => {
+    if (direction === 'next' && currentWeek < 8) {
+      setCurrentWeek(currentWeek + 1);
+    } else if (direction === 'prev' && currentWeek > 0) {
+      setCurrentWeek(currentWeek - 1);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -169,14 +221,13 @@ export default function CreateCashGame() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Játék típusa *
+                Játék típusa
               </label>
               <select
                 name="gameType"
                 value={formData.gameType}
                 onChange={handleInputChange}
                 className="admin-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-poker-green focus:border-transparent"
-                required
               >
                 <option value="NLH">No Limit Hold'em</option>
                 <option value="PLO">Pot Limit Omaha</option>
@@ -236,7 +287,7 @@ export default function CreateCashGame() {
           {/* Schedule */}
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Menetrend *
+              Menetrend
             </label>
             <input
               type="text"
@@ -244,7 +295,6 @@ export default function CreateCashGame() {
               value={formData.schedule}
               onChange={handleInputChange}
               className="admin-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-poker-green focus:border-transparent"
-              required
               placeholder="pl. Hétfő-Vasárnap 18:00-06:00"
             />
           </div>
@@ -254,16 +304,51 @@ export default function CreateCashGame() {
             <label className="block text-sm font-medium text-gray-700 mb-3">
               Hét napjai (válassz ki a megfelelő napokat) *
             </label>
+            
+            {/* Week Navigation */}
+            <div className="flex items-center justify-between mb-4 p-3 bg-gray-50 rounded-lg">
+              <button
+                type="button"
+                onClick={() => handleWeekChange('prev')}
+                disabled={currentWeek === 0}
+                className="flex items-center px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                Előző hét
+              </button>
+              
+              <div className="text-center">
+                <div className="text-sm font-medium text-gray-900">
+                  {currentWeek === 0 ? 'Jelenlegi hét' : `${currentWeek}. hét múlva`}
+                </div>
+                <div className="text-xs text-gray-500">
+                  {(() => {
+                    const startOfWeek = getStartOfWeek(new Date(), currentWeek);
+                    const endOfWeek = new Date(startOfWeek);
+                    endOfWeek.setDate(startOfWeek.getDate() + 6);
+                    return `${formatHungarianDate(startOfWeek)} - ${formatHungarianDate(endOfWeek)}`;
+                  })()}
+                </div>
+              </div>
+              
+              <button
+                type="button"
+                onClick={() => handleWeekChange('next')}
+                disabled={currentWeek >= 8}
+                className="flex items-center px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Következő hét
+                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Day Cards with Dates */}
             <div className="grid grid-cols-7 gap-2">
-              {[
-                { key: 'monday', label: 'Hétfő' },
-                { key: 'tuesday', label: 'Kedd' },
-                { key: 'wednesday', label: 'Szerda' },
-                { key: 'thursday', label: 'Csütörtök' },
-                { key: 'friday', label: 'Péntek' },
-                { key: 'saturday', label: 'Szombat' },
-                { key: 'sunday', label: 'Vasárnap' }
-              ].map((day) => (
+              {getWeekDays().map((day) => (
                 <button
                   key={day.key}
                   type="button"
@@ -274,8 +359,8 @@ export default function CreateCashGame() {
                       : 'bg-white text-gray-700 border-gray-300 hover:border-poker-green hover:bg-poker-green/10'
                   }`}
                 >
-                  <div className="text-xs font-bold">{day.label.substring(0, 3)}</div>
-                  <div className="text-xs mt-1">{day.label.substring(3)}</div>
+                  <div className="text-xs font-bold">{day.formattedDate}</div>
+                  <div className="text-xs mt-1">{day.label}</div>
                 </button>
               ))}
             </div>
@@ -287,7 +372,7 @@ export default function CreateCashGame() {
           {/* Start Date */}
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Kezdési dátum *
+              Kezdési dátum
             </label>
             <input
               type="date"
@@ -295,7 +380,6 @@ export default function CreateCashGame() {
               value={formData.startDate}
               onChange={handleInputChange}
               className="admin-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-poker-green focus:border-transparent"
-              required
             />
           </div>
 
