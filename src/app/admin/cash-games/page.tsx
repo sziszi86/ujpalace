@@ -12,7 +12,11 @@ export default function CashGamesAdmin() {
   useEffect(() => {
     const loadCashGames = async () => {
       try {
-        const response = await fetch('/api/admin/cash-games');
+        const response = await fetch('/api/admin/cash-games', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+          },
+        });
         if (response.ok) {
           const cashGamesData = await response.json();
           // Convert database format to admin format
@@ -49,7 +53,10 @@ export default function CashGamesAdmin() {
     if (confirm('Biztosan törölni szeretnéd ezt a cash game-et?')) {
       try {
         const response = await fetch(`/api/admin/cash-games/${id}`, {
-          method: 'DELETE'
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+          },
         });
         if (response.ok) {
           setCashGames(cashGames.filter(game => game.id !== id));
@@ -69,7 +76,10 @@ export default function CashGamesAdmin() {
     try {
       const response = await fetch(`/api/admin/cash-games/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+        },
         body: JSON.stringify({
           name: game.name,
           stakes: game.stakes,
@@ -102,7 +112,10 @@ export default function CashGamesAdmin() {
     try {
       const response = await fetch(`/api/admin/cash-games/${id}/featured`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+        },
         body: JSON.stringify({ featured: !game.featured })
       });
       
@@ -125,7 +138,10 @@ export default function CashGamesAdmin() {
     try {
       const response = await fetch('/api/admin/cash-games', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+        },
         body: JSON.stringify({
           name: `${cashGame.name} (másolat)`,
           game_type_id: 1,

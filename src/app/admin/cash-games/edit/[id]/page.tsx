@@ -51,7 +51,11 @@ export default function EditCashGame() {
   useEffect(() => {
     const loadCashGame = async () => {
       try {
-        const response = await fetch(`/api/admin/cash-games/${cashGameId}`);
+        const response = await fetch(`/api/admin/cash-games/${cashGameId}`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+          },
+        });
         
         if (response.ok) {
           const cashGameData = await response.json();
@@ -198,6 +202,7 @@ export default function EditCashGame() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
         },
         body: JSON.stringify(cashGameData),
       });
