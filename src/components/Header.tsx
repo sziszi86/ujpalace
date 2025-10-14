@@ -52,13 +52,9 @@ export default function Header() {
                 📞 +36 30 971 5832
               </span>
             </div>
-            <div className="flex items-center space-x-2 animate-fade-in" style={{animationDelay: '0.2s'}}>
+            <div className="flex items-center space-x-2 animate-fade-in max-w-lg" style={{animationDelay: '0.2s'}}>
               <span className="w-2 h-2 bg-orange-300 rounded-full animate-pulse"></span>
-              <span className="font-medium text-white/95">⚠️ Szerencsejátékban csak 18 éven felüliek vehetnek részt! A túlzásba vitt szerencsejáték ártalmas, függőséget okozhat! Kérje bejegyzését a játékosvédelmi nyilvántartásba! | Játékosvédelem: 
-                <Link href="/jatekosvedelm" className="ml-1 text-poker-accent hover:text-white underline transition-colors">
-                  36 80 205 352
-                </Link>
-              </span>
+              <span className="font-medium text-white/95 text-xs lg:text-sm leading-tight">⚠️ Szerencsejátékban csak 18 éven felüliek vehetnek részt! A túlzásba vitt szerencsejáték ártalmas, függőséget okozhat! Kérje bejegyzését a játékosvédelmi nyilvántartásba! | Játékosvédelem:<Link href="/jatekosvedelm" className="ml-1 text-poker-accent hover:text-white underline transition-colors">36 80 205 352</Link></span>
             </div>
           </div>
           <div className="flex flex-col lg:flex-row items-center space-y-2 lg:space-y-0 lg:space-x-6">
@@ -82,12 +78,14 @@ export default function Header() {
         <div className="flex justify-between items-center py-6">
           {/* Logo */}
           <Link href="/" className="flex items-center group animate-fade-in">
-            <div className="relative w-20 h-20 bg-gradient-to-br from-poker-primary to-poker-secondary rounded-2xl flex items-center justify-center shadow-2xl transform group-hover:scale-105 transition-all duration-300 animate-glow">
-              <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-2xl"></div>
-              <span className="text-white font-bold text-2xl relative z-10 animate-bounce-subtle">♠</span>
-              <div className="absolute -top-1 -right-1 w-6 h-6 bg-poker-gold rounded-full flex items-center justify-center">
-                <span className="text-poker-dark font-bold text-xs">P</span>
-              </div>
+            <div className="relative w-20 h-20 transform group-hover:scale-105 transition-all duration-300">
+              <Image
+                src="/images/logo.png"
+                alt="Palace Poker Logo"
+                width={80}
+                height={80}
+                className="rounded-2xl shadow-2xl animate-glow"
+              />
             </div>
             <div className="ml-4">
               <h1 className="text-white text-3xl font-bold bg-gradient-to-r from-white to-poker-accent bg-clip-text text-transparent group-hover:from-poker-accent group-hover:to-white transition-all duration-300">
