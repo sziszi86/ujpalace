@@ -231,14 +231,13 @@ export default function EditCashGame() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Játék típusa *
+                Játék típusa
               </label>
               <select
                 name="gameType"
                 value={formData.gameType}
                 onChange={handleInputChange}
                 className="admin-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-poker-green focus:border-transparent"
-                required
               >
                 <option value="NLH">No Limit Hold'em</option>
                 <option value="PLO">Pot Limit Omaha</option>
@@ -298,7 +297,7 @@ export default function EditCashGame() {
           {/* Schedule */}
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Menetrend *
+              Menetrend
             </label>
             <input
               type="text"
@@ -306,7 +305,6 @@ export default function EditCashGame() {
               value={formData.schedule}
               onChange={handleInputChange}
               className="admin-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-poker-green focus:border-transparent"
-              required
               placeholder="pl. Hétfő-Vasárnap 18:00-06:00"
             />
           </div>
@@ -349,7 +347,7 @@ export default function EditCashGame() {
           {/* Start Date */}
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Kezdési dátum *
+              Kezdési dátum
             </label>
             <input
               type="date"
@@ -357,7 +355,6 @@ export default function EditCashGame() {
               value={formData.startDate}
               onChange={handleInputChange}
               className="admin-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-poker-green focus:border-transparent"
-              required
             />
           </div>
 
