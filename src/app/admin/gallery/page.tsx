@@ -170,6 +170,20 @@ export default function AdminGalleryPage() {
       {/* Upload Section */}
       <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
         <h2 className="text-xl font-semibold text-poker-dark mb-4">Új képek feltöltése</h2>
+        
+        {/* Category Selection */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-poker-dark mb-2">Kategória</label>
+          <select className="w-full md:w-64 px-3 py-2 border border-poker-light rounded-lg focus:outline-none focus:ring-2 focus:ring-poker-primary">
+            <option value="terem">Terem</option>
+            <option value="versenyek">Versenyek</option>
+            <option value="cash-game">Cash Game</option>
+            <option value="csapat">Csapat</option>
+            <option value="események">Események</option>
+            <option value="egyéb">Egyéb</option>
+          </select>
+        </div>
+
         <div className="border-2 border-dashed border-poker-light rounded-lg p-8 text-center">
           <input
             type="file"
@@ -193,7 +207,8 @@ export default function AdminGalleryPage() {
               {uploading ? 'Feltöltés folyamatban...' : 'Kattints vagy húzd ide a képeket'}
             </div>
             <div className="text-sm text-poker-muted">
-              JPG, PNG, WebP fájlok • Max 10MB • Automatikus optimalizálás
+              JPG, PNG, WebP fájlok • Max 10MB • Automatikus optimalizálás<br/>
+              <span className="text-red-500">Átmenetileg nem elérhető - fejlesztés alatt</span>
             </div>
           </label>
         </div>
