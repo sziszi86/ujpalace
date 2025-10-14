@@ -586,7 +586,7 @@ export default function FeaturedOffers() {
                         <div className="flex justify-between items-center">
                           <span className="text-poker-muted">Következő dátum:</span>
                           <span className="font-semibold text-poker-primary text-sm">
-                            {cashGame.nextDate ? formatUpcomingDate(cashGame.nextDate) : cashGame.schedule}
+                            {cashGame.schedule}
                           </span>
                         </div>
                       </div>
