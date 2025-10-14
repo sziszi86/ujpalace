@@ -201,37 +201,22 @@ export async function updateTournament(id: number, data: any) {
   console.log('updateTournament called with ID:', id);
   console.log('updateTournament data:', JSON.stringify(data, null, 2));
   
+  // Try a simpler approach first - only update basic fields
   const query = `
     UPDATE tournaments 
     SET title = $1, description = $2, date = $3, buyin_amount = $4, starting_chips = $5,
-        structure_id = $6, max_players = $7, late_registration_end = $8,
-        rebuy_allowed = $9, rebuy_price = $10, rebuy_chips = $11, rebuy_period_end = $12,
-        addon_allowed = $13, addon_price = $14, addon_chips = $15, 
-        addon_period_start = $16, addon_period_end = $17,
-        status = $18, featured = $19, image_url = $20, updated_at = CURRENT_TIMESTAMP
-    WHERE id = $21
+        max_players = $6, status = $7, featured = $8, updated_at = CURRENT_TIMESTAMP
+    WHERE id = $9
   `;
   const params = [
     data.title,
     data.description || null,
     data.date || data.tournament_date,
     data.buyin_amount || data.buy_in || data.buyIn,
-    data.starting_chips || data.startingChips,
-    data.structure_id || null,
+    data.starting_chips || data.startingChips || 15000,
     data.max_players || data.maxPlayers || null,
-    data.late_registration_end || data.lateRegistrationEnd || null,
-    data.rebuy_allowed || data.rebuyAllowed || false,
-    data.rebuy_price || data.rebuyPrice || null,
-    data.rebuy_chips || data.rebuyChips || null,
-    data.rebuy_period_end || data.rebuyPeriodEnd || null,
-    data.addon_allowed || data.addonAllowed || false,
-    data.addon_price || data.addonPrice || null,
-    data.addon_chips || data.addonChips || null,
-    data.addon_period_start || data.addonPeriodStart || null,
-    data.addon_period_end || data.addonPeriodEnd || null,
     data.status || 'upcoming',
     data.featured || false,
-    data.image_url || data.imageUrl || null,
     id
   ];
   
