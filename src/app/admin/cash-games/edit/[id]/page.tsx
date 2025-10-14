@@ -75,7 +75,8 @@ export default function EditCashGame() {
             visibleUntil: cashGameData.visible_until || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
             description: cashGameData.description || '',
             image: cashGameData.image || '',
-            weekDays: cashGameData.week_days ? (Array.isArray(cashGameData.week_days) ? cashGameData.week_days : JSON.parse(cashGameData.week_days)) : ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+            weekDays: cashGameData.week_days ? (Array.isArray(cashGameData.week_days) ? cashGameData.week_days : JSON.parse(cashGameData.week_days)) : ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+            selectedDates: cashGameData.selected_dates ? (Array.isArray(cashGameData.selected_dates) ? cashGameData.selected_dates : JSON.parse(cashGameData.selected_dates)) : []
           });
         } else {
           alert('Cash Game nem található!');
