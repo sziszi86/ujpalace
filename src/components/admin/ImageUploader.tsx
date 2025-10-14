@@ -173,6 +173,9 @@ export default function ImageUploader({ value, onChange, currentImage, onImageSe
       try {
         const response = await fetch(`/api/images/${imageId}`, {
           method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+          },
         });
         
         if (response.ok) {

@@ -245,6 +245,7 @@ export default function EditTournamentPage() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
         },
         body: JSON.stringify(tournamentData),
       });
@@ -300,6 +301,7 @@ export default function EditTournamentPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
         },
         body: JSON.stringify(duplicateData),
       });
@@ -363,6 +365,7 @@ export default function EditTournamentPage() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
         },
         body: JSON.stringify(tournamentData),
       });
