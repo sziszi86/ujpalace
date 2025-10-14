@@ -78,7 +78,7 @@ export default function FeaturedEvents() {
             {tournaments.map((tournament) => (
               <div
                 key={tournament.id}
-                className="bg-poker-light border border-poker-accent/20 rounded-xl overflow-hidden hover:border-poker-gold/50 transition-all duration-300"
+                className="bg-gradient-to-br from-poker-dark/95 to-poker-dark border border-poker-accent/30 rounded-xl overflow-hidden hover:border-poker-gold/70 hover:shadow-xl transition-all duration-300"
               >
                 {tournament.image_url && (
                   <div className="h-48 overflow-hidden">
@@ -95,48 +95,22 @@ export default function FeaturedEvents() {
                     {tournament.title}
                   </h3>
                   
-                  <div className="space-y-2 mb-4">
-                    <div className="flex items-center text-poker-muted">
-                      <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <div className="space-y-3 mb-6">
+                    <div className="flex items-center text-poker-gold font-semibold text-lg">
+                      <svg className="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
                       </svg>
                       {formatDate(tournament.tournament_date)} {formatTime(tournament.tournament_time)}
                     </div>
                     
-                    <div className="flex items-center text-poker-gold">
+                    <div className="flex items-center text-white">
                       <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                       </svg>
                       Buy-in: {formatCurrency(Number(tournament.buy_in))}
                     </div>
-                    
-                    <div className="flex items-center text-poker-gold">
-                      <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M3.293 9.707a1 1 0 010-1.414l6-6a1 1 0 011.414 0l6 6a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L4.707 9.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                      </svg>
-                      Garancia: {formatCurrency(Number(tournament.guarantee_amount))}
-                    </div>
                   </div>
 
-                  <div className="flex justify-between items-center mb-4">
-                    <span className="text-sm text-poker-muted">
-                      {tournament.current_players} jelentkező
-                      {tournament.max_players && ` / ${tournament.max_players}`}
-                    </span>
-                    {tournament.max_players && (
-                      <div className="w-24 bg-poker-dark rounded-full h-2">
-                        <div
-                          className="bg-poker-gold h-2 rounded-full transition-all duration-300"
-                          style={{
-                            width: `${Math.min(
-                              (tournament.current_players / tournament.max_players) * 100,
-                              100
-                            )}%`,
-                          }}
-                        />
-                      </div>
-                    )}
-                  </div>
 
                   <Link
                     href={`/tournaments/${tournament.id}`}

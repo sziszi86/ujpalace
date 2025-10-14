@@ -307,28 +307,8 @@ export async function getCashGameById(id: number) {
 export async function createCashGame(data: any) {
   const query = `
     INSERT INTO cash_games 
-    (name, game_type_id, stakes, min_buyin, max_buyin, description, schedule, active) 
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-  `;
-  const params = [
-    data.name,
-    data.game_type_id || null,
-    data.stakes,
-    data.min_buy_in,
-    data.max_buy_in || null,
-    data.description || null,
-    data.schedule || null,
-    data.active !== undefined ? data.active : true
-  ];
-  return executeInsert(query, params);
-}
-
-export async function updateCashGame(id: number, data: any) {
-  const query = `
-    UPDATE cash_games 
-    SET name = $1, game_type_id = $2, stakes = $3, min_buyin = $4, max_buyin = $5, 
-        description = $6, schedule = $7, active = $8, updated_at = CURRENT_TIMESTAMP
-    WHERE id = $9
+    (name, game_type_id, stakes, min_buyin, max_buyin, description, schedule, active, week_days) 
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
   `;
   const params = [
     data.name,
@@ -339,6 +319,28 @@ export async function updateCashGame(id: number, data: any) {
     data.description || null,
     data.schedule || null,
     data.active !== undefined ? data.active : true,
+    data.week_days ? JSON.stringify(data.week_days) : null
+  ];
+  return executeInsert(query, params);
+}
+
+export async function updateCashGame(id: number, data: any) {
+  const query = `
+    UPDATE cash_games 
+    SET name = $1, game_type_id = $2, stakes = $3, min_buyin = $4, max_buyin = $5, 
+        description = $6, schedule = $7, active = $8, week_days = $9, updated_at = CURRENT_TIMESTAMP
+    WHERE id = $10
+  `;
+  const params = [
+    data.name,
+    data.game_type_id || null,
+    data.stakes,
+    data.min_buy_in,
+    data.max_buy_in || null,
+    data.description || null,
+    data.schedule || null,
+    data.active !== undefined ? data.active : true,
+    data.week_days ? JSON.stringify(data.week_days) : null,
     id
   ];
   return executeUpdate(query, params);

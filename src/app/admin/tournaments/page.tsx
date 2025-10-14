@@ -380,7 +380,7 @@ export default function AdminTournamentsPage() {
                   Dátum & Idő
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Buy-in / Díjalap
+                  Buy-in
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Státusz
@@ -449,8 +449,7 @@ export default function AdminTournamentsPage() {
                     <div className="text-sm text-gray-500">{tournament.time}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{formatCurrency(tournament.buyIn)}</div>
-                    <div className="text-sm text-gray-500">{formatCurrency(tournament.guarantee)} garancia</div>
+                    <div className="text-sm text-gray-900">{formatCurrency(tournament.buyIn || parseInt(tournament.buy_in || '0') || 0)}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(tournament.status)}`}>

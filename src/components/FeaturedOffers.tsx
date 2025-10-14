@@ -146,11 +146,99 @@ interface FeaturedOffersProps {
   cashGames?: CashGame[];
 }
 
+// Helper function to calculate the next cash game date based on schedule
+const getNextCashGameDate = (schedule: string): string | null => {
+  if (!schedule) return null;
+  
+  const today = new Date();
+  const currentDay = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+  
+  // Map Hungarian day names to day numbers
+  const dayMap: { [key: string]: number } = {
+    'vasárnap': 0, 'vas': 0,
+    'hétfő': 1, 'hét': 1,
+    'kedd': 2,
+    'szerda': 3, 'sze': 3,
+    'csütörtök': 4, 'csüt': 4,
+    'péntek': 5, 'pén': 5,
+    'szombat': 6, 'szo': 6
+  };
+  
+  // Extract days from schedule (e.g., "Szerda: 19:00-04:00, Péntek-Szombat: 19:30-04:00")
+  const scheduleDays: number[] = [];
+  
+  for (const [dayName, dayNum] of Object.entries(dayMap)) {
+    if (schedule.toLowerCase().includes(dayName.toLowerCase())) {
+      scheduleDays.push(dayNum);
+    }
+  }
+  
+  // If no days found, default to Wed, Fri, Sat (common poker schedule)
+  if (scheduleDays.length === 0) {
+    scheduleDays.push(3, 5, 6); // Wednesday, Friday, Saturday
+  }
+  
+  // Find the next occurrence
+  let nextDate = new Date(today);
+  let daysToAdd = 1;
+  
+  // Look for the next 14 days
+  for (let i = 0; i < 14; i++) {
+    const checkDate = new Date(today);
+    checkDate.setDate(today.getDate() + i);
+    const checkDay = checkDate.getDay();
+    
+    if (scheduleDays.includes(checkDay)) {
+      // If it's today, make sure we haven't passed the start time
+      if (i === 0) {
+        const now = new Date();
+        const startTime = extractStartTime(schedule);
+        if (startTime) {
+          const startToday = new Date(today);
+          const [hours, minutes] = startTime.split(':').map(Number);
+          startToday.setHours(hours, minutes, 0, 0);
+          
+          if (now > startToday) {
+            continue; // Too late today, find next occurrence
+          }
+        }
+      }
+      return checkDate.toISOString().split('T')[0];
+    }
+  }
+  
+  return null;
+};
+
+// Helper function to extract start time from schedule
+const extractStartTime = (schedule: string): string | null => {
+  const timeMatch = schedule.match(/(\d{2}):(\d{2})/);
+  return timeMatch ? `${timeMatch[1]}:${timeMatch[2]}` : null;
+};
+
+// Helper function to format upcoming date in Hungarian
+const formatUpcomingDate = (dateString: string): string => {
+  const date = new Date(dateString);
+  const today = new Date();
+  const diffTime = date.getTime() - today.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  
+  const dayNames = ['Vas', 'Hét', 'Kedd', 'Sze', 'Csüt', 'Pén', 'Szo'];
+  const dayName = dayNames[date.getDay()];
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  
+  if (diffDays === 0) return 'Ma';
+  if (diffDays === 1) return 'Holnap';
+  if (diffDays <= 7) return `${dayName} (${diffDays} nap)`;
+  
+  return `${dayName}, ${month}.${day}.`;
+};
+
 export default function FeaturedOffers() {
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [cashGames, setCashGames] = useState<CashGame[]>([]);
   const [currentTournamentPage, setCurrentTournamentPage] = useState(0);
-  const [currentCashGamePage, setCurrentCashGamePage] = useState(0);
   const [touchStart, setTouchStart] = useState<{x: number; y: number} | null>(null);
   const [touchEnd, setTouchEnd] = useState<{x: number; y: number} | null>(null);
 
@@ -203,11 +291,12 @@ export default function FeaturedOffers() {
         setTournaments(mockTournaments);
       });
 
-    // Load cash games from API
+      // Load cash games from API
     fetch('/api/cash-games')
       .then(res => res.json())
       .then(data => {
-        // Convert database format to frontend format
+        // Convert database format to frontend format and filter for upcoming scheduled games
+        const today = new Date().toISOString().split('T')[0];
         const formattedCashGames = data.map((game: any) => ({
           id: game.id,
           name: game.name,
@@ -217,12 +306,19 @@ export default function FeaturedOffers() {
           maxBuyIn: game.max_buy_in || game.maxBuyIn,
           schedule: game.schedule || 'Szerda: 19:00-04:00, Péntek-Szombat: 19:30-04:00',
           startDate: game.start_date || game.startDate,
+          nextDate: getNextCashGameDate(game.schedule),
           active: game.active === 1 || game.active === true || game.active !== 0,
           description: game.description || '',
           image: game.image_url || game.image || ''
         }));
-        // Only show active cash games, limit to 12
-        setCashGames(formattedCashGames.filter((game: any) => game.active).slice(0, 12));
+        
+        // Only show active cash games with upcoming dates, sort by next date, limit to 3
+        const upcomingCashGames = formattedCashGames
+          .filter((game: any) => game.active && game.nextDate)
+          .sort((a: any, b: any) => new Date(a.nextDate).getTime() - new Date(b.nextDate).getTime())
+          .slice(0, 3);
+        
+        setCashGames(upcomingCashGames);
       })
       .catch(err => {
         console.error('Failed to load cash games:', err);
@@ -260,25 +356,9 @@ export default function FeaturedOffers() {
     }
   };
 
-  // Cash Games pagination logic - 3 cash games per page  
-  const cashGamesPerPage = 3;
-  const totalCashGamePages = Math.ceil(cashGames.length / cashGamesPerPage);
-  const currentCashGames = cashGames.slice(
-    currentCashGamePage * cashGamesPerPage,
-    (currentCashGamePage + 1) * cashGamesPerPage
-  );
+  // Show only the first 3 upcoming cash games (already limited in API call)
+  const currentCashGames = cashGames;
 
-  const nextCashGamePage = () => {
-    if (currentCashGamePage < totalCashGamePages - 1) {
-      setCurrentCashGamePage(currentCashGamePage + 1);
-    }
-  };
-
-  const prevCashGamePage = () => {
-    if (currentCashGamePage > 0) {
-      setCurrentCashGamePage(currentCashGamePage - 1);
-    }
-  };
 
   // Touch handlers
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -315,12 +395,7 @@ export default function FeaturedOffers() {
           setCurrentTournamentPage(currentTournamentPage - 1);
         }
       } else if (type === 'cashgame') {
-        if (isLeftSwipe && currentCashGamePage < Math.ceil(cashGames.length / cashGamesPerPage) - 1) {
-          setCurrentCashGamePage(currentCashGamePage + 1);
-        }
-        if (isRightSwipe && currentCashGamePage > 0) {
-          setCurrentCashGamePage(currentCashGamePage - 1);
-        }
+        // No pagination for cash games - show static 3 games
       }
     }
   };
@@ -459,9 +534,9 @@ export default function FeaturedOffers() {
                 <div className="w-16 h-16 bg-gradient-to-r from-poker-green to-poker-darkgreen rounded-2xl flex items-center justify-center mr-4 shadow-xl animate-float">
                   <span className="text-2xl text-white">♠</span>
                 </div>
-                Élő Cash Game
+                Közelgő Cash Game-ek
               </h3>
-              <p className="text-poker-muted text-lg">Ülj le az asztalhoz és játssz a saját tempódban</p>
+              <p className="text-poker-muted text-lg">Jövő hetente induló cash game asztalok</p>
             </div>
             <a 
               href="/cash-games" 
@@ -474,21 +549,16 @@ export default function FeaturedOffers() {
             </a>
           </div>
           
-          <div 
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 touch-pan-y"
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={() => handleTouchEnd('cashgame')}
-          >
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {currentCashGames.map((cashGame, index) => (
               <div key={cashGame.id} className="animate-scale-in" style={{animationDelay: `${(index + 3) * 0.2}s`}}>
                 <a href={`/cash-games/${cashGame.id}`} className="block group">
                   <div className="card-modern p-8 h-full transition-all duration-300 hover:scale-105 group-hover:shadow-2xl">
-                    {/* Live Status Indicator */}
+                    {/* Upcoming Status Indicator */}
                     <div className="flex justify-between items-start mb-6">
                       <div className="flex items-center">
-                        <div className="w-3 h-3 bg-green-400 rounded-full mr-2 animate-pulse"></div>
-                        <span className="text-sm font-medium text-green-600">Élő asztal</span>
+                        <div className="w-3 h-3 bg-blue-400 rounded-full mr-2 animate-pulse"></div>
+                        <span className="text-sm font-medium text-blue-600">Közelgő asztal</span>
                       </div>
                       <div className="text-2xl transform group-hover:scale-110 transition-transform">♠</div>
                     </div>
@@ -514,8 +584,10 @@ export default function FeaturedOffers() {
                           </span>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-poker-muted">Program:</span>
-                          <span className="font-semibold text-poker-dark text-sm">{cashGame.schedule}</span>
+                          <span className="text-poker-muted">Következő dátum:</span>
+                          <span className="font-semibold text-poker-primary text-sm">
+                            {cashGame.nextDate ? formatUpcomingDate(cashGame.nextDate) : cashGame.schedule}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -541,58 +613,12 @@ export default function FeaturedOffers() {
             </span>
           </div>
 
-          {/* Cash Games Pagination */}
-          {totalCashGamePages > 1 && (
-            <div className="flex justify-center items-center mt-8 space-x-4">
-              <button
-                onClick={prevCashGamePage}
-                disabled={currentCashGamePage === 0}
-                className={`p-3 rounded-full transition-all duration-300 ${
-                  currentCashGamePage === 0
-                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                    : 'bg-poker-green text-white hover:bg-poker-darkgreen shadow-lg hover:shadow-xl transform hover:scale-105'
-                }`}
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-              
-              <div className="flex space-x-2">
-                {Array.from({ length: totalCashGamePages }, (_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setCurrentCashGamePage(i)}
-                    className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                      i === currentCashGamePage
-                        ? 'bg-poker-green scale-125'
-                        : 'bg-gray-300 hover:bg-poker-green/50'
-                    }`}
-                  />
-                ))}
-              </div>
-              
-              <button
-                onClick={nextCashGamePage}
-                disabled={currentCashGamePage === totalCashGamePages - 1}
-                className={`p-3 rounded-full transition-all duration-300 ${
-                  currentCashGamePage === totalCashGamePages - 1
-                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                    : 'bg-poker-green text-white hover:bg-poker-darkgreen shadow-lg hover:shadow-xl transform hover:scale-105'
-                }`}
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            </div>
-          )}
           
           {cashGames.length === 0 && (
             <div className="text-center py-12 bg-white/50 rounded-xl">
               <div className="text-6xl mb-4">♠</div>
-              <h3 className="text-xl font-semibold text-poker-dark mb-2">Jelenleg nincsenek aktív cash game asztalok</h3>
-              <p className="text-poker-muted">Hamarosan új asztalok nyílnak!</p>
+              <h3 className="text-xl font-semibold text-poker-dark mb-2">Jelenleg nincsenek közelgő cash game asztalok</h3>
+              <p className="text-poker-muted">Hamarosan új időpontok kerülnek kiírásra!</p>
             </div>
           )}
         </div>

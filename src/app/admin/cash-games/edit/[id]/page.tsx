@@ -14,13 +14,17 @@ const MDEditor = dynamic(() => import('@uiw/react-md-editor'), {
 interface CashGameFormData {
   name: string;
   stakes: string;
+  gameType: string;
   minBuyIn: string;
   maxBuyIn: string;
   schedule: string;
+  startDate: string;
   active: boolean;
+  visibleFrom: string;
+  visibleUntil: string;
   description: string;
   image: string;
-  scheduledDates: string[]; // Array of dates in YYYY-MM-DD format
+  weekDays: string[];
 }
 
 export default function EditCashGame() {
@@ -32,20 +36,17 @@ export default function EditCashGame() {
   const [formData, setFormData] = useState<CashGameFormData>({
     name: '',
     stakes: '',
+    gameType: 'NLH',
     minBuyIn: '',
     maxBuyIn: '',
-    schedule: '',
+    schedule: 'Hétfő-Vasárnap 18:00-06:00',
+    startDate: new Date().toISOString().split('T')[0],
     active: true,
+    visibleFrom: new Date().toISOString().split('T')[0],
+    visibleUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     description: '',
     image: '',
-    scheduledDates: []
-  });
-  
-  const [currentWeekStart, setCurrentWeekStart] = useState(() => {
-    const today = new Date();
-    const day = today.getDay();
-    const diff = today.getDate() - day + (day === 0 ? -6 : 1);
-    return new Date(today.setDate(diff));
+    weekDays: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
   });
 
   useEffect(() => {
@@ -62,13 +63,17 @@ export default function EditCashGame() {
           setFormData({
             name: cashGameData.name || '',
             stakes: cashGameData.stakes || '',
+            gameType: cashGameData.game_type || 'NLH',
             minBuyIn: cashGameData.min_buyin?.toString() || '',
             maxBuyIn: cashGameData.max_buyin?.toString() || '',
-            schedule: cashGameData.schedule || '',
+            schedule: cashGameData.schedule || 'Hétfő-Vasárnap 18:00-06:00',
+            startDate: cashGameData.start_date || new Date().toISOString().split('T')[0],
             active: cashGameData.active !== undefined ? cashGameData.active : true,
+            visibleFrom: cashGameData.visible_from || new Date().toISOString().split('T')[0],
+            visibleUntil: cashGameData.visible_until || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
             description: cashGameData.description || '',
             image: cashGameData.image || '',
-            scheduledDates: cashGameData.scheduledDates || []
+            weekDays: cashGameData.week_days ? (Array.isArray(cashGameData.week_days) ? cashGameData.week_days : JSON.parse(cashGameData.week_days)) : ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
           });
         } else {
           alert('Cash Game nem található!');
@@ -101,76 +106,20 @@ export default function EditCashGame() {
     });
   };
 
-  // Helper functions for calendar
-  const getWeekStart = (date: Date) => {
-    const d = new Date(date);
-    const day = d.getDay();
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
-    return new Date(d.setDate(diff));
-  };
-
-  const getCurrentWeekDays = () => {
-    const weekStart = getWeekStart(currentWeekStart);
-    const days = [];
-    for (let i = 0; i < 7; i++) {
-      const day = new Date(weekStart);
-      day.setDate(weekStart.getDate() + i);
-      days.push(day);
-    }
-    return days;
-  };
-
-  const getMaxWeek = () => {
-    const today = new Date();
-    const maxDate = new Date(today);
-    maxDate.setMonth(today.getMonth() + 3); // 3 months ahead
-    return getWeekStart(maxDate);
-  };
-
-  const canNavigateNext = () => {
-    const nextWeek = new Date(currentWeekStart);
-    nextWeek.setDate(currentWeekStart.getDate() + 7);
-    const maxWeek = getMaxWeek();
-    return nextWeek <= maxWeek;
-  };
-
-  const canNavigatePrev = () => {
-    const today = new Date();
-    const currentWeek = getWeekStart(currentWeekStart);
-    const todayWeek = getWeekStart(today);
-    return currentWeek > todayWeek;
-  };
-
-  const navigateWeek = (direction: 'prev' | 'next') => {
-    if (direction === 'prev' && !canNavigatePrev()) return;
-    if (direction === 'next' && !canNavigateNext()) return;
+  const handleWeekDayToggle = (day: string) => {
+    const currentDays = [...formData.weekDays];
+    const index = currentDays.indexOf(day);
     
-    const newWeekStart = new Date(currentWeekStart);
-    newWeekStart.setDate(currentWeekStart.getDate() + (direction === 'next' ? 7 : -7));
-    setCurrentWeekStart(newWeekStart);
-  };
-
-  const toggleDate = (date: Date) => {
-    const dateStr = date.toISOString().split('T')[0];
-    const newScheduledDates = formData.scheduledDates.includes(dateStr)
-      ? formData.scheduledDates.filter(d => d !== dateStr)
-      : [...formData.scheduledDates, dateStr];
+    if (index > -1) {
+      currentDays.splice(index, 1);
+    } else {
+      currentDays.push(day);
+    }
     
     setFormData({
       ...formData,
-      scheduledDates: newScheduledDates
+      weekDays: currentDays
     });
-  };
-
-  const isDateSelected = (date: Date) => {
-    const dateStr = date.toISOString().split('T')[0];
-    return formData.scheduledDates.includes(dateStr);
-  };
-
-  const isDatePast = (date: Date) => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return date < today;
   };
 
   const handleImageSelect = (imageUrl: string) => {
@@ -189,13 +138,15 @@ export default function EditCashGame() {
         id: parseInt(cashGameId),
         name: formData.name,
         stakes: formData.stakes,
+        game_type_id: 1, // Default game type ID
         min_buy_in: formData.minBuyIn ? parseInt(formData.minBuyIn) : null,
         max_buy_in: formData.maxBuyIn ? parseInt(formData.maxBuyIn) : null,
-        schedule: formData.schedule,
-        active: formData.active,
         description: formData.description,
-        image: formData.image,
-        scheduledDates: formData.scheduledDates
+        schedule: formData.schedule,
+        start_date: formData.startDate,
+        active: formData.active ? 1 : 0,
+        image_url: formData.image || '',
+        week_days: formData.weekDays
       };
       
       const response = await fetch(`/api/admin/cash-games/${cashGameId}`, {
@@ -262,7 +213,7 @@ export default function EditCashGame() {
       <div className="bg-white rounded-lg shadow p-6">
         <form onSubmit={handleSubmit}>
           {/* Basic Info */}
-          <div className="grid grid-cols-1 gap-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Cash Game név *
@@ -276,6 +227,25 @@ export default function EditCashGame() {
                 required
                 placeholder="pl. No Limit Hold'em"
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Játék típusa *
+              </label>
+              <select
+                name="gameType"
+                value={formData.gameType}
+                onChange={handleInputChange}
+                className="admin-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-poker-green focus:border-transparent"
+                required
+              >
+                <option value="NLH">No Limit Hold'em</option>
+                <option value="PLO">Pot Limit Omaha</option>
+                <option value="LHE">Limit Hold'em</option>
+                <option value="STUD">7 Card Stud</option>
+                <option value="MIXED">Mixed Games</option>
+              </select>
             </div>
           </div>
 
@@ -341,83 +311,84 @@ export default function EditCashGame() {
             />
           </div>
 
-          {/* Schedule Calendar */}
+          {/* Weekly Calendar Day Selector */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-4">
-              Ütemezés - Válaszd ki azokat a napokat, amikor megjelenjen a cash game *
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              Hét napjai (válassz ki a megfelelő napokat) *
             </label>
-            <div className="bg-white border border-gray-300 rounded-lg p-4">
-              {/* Calendar Navigation */}
-              <div className="flex items-center justify-between mb-4">
+            <div className="grid grid-cols-7 gap-2">
+              {[
+                { key: 'monday', label: 'Hétfő' },
+                { key: 'tuesday', label: 'Kedd' },
+                { key: 'wednesday', label: 'Szerda' },
+                { key: 'thursday', label: 'Csütörtök' },
+                { key: 'friday', label: 'Péntek' },
+                { key: 'saturday', label: 'Szombat' },
+                { key: 'sunday', label: 'Vasárnap' }
+              ].map((day) => (
                 <button
+                  key={day.key}
                   type="button"
-                  onClick={() => navigateWeek('prev')}
-                  disabled={!canNavigatePrev()}
-                  className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={() => handleWeekDayToggle(day.key)}
+                  className={`p-3 text-center text-sm font-medium rounded-lg border-2 transition-all duration-200 ${
+                    formData.weekDays.includes(day.key)
+                      ? 'bg-poker-green text-white border-poker-green shadow-lg'
+                      : 'bg-white text-gray-700 border-gray-300 hover:border-poker-green hover:bg-poker-green/10'
+                  }`}
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
+                  <div className="text-xs font-bold">{day.label.substring(0, 3)}</div>
+                  <div className="text-xs mt-1">{day.label.substring(3)}</div>
                 </button>
-                
-                <h3 className="text-lg font-medium">
-                  {getCurrentWeekDays()[0].toLocaleDateString('hu-HU', { month: 'long', year: 'numeric' })}
-                  {getCurrentWeekDays()[0].getMonth() !== getCurrentWeekDays()[6].getMonth() && 
-                    ` - ${getCurrentWeekDays()[6].toLocaleDateString('hu-HU', { month: 'long', year: 'numeric' })}`
-                  }
-                </h3>
-                
-                <button
-                  type="button"
-                  onClick={() => navigateWeek('next')}
-                  disabled={!canNavigateNext()}
-                  className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
-              </div>
-              
-              {/* Week Days */}
-              <div className="grid grid-cols-7 gap-2">
-                {['Hétfő', 'Kedd', 'Szerda', 'Csütörtök', 'Péntek', 'Szombat', 'Vasárnap'].map((dayName, index) => (
-                  <div key={index} className="text-center text-sm font-medium text-gray-600 py-2">
-                    {dayName}
-                  </div>
-                ))}
-                
-                {getCurrentWeekDays().map((date, index) => {
-                  const isPast = isDatePast(date);
-                  const isSelected = isDateSelected(date);
-                  
-                  return (
-                    <button
-                      key={index}
-                      type="button"
-                      onClick={() => !isPast && toggleDate(date)}
-                      disabled={isPast}
-                      className={`
-                        p-3 text-sm rounded-lg border transition-all duration-200
-                        ${isPast 
-                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                          : isSelected
-                            ? 'bg-poker-green text-white border-poker-green shadow-md'
-                            : 'bg-white hover:bg-poker-light border-gray-300 hover:border-poker-green'
-                        }
-                      `}
-                    >
-                      <div className="font-medium">{date.getDate()}</div>
-                      {isSelected && <div className="text-xs mt-1">✓</div>}
-                    </button>
-                  );
-                })}
-              </div>
-              
-              <div className="mt-4 text-sm text-gray-600">
-                <p>🟢 Kiválasztott napok: {formData.scheduledDates.length}</p>
-                <p className="mt-1">💡 Kattints a napokra a kiválasztáshoz/eltávolításhoz</p>
-              </div>
+              ))}
+            </div>
+            <p className="text-xs text-gray-500 mt-2">
+              Válaszd ki azokat a napokat, amikor ez a cash game elérhető lesz. Legalább egy napot ki kell választani.
+            </p>
+          </div>
+
+          {/* Start Date */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Kezdési dátum *
+            </label>
+            <input
+              type="date"
+              name="startDate"
+              value={formData.startDate}
+              onChange={handleInputChange}
+              className="admin-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-poker-green focus:border-transparent"
+              required
+            />
+          </div>
+
+          {/* Visibility Dates */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Látható ettől a dátumtól *
+              </label>
+              <input
+                type="date"
+                name="visibleFrom"
+                value={formData.visibleFrom}
+                onChange={handleInputChange}
+                className="admin-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-poker-green focus:border-transparent"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Látható eddig a dátumig *
+              </label>
+              <input
+                type="date"
+                name="visibleUntil"
+                value={formData.visibleUntil}
+                onChange={handleInputChange}
+                className="admin-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-poker-green focus:border-transparent"
+                required
+              />
             </div>
           </div>
 

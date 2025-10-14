@@ -24,6 +24,7 @@ interface CashGameFormData {
   visibleUntil: string;
   description: string;
   image: string;
+  weekDays: string[];
 }
 
 export default function CreateCashGame() {
@@ -41,7 +42,8 @@ export default function CreateCashGame() {
     visibleFrom: new Date().toISOString().split('T')[0],
     visibleUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 1 év múlva
     description: '',
-    image: ''
+    image: '',
+    weekDays: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -66,6 +68,22 @@ export default function CreateCashGame() {
     });
   };
 
+  const handleWeekDayToggle = (day: string) => {
+    const currentDays = [...formData.weekDays];
+    const index = currentDays.indexOf(day);
+    
+    if (index > -1) {
+      currentDays.splice(index, 1);
+    } else {
+      currentDays.push(day);
+    }
+    
+    setFormData({
+      ...formData,
+      weekDays: currentDays
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -81,7 +99,8 @@ export default function CreateCashGame() {
         schedule: formData.schedule,
         start_date: formData.startDate,
         active: formData.active ? 1 : 0,
-        image_url: formData.image || ''
+        image_url: formData.image || '',
+        week_days: formData.weekDays
       };
 
       const response = await fetch('/api/admin/cash-games', {
@@ -228,6 +247,41 @@ export default function CreateCashGame() {
               required
               placeholder="pl. Hétfő-Vasárnap 18:00-06:00"
             />
+          </div>
+
+          {/* Weekly Calendar Day Selector */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              Hét napjai (válassz ki a megfelelő napokat) *
+            </label>
+            <div className="grid grid-cols-7 gap-2">
+              {[
+                { key: 'monday', label: 'Hétfő' },
+                { key: 'tuesday', label: 'Kedd' },
+                { key: 'wednesday', label: 'Szerda' },
+                { key: 'thursday', label: 'Csütörtök' },
+                { key: 'friday', label: 'Péntek' },
+                { key: 'saturday', label: 'Szombat' },
+                { key: 'sunday', label: 'Vasárnap' }
+              ].map((day) => (
+                <button
+                  key={day.key}
+                  type="button"
+                  onClick={() => handleWeekDayToggle(day.key)}
+                  className={`p-3 text-center text-sm font-medium rounded-lg border-2 transition-all duration-200 ${
+                    formData.weekDays.includes(day.key)
+                      ? 'bg-poker-green text-white border-poker-green shadow-lg'
+                      : 'bg-white text-gray-700 border-gray-300 hover:border-poker-green hover:bg-poker-green/10'
+                  }`}
+                >
+                  <div className="text-xs font-bold">{day.label.substring(0, 3)}</div>
+                  <div className="text-xs mt-1">{day.label.substring(3)}</div>
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-gray-500 mt-2">
+              Válaszd ki azokat a napokat, amikor ez a cash game elérhető lesz. Legalább egy napot ki kell választani.
+            </p>
           </div>
 
           {/* Start Date */}
