@@ -9,7 +9,8 @@
       "Bash(node:*)",
       "Bash(curl:*)",
       "Bash(npm install:*)",
-      "Bash(vercel:*)"
+      "Bash(vercel:*)",
+      "WebFetch(domain:palace-poker.hu)"
     ],
     "deny": [],
     "ask": []

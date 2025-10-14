@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Tournament, CashGame } from '@/types';
 import TournamentCard from './TournamentCard';
 import { formatCurrency } from '@/utils/formatters';
@@ -235,6 +235,58 @@ const formatUpcomingDate = (dateString: string): string => {
   return `${dayName}, ${month}.${day}.`;
 };
 
+// Helper function to format schedule nicely
+const formatSchedule = (schedule: string): React.ReactElement => {
+  if (!schedule) {
+    return <span className="text-xs">Sze-Pén-Szo 19:00+</span>;
+  }
+  
+  // Split by comma to handle multiple schedules
+  const schedules = schedule.split(',').map(s => s.trim());
+  
+  return (
+    <div className="text-xs space-y-1">
+      {schedules.map((sched, index) => {
+        // Extract day and time parts
+        const parts = sched.split(':');
+        if (parts.length >= 2) {
+          const dayPart = parts[0].trim();
+          const timePart = parts.slice(1).join(':').trim();
+          return (
+            <div key={index} className="flex flex-col">
+              <span className="font-medium text-poker-primary">{dayPart}</span>
+              <span className="text-poker-muted">{timePart}</span>
+            </div>
+          );
+        }
+        return <span key={index}>{sched}</span>;
+      })}
+    </div>
+  );
+};
+
+// Helper function to format stakes nicely
+const formatStakes = (name: string, stakes: string): React.ReactElement => {
+  // Try to extract multiple stakes from the name if available
+  const nameStakesMatch = name.match(/(\d+\/\d+)/g);
+  
+  if (nameStakesMatch && nameStakesMatch.length > 1) {
+    // Multiple stakes found in name
+    return (
+      <div className="text-right">
+        {nameStakesMatch.map((stake, index) => (
+          <div key={index} className="font-bold text-poker-primary">
+            {stake} Ft
+          </div>
+        ))}
+      </div>
+    );
+  }
+  
+  // Single stake or fallback
+  return <span className="font-bold text-poker-primary text-lg">{stakes} Ft</span>;
+};
+
 export default function FeaturedOffers() {
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [cashGames, setCashGames] = useState<CashGame[]>([]);
@@ -302,8 +354,8 @@ export default function FeaturedOffers() {
           name: game.name,
           stakes: game.stakes,
           game: game.game_type || game.game || 'NLH',
-          minBuyIn: game.min_buy_in || game.minBuyIn,
-          maxBuyIn: game.max_buy_in || game.maxBuyIn,
+          minBuyIn: game.min_buyin || game.minBuyIn,
+          maxBuyIn: game.max_buyin || game.maxBuyIn,
           schedule: game.schedule || 'Szerda: 19:00-04:00, Péntek-Szombat: 19:30-04:00',
           startDate: game.start_date || game.startDate,
           nextDate: getNextCashGameDate(game.schedule),
@@ -312,10 +364,9 @@ export default function FeaturedOffers() {
           image: game.image_url || game.image || ''
         }));
         
-        // Only show active cash games with upcoming dates, sort by next date, limit to 3
+        // Show all active cash games, limit to 3
         const upcomingCashGames = formattedCashGames
-          .filter((game: any) => game.active && game.nextDate)
-          .sort((a: any, b: any) => new Date(a.nextDate).getTime() - new Date(b.nextDate).getTime())
+          .filter((game: any) => game.active)
           .slice(0, 3);
         
         setCashGames(upcomingCashGames);
@@ -573,9 +624,9 @@ export default function FeaturedOffers() {
                       </p>
                       
                       <div className="space-y-2">
-                        <div className="flex justify-between items-center">
+                        <div className="flex justify-between items-start">
                           <span className="text-poker-muted">Tétek:</span>
-                          <span className="font-bold text-poker-primary text-lg">{cashGame.stakes}</span>
+                          {formatStakes(cashGame.name, cashGame.stakes)}
                         </div>
                         <div className="flex justify-between items-center">
                           <span className="text-poker-muted">Buy-in:</span>
@@ -583,11 +634,11 @@ export default function FeaturedOffers() {
                             {formatCurrency(cashGame.minBuyIn)} - {formatCurrency(cashGame.maxBuyIn)}
                           </span>
                         </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-poker-muted">Következő dátum:</span>
-                          <span className="font-semibold text-poker-primary text-sm">
-                            {cashGame.schedule}
-                          </span>
+                        <div className="flex justify-between items-start">
+                          <span className="text-poker-muted">Menetrend:</span>
+                          <div className="text-right">
+                            {formatSchedule(cashGame.schedule)}
+                          </div>
                         </div>
                       </div>
                     </div>

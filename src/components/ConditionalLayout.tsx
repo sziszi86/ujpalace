@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import VisitorTracker from '@/components/VisitorTracker';
+import CookieBanner from '@/components/CookieBanner';
 
 interface ConditionalLayoutProps {
   children: React.ReactNode;
@@ -29,6 +30,16 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
         {children}
       </main>
       <Footer />
+      <CookieBanner 
+        onAccept={() => {
+          // Optional: Track cookie acceptance
+          console.log('Cookies accepted');
+        }}
+        onDecline={() => {
+          // Optional: Track cookie decline
+          console.log('Cookies declined');
+        }}
+      />
     </div>
   );
 }
