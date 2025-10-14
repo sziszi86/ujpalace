@@ -252,16 +252,16 @@ export default function TournamentDetailPage() {
                       <span className="text-poker-muted">Kezdő chipek:</span>
                       <span className="font-medium">{tournament.starting_chips ? formatChips(tournament.starting_chips) : 'N/A'}</span>
                     </div>
-                    {(tournament.rebuy_price || tournament.rebuyPrice) && Number(tournament.rebuy_price || tournament.rebuyPrice) > 0 && (
+                    {(tournament.rebuyPrice) && Number(tournament.rebuyPrice) > 0 && (
                       <div className="flex justify-between">
                         <span className="text-poker-muted">Rebuy összeg:</span>
-                        <span className="font-medium">{formatCurrency(Number(tournament.rebuy_price || tournament.rebuyPrice))}</span>
+                        <span className="font-medium">{formatCurrency(Number(tournament.rebuyPrice))}</span>
                       </div>
                     )}
-                    {(tournament.rebuy_chips || tournament.rebuyChips) && (
+                    {(tournament.rebuyChips) && (
                       <div className="flex justify-between">
                         <span className="text-poker-muted">Rebuy chipek:</span>
-                        <span className="font-medium">{formatChips(Number(tournament.rebuy_chips || tournament.rebuyChips))}</span>
+                        <span className="font-medium">{formatChips(Number(tournament.rebuyChips))}</span>
                       </div>
                     )}
                     <div className="flex justify-between">
@@ -271,48 +271,48 @@ export default function TournamentDetailPage() {
                   </div>
                 </div>
 
-                {(tournament.rebuy_price || tournament.rebuyPrice || tournament.addon_price || tournament.addonPrice || tournament.rebuy_count || tournament.rebuyCount) && (
+                {(tournament.rebuyPrice || tournament.addonPrice || tournament.rebuyCount) && (
                   <div className="bg-poker-light/50 p-4 rounded-lg">
                     <h3 className="font-semibold text-poker-dark mb-2">Rebuy & Add-on</h3>
                     <div className="space-y-2 text-sm">
-                      {(tournament.rebuy_count || tournament.rebuyCount) && (tournament.rebuy_count > 1 || tournament.rebuyCount > 1) && (
+                      {tournament.rebuyCount && tournament.rebuyCount > 1 && (
                         <div className="flex justify-between">
                           <span className="text-poker-muted">Rebuy-ok száma:</span>
-                          <span className="font-medium">{tournament.rebuy_count || tournament.rebuyCount} db</span>
+                          <span className="font-medium">{tournament.rebuyCount} db</span>
                         </div>
                       )}
-                      {(tournament.rebuy_price || tournament.rebuyPrice) && (Number(tournament.rebuy_price) > 0 || Number(tournament.rebuyPrice) > 0) && (
+                      {tournament.rebuyPrice && Number(tournament.rebuyPrice) > 0 && (
                         <>
                           <div className="flex justify-between">
                             <span className="text-poker-muted">Rebuy ár:</span>
-                            <span className="font-medium">{formatCurrency(Number(tournament.rebuy_price || tournament.rebuyPrice))}</span>
+                            <span className="font-medium">{formatCurrency(Number(tournament.rebuyPrice))}</span>
                           </div>
-                          {(tournament.rebuy_chips || tournament.rebuyChips) && (
+                          {tournament.rebuyChips && (
                             <div className="flex justify-between">
                               <span className="text-poker-muted">Rebuy chipek:</span>
-                              <span className="font-medium">{formatChips(Number(tournament.rebuy_chips || tournament.rebuyChips))}</span>
+                              <span className="font-medium">{formatChips(Number(tournament.rebuyChips))}</span>
                             </div>
                           )}
                         </>
                       )}
-                      {(tournament.addon_price || tournament.addonPrice) && (Number(tournament.addon_price) > 0 || Number(tournament.addonPrice) > 0) && (
+                      {tournament.addonPrice && Number(tournament.addonPrice) > 0 && (
                         <>
                           <div className="flex justify-between">
                             <span className="text-poker-muted">Add-on ár:</span>
-                            <span className="font-medium">{formatCurrency(Number(tournament.addon_price || tournament.addonPrice))}</span>
+                            <span className="font-medium">{formatCurrency(Number(tournament.addonPrice))}</span>
                           </div>
-                          {(tournament.addon_chips || tournament.addonChips) && (
+                          {tournament.addonChips && (
                             <div className="flex justify-between">
                               <span className="text-poker-muted">Add-on chipek:</span>
-                              <span className="font-medium">{formatChips(Number(tournament.addon_chips || tournament.addonChips))}</span>
+                              <span className="font-medium">{formatChips(Number(tournament.addonChips))}</span>
                             </div>
                           )}
                         </>
                       )}
-                      {(tournament.addon_count || tournament.addonCount) && (
+                      {tournament.addonCount && (
                         <div className="flex justify-between">
                           <span className="text-poker-muted">Add-on darab:</span>
-                          <span className="font-medium">{tournament.addon_count || tournament.addonCount} db</span>
+                          <span className="font-medium">{tournament.addonCount} db</span>
                         </div>
                       )}
                     </div>
@@ -495,7 +495,7 @@ export default function TournamentDetailPage() {
               <div className="flex justify-center items-center space-x-8">
                 <button
                   onClick={() => {
-                    const shareText = `${tournament.title}\n📅 ${tournament.tournament_date ? formatDate(tournament.tournament_date) : ''} ${tournament.tournament_time}\n💰 Buy-in: ${formatCurrency(Number(tournament.buy_in))}${(tournament.rebuy_price || tournament.rebuyPrice) && Number(tournament.rebuy_price || tournament.rebuyPrice) > 0 ? `\n🔄 Rebuy: ${formatCurrency(Number(tournament.rebuy_price || tournament.rebuyPrice))}` : ''}${(tournament.addon_price || tournament.addonPrice) && Number(tournament.addon_price || tournament.addonPrice) > 0 ? `\n➕ Add-on: ${formatCurrency(Number(tournament.addon_price || tournament.addonPrice))}` : ''}\n${tournament.image_url ? `\n🖼️ Kép: ${tournament.image_url}` : ''}\n\nRészletek: ${window.location.href}`;
+                    const shareText = `${tournament.title}\n📅 ${tournament.tournament_date ? formatDate(tournament.tournament_date) : ''} ${tournament.tournament_time}\n💰 Buy-in: ${formatCurrency(Number(tournament.buy_in))}${tournament.rebuyPrice && Number(tournament.rebuyPrice) > 0 ? `\n🔄 Rebuy: ${formatCurrency(Number(tournament.rebuyPrice))}` : ''}${tournament.addonPrice && Number(tournament.addonPrice) > 0 ? `\n➕ Add-on: ${formatCurrency(Number(tournament.addonPrice))}` : ''}\n${tournament.image_url ? `\n🖼️ Kép: ${tournament.image_url}` : ''}\n\nRészletek: ${window.location.href}`;
                     const shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}&quote=${encodeURIComponent(shareText)}`;
                     window.open(shareUrl, '_blank', 'width=600,height=400');
                   }}
@@ -509,7 +509,7 @@ export default function TournamentDetailPage() {
 
                 <button
                   onClick={() => {
-                    const shareText = `${tournament.title}\n📅 ${tournament.tournament_date ? formatDate(tournament.tournament_date) : ''} ${tournament.tournament_time}\n💰 Buy-in: ${formatCurrency(Number(tournament.buy_in))}${(tournament.rebuy_price || tournament.rebuyPrice) && Number(tournament.rebuy_price || tournament.rebuyPrice) > 0 ? `\n🔄 Rebuy: ${formatCurrency(Number(tournament.rebuy_price || tournament.rebuyPrice))}` : ''}${(tournament.addon_price || tournament.addonPrice) && Number(tournament.addon_price || tournament.addonPrice) > 0 ? `\n➕ Add-on: ${formatCurrency(Number(tournament.addon_price || tournament.addonPrice))}` : ''}\n\n#PalacePoker #PokerTournament\n\nRészletek: ${window.location.href}`;
+                    const shareText = `${tournament.title}\n📅 ${tournament.tournament_date ? formatDate(tournament.tournament_date) : ''} ${tournament.tournament_time}\n💰 Buy-in: ${formatCurrency(Number(tournament.buy_in))}${tournament.rebuyPrice && Number(tournament.rebuyPrice) > 0 ? `\n🔄 Rebuy: ${formatCurrency(Number(tournament.rebuyPrice))}` : ''}${tournament.addonPrice && Number(tournament.addonPrice) > 0 ? `\n➕ Add-on: ${formatCurrency(Number(tournament.addonPrice))}` : ''}\n\n#PalacePoker #PokerTournament\n\nRészletek: ${window.location.href}`;
                     navigator.clipboard.writeText(shareText).then(() => {
                       alert('Szöveg másolva a vágólapra! Oszd meg Instagramon!');
                     });

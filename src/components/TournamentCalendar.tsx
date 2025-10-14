@@ -550,23 +550,23 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
                                   {formatCurrency(Number(tournament.buyIn || tournament.buy_in || 0))}
                                 </p>
                               </div>
-                              {(tournament.rebuyPrice || tournament.rebuy_price) && Number(tournament.rebuyPrice || tournament.rebuy_price) > 0 ? (
+                              {tournament.rebuyPrice && Number(tournament.rebuyPrice) > 0 ? (
                                 <div className="text-center">
                                   <p className="text-xs text-poker-muted">Rebuy</p>
                                   <p className="font-bold text-poker-gold">
-                                    {formatCurrency(Number(tournament.rebuyPrice || tournament.rebuy_price))}
+                                    {formatCurrency(Number(tournament.rebuyPrice))}
                                   </p>
-                                  {(tournament.rebuyCount || tournament.rebuy_count) && (tournament.rebuyCount > 1 || tournament.rebuy_count > 1) && (
+                                  {tournament.rebuyCount && tournament.rebuyCount > 1 && (
                                     <p className="text-xs text-poker-accent">
-                                      {tournament.rebuyCount || tournament.rebuy_count}x
+                                      {tournament.rebuyCount}x
                                     </p>
                                   )}
                                 </div>
-                              ) : (tournament.addonPrice || tournament.addon_price) && Number(tournament.addonPrice || tournament.addon_price) > 0 ? (
+                              ) : tournament.addonPrice && Number(tournament.addonPrice) > 0 ? (
                                 <div className="text-center">
                                   <p className="text-xs text-poker-muted">Add-on</p>
                                   <p className="font-bold text-poker-gold">
-                                    {formatCurrency(Number(tournament.addonPrice || tournament.addon_price))}
+                                    {formatCurrency(Number(tournament.addonPrice))}
                                   </p>
                                 </div>
                               ) : (

@@ -87,9 +87,9 @@ export default function TournamentListPage() {
       case 'date':
         return new Date(a.tournament_date || a.date).getTime() - new Date(b.tournament_date || b.date).getTime();
       case 'buyIn':
-        return (a.buy_in || a.buyIn) - (b.buy_in || b.buyIn);
+        return Number(a.buy_in || a.buyIn || 0) - Number(b.buy_in || b.buyIn || 0);
       case 'guarantee':
-        return (b.guarantee_amount || b.guarantee || 0) - (a.guarantee_amount || a.guarantee || 0);
+        return Number(b.guarantee_amount || b.guarantee || 0) - Number(a.guarantee_amount || a.guarantee || 0);
       default:
         return 0;
     }
@@ -212,7 +212,7 @@ export default function TournamentListPage() {
                         <p className="text-xs text-black mb-1">Buy-in</p>
                         <p className="font-bold text-sm text-poker-primary">{formatCurrency(Number(tournament.buy_in || tournament.buyIn))}</p>
                         {(tournament.starting_chips || tournament.startingChips) && (
-                          <p className="text-xs text-gray-600">{formatChips(tournament.starting_chips || tournament.startingChips)}</p>
+                          <p className="text-xs text-gray-600">{formatChips(Number(tournament.starting_chips || tournament.startingChips || 0))}</p>
                         )}
                       </div>
                       <div className="text-center p-3 bg-gray-50 rounded-lg">
@@ -226,26 +226,26 @@ export default function TournamentListPage() {
 
                     {/* Additional Details */}
                     <div className="flex flex-wrap gap-2 mb-4">
-                      {(tournament.rebuy_price || tournament.rebuyPrice) && (
+                      {tournament.rebuyPrice && (
                         <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
-                          Rebuy: {formatCurrency(Number(tournament.rebuy_price || tournament.rebuyPrice))} 
-                          {(tournament.rebuy_count || tournament.rebuyCount) && (tournament.rebuy_count > 1 || tournament.rebuyCount > 1) && ` (${tournament.rebuy_count || tournament.rebuyCount}x)`}
+                          Rebuy: {formatCurrency(Number(tournament.rebuyPrice))} 
+                          {tournament.rebuyCount && tournament.rebuyCount > 1 && ` (${tournament.rebuyCount}x)`}
                         </span>
                       )}
-                      {(tournament.addon_price || tournament.addonPrice) && (
+                      {tournament.addonPrice && (
                         <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">
-                          Add-on: {formatCurrency(Number(tournament.addon_price || tournament.addonPrice))}
-                          {(tournament.addon_chips || tournament.addonChips) && ` (${formatChips(Number(tournament.addon_chips || tournament.addonChips))})`}
+                          Add-on: {formatCurrency(Number(tournament.addonPrice))}
+                          {tournament.addonChips && ` (${formatChips(Number(tournament.addonChips))})`}
                         </span>
                       )}
-                      {(tournament.blindStructure || tournament.blind_structure) && (
+                      {tournament.blindStructure && (
                         <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
-                          {tournament.blindStructure || tournament.blind_structure}
+                          {tournament.blindStructure}
                         </span>
                       )}
-                      {(tournament.lateRegistration || tournament.late_registration) && (
+                      {tournament.lateRegistration && (
                         <span className="px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full">
-                          Utólagos nevezés: {tournament.lateRegistrationUntil || tournament.late_registration_until}
+                          Utólagos nevezés: {tournament.lateRegistrationUntil}
                         </span>
                       )}
                     </div>
