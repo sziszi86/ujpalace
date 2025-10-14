@@ -44,7 +44,7 @@ export default function EditAboutPage() {
               title: data.title || '',
               content: data.content || '',
               features: data.features || [],
-              image: data.image || '',
+              image: data.hero_image || '',
               active: data.active
             });
           } else {
@@ -83,7 +83,10 @@ export default function EditAboutPage() {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
           },
-          body: JSON.stringify(formData),
+          body: JSON.stringify({
+            ...formData,
+            hero_image: formData.image
+          }),
         }
       );
 

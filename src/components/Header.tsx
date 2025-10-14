@@ -78,20 +78,14 @@ export default function Header() {
         <div className="flex justify-between items-center py-6">
           {/* Logo */}
           <Link href="/" className="flex items-center group animate-fade-in">
-            <div className="relative w-20 h-20 transform group-hover:scale-105 transition-all duration-300">
+            <div className="relative w-20 h-20 flex items-center justify-center transform group-hover:scale-105 transition-all duration-300">
               <Image
                 src="/images/logo.png"
                 alt="Palace Poker Logo"
                 width={80}
                 height={80}
-                className="rounded-2xl shadow-2xl animate-glow"
+                className="rounded-2xl shadow-2xl animate-glow object-contain"
               />
-            </div>
-            <div className="ml-4">
-              <h1 className="text-white text-3xl font-bold bg-gradient-to-r from-white to-poker-accent bg-clip-text text-transparent group-hover:from-poker-accent group-hover:to-white transition-all duration-300">
-                Palace Poker
-              </h1>
-              <p className="text-poker-accent text-sm font-medium tracking-wider">SZOMBATHELY </p>
             </div>
           </Link>
 

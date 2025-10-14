@@ -22,7 +22,7 @@ export async function GET(
 
     return NextResponse.json({
       ...aboutPage,
-      features: aboutPage.features ? JSON.parse(aboutPage.features) : null
+      features: aboutPage.features ? JSON.parse(aboutPage.features) : []
     });
   } catch (error) {
     console.error('Error fetching about page:', error);
@@ -48,7 +48,7 @@ export async function PUT(
 
     const { id } = await params;
     const body = await request.json();
-    const { title, content, features = [], image = '', active = true } = body;
+    const { title, content, features = [], hero_image = '', meta_description = '', active = true } = body;
 
     if (!title || !content) {
       return NextResponse.json(
@@ -58,8 +58,8 @@ export async function PUT(
     }
 
     await executeQuery(
-      'UPDATE about_pages SET title = $1, content = $2, features = $3, image = $4, active = $5 WHERE id = $6',
-      [title, content, JSON.stringify(features), image, active, id]
+      'UPDATE about_pages SET title = $1, content = $2, features = $3, hero_image = $4, meta_description = $5, active = $6 WHERE id = $7',
+      [title, content, JSON.stringify(features), hero_image, meta_description, active, id]
     );
 
     return NextResponse.json({
@@ -67,7 +67,8 @@ export async function PUT(
       title,
       content,
       features,
-      image,
+      hero_image,
+      meta_description,
       active,
       updated_at: new Date().toISOString()
     });

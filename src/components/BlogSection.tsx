@@ -82,22 +82,13 @@ export default function BlogSection() {
                 key={item.id}
                 className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300"
               >
-                {item.image ? (
-                  <div className="h-48 overflow-hidden">
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                    />
-                  </div>
-                ) : (
-                  <div className="h-48 bg-gradient-to-br from-poker-gold to-poker-gold/70 flex items-center justify-center">
-                    <svg className="w-16 h-16 text-white/70" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M2 5a2 2 0 012-2h8a2 2 0 012 2v10a2 2 0 002 2H4a2 2 0 01-2-2V5zm3 1h6v4H5V6zm6 6H5v2h6v-2z" clipRule="evenodd" />
-                      <path d="M15 7h1a2 2 0 012 2v5.5a1.5 1.5 0 01-3 0V9a1 1 0 00-1-1h-1v-1z" />
-                    </svg>
-                  </div>
-                )}
+                <div className="h-48 overflow-hidden">
+                  <img
+                    src={item.image || '/images/newsplace.jpg'}
+                    alt={item.title}
+                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
                 
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-3">
