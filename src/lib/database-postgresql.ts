@@ -185,8 +185,11 @@ export async function getTournamentById(id: number) {
     console.log('getTournamentById called with id:', id);
     
     const query = `
-      SELECT t.id, t.title, t.description, t.date, t.buyin_amount, t.starting_chips, 
+      SELECT t.id, t.title, t.description, t.long_description, t.date, t.buyin_amount, t.starting_chips, 
              t.max_players, t.status, t.featured, t.image_url, t.structure_id,
+             t.rebuy_count, t.rebuy_price, t.rebuy_chips, t.rebuy_amounts,
+             t.addon_price, t.addon_chips, t.category, t.venue, t.special_notes,
+             t.visible_from, t.visible_until, t.guarantee_amount,
              t.date as tournament_date,
              EXTRACT(HOUR FROM t.date) || ':' || LPAD(EXTRACT(MINUTE FROM t.date)::text, 2, '0') as tournament_time,
              t.buyin_amount as buy_in,
@@ -289,17 +292,21 @@ export async function updateTournament(id: number, data: any) {
     tournamentDateTime = `${data.date} ${data.time}:00`;
   }
 
-  // Update only basic tournament fields that definitely exist
+  // Update all tournament fields including rebuy and addon fields
   const query = `
     UPDATE tournaments 
-    SET title = $1, description = $2, date = $3, buyin_amount = $4, 
-        starting_chips = $5, max_players = $6, status = $7, featured = $8, 
-        structure_id = $9, image_url = $10, updated_at = CURRENT_TIMESTAMP
-    WHERE id = $11
+    SET title = $1, description = $2, long_description = $3, date = $4, buyin_amount = $5, 
+        starting_chips = $6, max_players = $7, status = $8, featured = $9, 
+        structure_id = $10, image_url = $11, rebuy_price = $12, rebuy_chips = $13,
+        rebuy_count = $14, rebuy_amounts = $15, addon_price = $16, addon_chips = $17,
+        category = $18, venue = $19, special_notes = $20, visible_from = $21,
+        visible_until = $22, guarantee_amount = $23
+    WHERE id = $24
   `;
   const params = [
     data.title,
     data.description || null,
+    data.long_description || data.longDescription || null,
     tournamentDateTime,
     data.buyin_amount || data.buy_in || data.buyIn || 0,
     data.starting_chips || data.startingChips || 15000,
@@ -307,7 +314,19 @@ export async function updateTournament(id: number, data: any) {
     data.status || 'upcoming',
     data.featured || false,
     structureId,
-    data.image_url || data.image || null,
+    data.image_url || data.image || data.imageUrl || null,
+    data.rebuy_price || data.rebuyPrice ? parseInt(data.rebuy_price || data.rebuyPrice) || null : null,
+    data.rebuy_chips || data.rebuyChips ? parseInt(data.rebuy_chips || data.rebuyChips) || null : null,
+    data.rebuy_count || data.rebuyCount ? parseInt(data.rebuy_count || data.rebuyCount) || 1 : 1,
+    data.rebuy_amounts || data.rebuyAmounts || null,
+    data.addon_price || data.addonPrice ? parseInt(data.addon_price || data.addonPrice) || null : null,
+    data.addon_chips || data.addonChips ? parseInt(data.addon_chips || data.addonChips) || null : null,
+    data.category || null,
+    data.venue || 'Palace Poker Szombathely',
+    data.special_notes || data.specialNotes || null,
+    data.visible_from || data.visibleFrom ? (data.visible_from || data.visibleFrom).split('T')[0] : null,
+    data.visible_until || data.visibleUntil ? (data.visible_until || data.visibleUntil).split('T')[0] : null,
+    data.guarantee_amount || data.guarantee ? parseInt(data.guarantee_amount || data.guarantee) || null : null,
     id
   ];
   

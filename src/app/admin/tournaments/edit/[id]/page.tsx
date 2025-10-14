@@ -210,6 +210,8 @@ export default function EditTournamentPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('🚀 MENTÉS ELKEZDŐDÖTT!');
+    console.log('🔍 FormData:', formData);
     setSaving(true);
 
     // Validáció: Struktúra kötelező
@@ -238,6 +240,8 @@ export default function EditTournamentPage() {
         buy_in: parseInt(formData.buyIn) || 0,
         rebuy_price: parseInt(formData.rebuyPrice) || 0,
         rebuy_chips: parseInt(formData.rebuyChips) || 0,
+        rebuy_count: parseInt(formData.rebuyCount) || 1,
+        rebuy_amounts: formData.rebuyAmounts || '',
         addon_price: parseInt(formData.addonPrice) || 0,
         addon_chips: parseInt(formData.addonChips) || 0,
         structure: formData.structure,
@@ -266,6 +270,8 @@ export default function EditTournamentPage() {
       };
 
       // API mentés
+      console.log('📤 Küldött adat:', JSON.stringify(tournamentData, null, 2));
+      
       const response = await fetch('/api/admin/tournaments', {
         method: 'PUT',
         headers: {
@@ -275,7 +281,11 @@ export default function EditTournamentPage() {
         body: JSON.stringify(tournamentData),
       });
 
+      console.log('📡 Response status:', response.status);
+
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ Response error:', errorText);
         throw new Error('Failed to update tournament');
       }
       

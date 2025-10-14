@@ -547,18 +547,34 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
                               <div>
                                 <p className="text-xs text-poker-muted">Buy-in</p>
                                 <p className="font-bold text-poker-primary">
-                                  {formatCurrency(tournament.buyIn)}
+                                  {formatCurrency(Number(tournament.buyIn || tournament.buy_in || 0))}
                                 </p>
                               </div>
-                              <div>
-                                <p className="text-xs text-poker-muted">Garantált</p>
-                                <p className="font-bold text-poker-gold">
-                                  {formatCurrency(tournament.guarantee)}
-                                </p>
-                              </div>
+                              {(tournament.rebuyPrice || tournament.rebuy_price) && Number(tournament.rebuyPrice || tournament.rebuy_price) > 0 ? (
+                                <div className="text-center">
+                                  <p className="text-xs text-poker-muted">Rebuy</p>
+                                  <p className="font-bold text-poker-gold">
+                                    {formatCurrency(Number(tournament.rebuyPrice || tournament.rebuy_price))}
+                                  </p>
+                                  {(tournament.rebuyCount || tournament.rebuy_count) && (tournament.rebuyCount > 1 || tournament.rebuy_count > 1) && (
+                                    <p className="text-xs text-poker-accent">
+                                      {tournament.rebuyCount || tournament.rebuy_count}x
+                                    </p>
+                                  )}
+                                </div>
+                              ) : (tournament.addonPrice || tournament.addon_price) && Number(tournament.addonPrice || tournament.addon_price) > 0 ? (
+                                <div className="text-center">
+                                  <p className="text-xs text-poker-muted">Add-on</p>
+                                  <p className="font-bold text-poker-gold">
+                                    {formatCurrency(Number(tournament.addonPrice || tournament.addon_price))}
+                                  </p>
+                                </div>
+                              ) : (
+                                <div></div>
+                              )}
                               <div className="text-right">
                                 <p className="text-xs text-poker-muted">Időpont</p>
-                                <p className="font-bold text-poker-dark">{tournament.time}</p>
+                                <p className="font-bold text-poker-dark">{tournament.time || tournament.tournament_time}</p>
                               </div>
                             </div>
 

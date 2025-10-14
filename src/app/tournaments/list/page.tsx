@@ -85,11 +85,11 @@ export default function TournamentListPage() {
   const sortedTournaments = [...filteredTournaments].sort((a, b) => {
     switch (sortBy) {
       case 'date':
-        return new Date(a.date).getTime() - new Date(b.date).getTime();
+        return new Date(a.tournament_date || a.date).getTime() - new Date(b.tournament_date || b.date).getTime();
       case 'buyIn':
-        return a.buyIn - b.buyIn;
+        return (a.buy_in || a.buyIn) - (b.buy_in || b.buyIn);
       case 'guarantee':
-        return (b.guarantee || 0) - (a.guarantee || 0);
+        return (b.guarantee_amount || b.guarantee || 0) - (a.guarantee_amount || a.guarantee || 0);
       default:
         return 0;
     }
@@ -202,28 +202,23 @@ export default function TournamentListPage() {
                     </div>
 
                     {/* Tournament Details Grid */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
                       <div className="text-center p-3 bg-gray-50 rounded-lg">
                         <p className="text-xs text-black mb-1">Dátum</p>
-                        <p className="font-bold text-sm text-poker-dark">{formatDate(tournament.date)}</p>
-                        <p className="text-xs text-gray-600">{tournament.time}</p>
+                        <p className="font-bold text-sm text-poker-dark">{formatDate(tournament.tournament_date || tournament.date)}</p>
+                        <p className="text-xs text-gray-600">{tournament.tournament_time || tournament.time}</p>
                       </div>
                       <div className="text-center p-3 bg-gray-50 rounded-lg">
                         <p className="text-xs text-black mb-1">Buy-in</p>
-                        <p className="font-bold text-sm text-poker-primary">{formatCurrency(tournament.buyIn)}</p>
-                        {tournament.startingChips && (
-                          <p className="text-xs text-gray-600">{formatChips(tournament.startingChips)}</p>
+                        <p className="font-bold text-sm text-poker-primary">{formatCurrency(Number(tournament.buy_in || tournament.buyIn))}</p>
+                        {(tournament.starting_chips || tournament.startingChips) && (
+                          <p className="text-xs text-gray-600">{formatChips(tournament.starting_chips || tournament.startingChips)}</p>
                         )}
-                      </div>
-                      <div className="text-center p-3 bg-gray-50 rounded-lg">
-                        <p className="text-xs text-black mb-1">Díjalap</p>
-                        <p className="font-bold text-sm text-poker-gold">{formatCurrency(tournament.guarantee || 0)}</p>
-                        <p className="text-xs text-gray-600">garantált</p>
                       </div>
                       <div className="text-center p-3 bg-gray-50 rounded-lg">
                         <p className="text-xs text-black mb-1">Jelentkezők</p>
                         <p className="font-bold text-sm text-poker-dark">
-                          {tournament.currentPlayers || 0}/{tournament.maxPlayers || '∞'}
+                          {tournament.currentPlayers || tournament.current_players || 0}/{tournament.maxPlayers || tournament.max_players || '∞'}
                         </p>
                         <p className="text-xs text-gray-600">{tournament.structure}</p>
                       </div>
@@ -231,24 +226,26 @@ export default function TournamentListPage() {
 
                     {/* Additional Details */}
                     <div className="flex flex-wrap gap-2 mb-4">
-                      {tournament.rebuyPrice && (
+                      {(tournament.rebuy_price || tournament.rebuyPrice) && (
                         <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
-                          Rebuy: {formatCurrency(tournament.rebuyPrice)}
+                          Rebuy: {formatCurrency(Number(tournament.rebuy_price || tournament.rebuyPrice))} 
+                          {(tournament.rebuy_count || tournament.rebuyCount) && (tournament.rebuy_count > 1 || tournament.rebuyCount > 1) && ` (${tournament.rebuy_count || tournament.rebuyCount}x)`}
                         </span>
                       )}
-                      {tournament.addonPrice && (
+                      {(tournament.addon_price || tournament.addonPrice) && (
                         <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">
-                          Add-on: {formatCurrency(tournament.addonPrice)}
+                          Add-on: {formatCurrency(Number(tournament.addon_price || tournament.addonPrice))}
+                          {(tournament.addon_chips || tournament.addonChips) && ` (${formatChips(Number(tournament.addon_chips || tournament.addonChips))})`}
                         </span>
                       )}
-                      {tournament.blindStructure && (
+                      {(tournament.blindStructure || tournament.blind_structure) && (
                         <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
-                          {tournament.blindStructure}
+                          {tournament.blindStructure || tournament.blind_structure}
                         </span>
                       )}
-                      {tournament.lateRegistration && (
+                      {(tournament.lateRegistration || tournament.late_registration) && (
                         <span className="px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full">
-                          Utólagos nevezés: {tournament.lateRegistrationUntil}
+                          Utólagos nevezés: {tournament.lateRegistrationUntil || tournament.late_registration_until}
                         </span>
                       )}
                     </div>

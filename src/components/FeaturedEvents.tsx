@@ -14,6 +14,10 @@ interface Tournament {
   current_players: number;
   max_players: number | null;
   image_url?: string;
+  rebuy_count?: number;
+  rebuy_price?: string | number;
+  addon_price?: string | number;
+  addon_chips?: string | number;
 }
 
 export default function FeaturedEvents() {
@@ -103,11 +107,26 @@ export default function FeaturedEvents() {
                       {formatDate(tournament.tournament_date)} {formatTime(tournament.tournament_time)}
                     </div>
                     
-                    <div className="flex items-center text-white">
-                      <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
-                      </svg>
-                      Buy-in: {formatCurrency(Number(tournament.buy_in))}
+                    <div className="text-white">
+                      <div className="flex items-center mb-2">
+                        <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                        </svg>
+                        Buy-in: {formatCurrency(Number(tournament.buy_in))}
+                      </div>
+                      {(tournament.rebuy_price || tournament.addon_price) && (
+                        <div className="text-sm text-poker-accent ml-6 space-y-1">
+                          {tournament.rebuy_price && Number(tournament.rebuy_price) > 0 && (
+                            <div>
+                              Rebuy: {formatCurrency(Number(tournament.rebuy_price))}
+                              {tournament.rebuy_count && tournament.rebuy_count > 1 && ` (${tournament.rebuy_count}x)`}
+                            </div>
+                          )}
+                          {tournament.addon_price && Number(tournament.addon_price) > 0 && (
+                            <div>Add-on: {formatCurrency(Number(tournament.addon_price))}</div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
 
