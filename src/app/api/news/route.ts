@@ -12,9 +12,10 @@ export async function GET(request: Request) {
     let query = `
       SELECT id, title, 
              content, excerpt, 
-             image as image_url, 
-             publish_date,
-             status,
+             featured_image as image_url,
+             featured_image as image, 
+             created_at as publish_date,
+             CASE WHEN published = true THEN 'published' ELSE 'draft' END as status,
              featured, author, 
              created_at, updated_at
       FROM news 

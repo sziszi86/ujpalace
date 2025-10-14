@@ -200,21 +200,20 @@ export async function createTournament(data: any) {
 export async function updateTournament(id: number, data: any) {
   const query = `
     UPDATE tournaments 
-    SET title = $1, description = $2, category_id = $3, tournament_date = $4, tournament_time = $5, 
-        buy_in = $6, guarantee_amount = $7, structure = $8, max_players = $9, rules = $10, updated_at = CURRENT_TIMESTAMP
-    WHERE id = $11
+    SET title = $1, description = $2, date = $3, buyin_amount = $4, starting_chips = $5,
+        max_players = $6, status = $7, featured = $8, image_url = $9, updated_at = CURRENT_TIMESTAMP
+    WHERE id = $10
   `;
   const params = [
     data.title,
     data.description || null,
-    data.category_id || null,
-    data.tournament_date,
-    data.tournament_time,
-    data.buy_in,
-    data.guarantee_amount || null,
-    data.structure || null,
+    data.date || data.tournament_date,
+    data.buyin_amount || data.buy_in,
+    data.starting_chips,
     data.max_players || null,
-    data.rules || null,
+    data.status || 'upcoming',
+    data.featured || false,
+    data.image_url || null,
     id
   ];
   return executeUpdate(query, params);
