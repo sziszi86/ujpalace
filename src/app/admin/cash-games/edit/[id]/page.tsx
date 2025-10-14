@@ -144,7 +144,7 @@ export default function EditCashGame() {
         description: formData.description,
         schedule: formData.schedule,
         start_date: formData.startDate,
-        active: formData.active ? 1 : 0,
+        active: formData.active,
         image_url: formData.image || '',
         week_days: formData.weekDays
       };

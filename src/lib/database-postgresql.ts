@@ -321,8 +321,8 @@ export async function createCashGame(data: any) {
   
   const query = `
     INSERT INTO cash_games 
-    (name, game_type_id, stakes, small_blind, big_blind, min_buyin, max_buyin, description, schedule, active, week_days) 
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+    (name, game_type_id, stakes, small_blind, big_blind, min_buyin, max_buyin, description, schedule, active, week_days, image_url) 
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
   `;
   const params = [
     data.name,
@@ -335,7 +335,8 @@ export async function createCashGame(data: any) {
     data.description || null,
     data.schedule || null,
     data.active !== undefined ? data.active : true,
-    data.week_days ? JSON.stringify(data.week_days) : null
+    data.week_days ? JSON.stringify(data.week_days) : null,
+    data.image_url || null
   ];
   return executeInsert(query, params);
 }

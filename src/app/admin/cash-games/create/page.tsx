@@ -98,7 +98,7 @@ export default function CreateCashGame() {
         max_buy_in: formData.maxBuyIn ? parseInt(formData.maxBuyIn) : null,
         description: formData.description,
         schedule: formData.schedule,
-        active: formData.active ? 1 : 0,
+        active: formData.active,
         image_url: formData.image || '',
         week_days: formData.weekDays
       };
