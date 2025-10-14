@@ -15,7 +15,7 @@ export async function GET() {
         const levels = await executeQuery(`
           SELECT 
             id,
-            level,
+            level_number as "level",
             small_blind as "smallBlind",
             big_blind as "bigBlind",
             ante,
@@ -24,7 +24,7 @@ export async function GET() {
             break_duration_minutes as "breakDurationMinutes"
           FROM structure_levels 
           WHERE structure_id = $1 
-          ORDER BY level
+          ORDER BY level_number
         `, [structure.id]);
 
         return {
@@ -80,7 +80,7 @@ export async function POST(request: Request) {
       for (const levelData of levelInserts) {
         await executeQuery(
           `INSERT INTO structure_levels 
-           (structure_id, level, small_blind, big_blind, ante, duration_minutes, break_after, break_duration_minutes) 
+           (structure_id, level_number, small_blind, big_blind, ante, duration_minutes, break_after, break_duration_minutes) 
            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
           levelData
         );
