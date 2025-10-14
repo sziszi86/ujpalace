@@ -7,11 +7,8 @@
     "NEXTAUTH_URL": "https://palacepokerv1.vercel.app",
     "NEXTAUTH_SECRET": "vfzAA83gJej7JC59nI745GEShYjqO86epVcGhK7KyZA=",
     "JWT_SECRET": "LoveYniQ7HEekBm4wWQaH15EVRZa9vWHqvvw3TAmCfg=",
-    "DB_HOST": "tmseventyseven.tarhely.eu",
-    "DB_USER": "salamons_poker",
-    "DB_PASSWORD": "Subaru86iok200",
-    "DB_NAME": "salamons_palacepoker",
-    "DB_PORT": "3306"
+    "DATABASE_URL": "postgresql://postgres:omxEYrIRruGJUuVONphKwkmtIBfVsbrq@hopper.proxy.rlwy.net:55757/railway",
+    "NODE_ENV": "production"
   },
   "functions": {
     "src/app/api/**/*.ts": {
