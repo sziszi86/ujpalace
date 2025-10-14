@@ -14,6 +14,23 @@ export default function CashGamesPage() {
           </p>
         </div>
         
+        <div className="mb-6 text-center">
+          <div className="inline-flex rounded-lg bg-white shadow-lg p-1">
+            <a 
+              href="/cash-games" 
+              className="px-6 py-3 text-sm font-semibold text-white bg-poker-primary rounded-md shadow-lg"
+            >
+              📅 Naptár nézet
+            </a>
+            <a 
+              href="/cash-games/list" 
+              className="px-6 py-3 text-sm font-semibold text-poker-muted hover:text-poker-dark"
+            >
+              📋 Lista nézet
+            </a>
+          </div>
+        </div>
+        
         <TournamentCalendar showCashGames={true} onlyShowCashGames={true} />
       </div>
     </div>

@@ -43,22 +43,24 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
           // Only show active cash games
           const activeCashGames = cashGameData.filter((cashGame: CashGame) => Boolean(cashGame.active));
           
-          // Add test cash game to verify display logic
-          const testCashGame = {
-            id: 999,
-            name: 'Test Cash Game',
-            stakes: '100/200',
-            game: 'Texas Hold\'em',
-            minBuyIn: 20000,
-            maxBuyIn: 40000,
-            description: 'Test game',
-            schedule: 'Daily 18:00-06:00',
-            scheduledDates: ['2025-09-16', '2025-09-17', '2025-09-18'],
-            active: true,
-            featured: false
-          };
+          // Generate scheduled dates for active cash games (next 30 days)
+          const today = new Date();
+          const enhancedCashGames = activeCashGames.map((cashGame: any) => {
+            const scheduledDates = [];
+            for (let i = 0; i < 30; i++) {
+              const date = new Date(today);
+              date.setDate(today.getDate() + i);
+              scheduledDates.push(date.toISOString().split('T')[0]);
+            }
+            return {
+              ...cashGame,
+              scheduledDates,
+              minBuyIn: cashGame.min_buy_in || cashGame.minBuyIn,
+              maxBuyIn: cashGame.max_buy_in || cashGame.maxBuyIn
+            };
+          });
           
-          setCashGames([...activeCashGames, testCashGame as any]);
+          setCashGames(enhancedCashGames);
         }
       } catch (error) {
         console.error('Error fetching data:', error);

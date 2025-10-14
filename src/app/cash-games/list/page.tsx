@@ -8,7 +8,7 @@ import { formatCurrency } from '@/utils/formatters';
 export default function CashGameListPage() {
   const [cashGames, setCashGames] = useState<CashGame[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filterActive, setFilterActive] = useState<string>('all');
+  const [filterActive, setFilterActive] = useState<string>('active');
   const [sortBy, setSortBy] = useState<string>('stakes');
 
   useEffect(() => {
@@ -68,6 +68,19 @@ export default function CashGameListPage() {
   const filteredCashGames = cashGames.filter(cashGame => {
     if (filterActive === 'all') return true;
     return filterActive === 'active' ? cashGame.active : !cashGame.active;
+  });
+
+  const sortedCashGames = [...filteredCashGames].sort((a, b) => {
+    switch (sortBy) {
+      case 'stakes':
+        return a.stakes.localeCompare(b.stakes);
+      case 'game':
+        return a.game.localeCompare(b.game);
+      case 'minBuyIn':
+        return a.minBuyIn - b.minBuyIn;
+      default:
+        return 0;
+    }
   });
 
   return (
@@ -132,7 +145,7 @@ export default function CashGameListPage() {
         {/* Cash Game List */}
         {!loading && (
           <div className="space-y-4">
-            {filteredCashGames.map((cashGame) => (
+            {sortedCashGames.map((cashGame) => (
             <div key={cashGame.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
               <div className="flex flex-col lg:flex-row">
                 {/* Game Type Header */}
@@ -156,65 +169,73 @@ export default function CashGameListPage() {
                 <div className="lg:w-3/4 p-6">
                   <div className="flex flex-col lg:flex-row justify-between items-start mb-4">
                     <div className="mb-4 lg:mb-0">
-                      <h2 className="text-2xl font-bold text-poker-dark mb-2">{cashGame.name}</h2>
+                      <div className="flex items-center mb-2">
+                        <h2 className="text-2xl font-bold text-poker-dark mr-3">{cashGame.name}</h2>
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${cashGame.active ? 'bg-green-500 text-white' : 'bg-gray-500 text-white'}`}>
+                          {cashGame.active ? 'Aktív' : 'Inaktív'}
+                        </span>
+                        {cashGame.featured && (
+                          <span className="ml-2 px-3 py-1 bg-poker-red text-white text-xs font-bold rounded-full">
+                            ⭐ Kiemelt
+                          </span>
+                        )}
+                      </div>
                       <p className="text-gray-600 mb-3">{cashGame.description}</p>
                     </div>
                   </div>
 
                   {/* Cash Game Details Grid */}
-                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                     <div className="text-center p-3 bg-gray-50 rounded-lg">
-                      <p className="text-xs text-gray-500 mb-1">Kategória</p>
-                      <p className="font-bold text-sm text-poker-dark">Cash Game</p>
+                      <p className="text-xs text-black mb-1">Játék típus</p>
+                      <p className="font-bold text-sm text-poker-dark">{cashGame.game}</p>
                     </div>
                     <div className="text-center p-3 bg-gray-50 rounded-lg">
-                      <p className="text-xs text-gray-500 mb-1">Tétek</p>
+                      <p className="text-xs text-black mb-1">Tétek</p>
                       <p className="font-bold text-sm text-poker-primary">{cashGame.stakes}</p>
                     </div>
                     <div className="text-center p-3 bg-gray-50 rounded-lg">
-                      <p className="text-xs text-gray-500 mb-1">Min. beszálló</p>
+                      <p className="text-xs text-black mb-1">Min. beszálló</p>
                       <p className="font-bold text-sm text-poker-green">{formatCurrency(cashGame.minBuyIn)}</p>
                     </div>
                     <div className="text-center p-3 bg-gray-50 rounded-lg">
-                      <p className="text-xs text-gray-500 mb-1">Kezdési dátum</p>
-                      <p className="font-bold text-sm text-poker-dark">
-                        {(cashGame as any).startDate ? new Date((cashGame as any).startDate).toLocaleDateString('hu-HU') : 'Nincs megadva'}
-                      </p>
-                    </div>
-                    <div className="text-center p-3 bg-gray-50 rounded-lg">
-                      <p className="text-xs text-gray-500 mb-1">Menetrend</p>
-                      <p className="font-bold text-sm text-poker-dark">{cashGame.schedule}</p>
+                      <p className="text-xs text-black mb-1">Max. beszálló</p>
+                      <p className="font-bold text-sm text-poker-gold">{formatCurrency(cashGame.maxBuyIn)}</p>
                     </div>
                   </div>
 
-                  {/* Game Features */}
-                  <div className="flex flex-wrap gap-2 mb-6">
-                    <span className="px-3 py-1 bg-green-100 text-green-800 text-xs rounded-full font-medium">
-                      ✓ Professzionális környezet
-                    </span>
-                    <span className="px-3 py-1 bg-blue-100 text-blue-800 text-xs rounded-full font-medium">
+                  {/* Additional Details */}
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
                       ✓ Élő dealer
                     </span>
-                    <span className="px-3 py-1 bg-purple-100 text-purple-800 text-xs rounded-full font-medium">
+                    <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                      ✓ Professzionális környezet
+                    </span>
+                    <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">
                       ✓ Ingyenes italszervíz
                     </span>
-                    <span className="px-3 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full font-medium">
-                      Max: {formatCurrency(cashGame.maxBuyIn)}
+                    <span className="px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full">
+                      Menetrend: {cashGame.schedule}
                     </span>
+                    {cashGame.featured && (
+                      <span className="px-2 py-1 bg-poker-red text-white text-xs rounded-full">
+                        ⭐ Kiemelt
+                      </span>
+                    )}
                   </div>
 
-                  {/* Action Buttons */}
-                  <div className="flex flex-col sm:flex-row gap-3">
+                  {/* Action Button */}
+                  <div className="flex flex-col sm:flex-row gap-3 justify-end">
                     <a 
                       href="tel:+36309715832"
-                      className="flex-1 btn-outline text-center"
+                      className="btn-outline text-center"
                     >
                       <span className="mr-2">📞</span>
                       <span>Helyfoglalás</span>
                     </a>
-                    
-                    <Link href={`/cash-games/${cashGame.id}`} className="flex-1">
-                      <button className="w-full btn-primary text-center">
+                    <Link href={`/cash-games/${cashGame.id}`}>
+                      <button className="w-full btn-primary px-6 py-2 text-sm">
                         <span className="mr-2">📋</span>
                         <span>Részletek</span>
                       </button>
@@ -227,7 +248,7 @@ export default function CashGameListPage() {
           </div>
         )}
 
-        {!loading && filteredCashGames.length === 0 && (
+        {!loading && sortedCashGames.length === 0 && (
           <div className="text-center py-12">
             <div className="text-6xl mb-4">♠</div>
             <h3 className="text-xl font-semibold text-gray-700 mb-2">Nincs cash game asztal a kiválasztott szűrővel</h3>
