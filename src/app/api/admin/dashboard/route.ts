@@ -117,13 +117,35 @@ export async function GET() {
       console.warn('Could not fetch player stats:', error);
     }
 
+    // Get current visitor count
+    let currentVisitors = 0;
+    try {
+      // Clean up expired visitors first
+      await executeQuery(`
+        DELETE FROM active_visitors 
+        WHERE expires_at < CURRENT_TIMESTAMP
+      `);
+
+      // Get current visitor count
+      const [visitorCount] = await executeQuery(`
+        SELECT COUNT(*) as count 
+        FROM active_visitors 
+        WHERE expires_at > CURRENT_TIMESTAMP
+      `);
+      
+      currentVisitors = parseInt(visitorCount?.count || '0');
+    } catch (error) {
+      console.warn('Could not fetch visitor count (table might not exist yet):', error);
+    }
+
     // System status
     const systemStatus = {
       database: {
         status: 'online'
       },
       website: {
-        uptime: '99.9%'
+        uptime: '99.9%',
+        currentVisitors
       },
       backup: {
         lastBackup: new Date().toISOString().split('T')[0]
