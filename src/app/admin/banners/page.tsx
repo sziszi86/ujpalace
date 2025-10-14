@@ -9,10 +9,11 @@ interface Banner {
   title: string;
   description: string;
   image_url: string;
-  active: number;
-  visible_from: string;
-  visible_until: string;
-  order_position: number;
+  link_url: string;
+  active: boolean;
+  order_index: number;
+  created_at: string;
+  updated_at: string;
 }
 
 export default function BannersAdmin() {
@@ -130,10 +131,9 @@ export default function BannersAdmin() {
           title: banner.title,
           description: banner.description,
           image_url: banner.image_url,
-          active: banner.active === 1 ? 0 : 1,
-          visible_from: banner.visible_from,
-          visible_until: banner.visible_until,
-          order_position: banner.order_position,
+          active: !banner.active,
+          url: banner.link_url,
+          order_index: banner.order_index,
         }),
       });
 
@@ -167,9 +167,8 @@ export default function BannersAdmin() {
           description: banner.description,
           image_url: banner.image_url,
           active: banner.active,
-          visible_from: banner.visible_from,
-          visible_until: banner.visible_until,
-          order_position: Math.max(...banners.map(b => b.order_position)) + 1,
+          url: banner.link_url,
+          order_index: Math.max(...banners.map(b => b.order_index)) + 1,
         }),
       });
 
@@ -237,7 +236,7 @@ export default function BannersAdmin() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Aktív</p>
-              <p className="text-2xl font-bold text-gray-900">{banners.filter(b => b.active === 1).length}</p>
+              <p className="text-2xl font-bold text-gray-900">{banners.filter(b => b.active === true).length}</p>
             </div>
           </div>
         </div>
@@ -251,7 +250,7 @@ export default function BannersAdmin() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Inaktív</p>
-              <p className="text-2xl font-bold text-gray-900">{banners.filter(b => b.active === 0).length}</p>
+              <p className="text-2xl font-bold text-gray-900">{banners.filter(b => b.active === false).length}</p>
             </div>
           </div>
         </div>
@@ -285,7 +284,7 @@ export default function BannersAdmin() {
         ) : (
           <div className="divide-y divide-gray-200">
             {banners
-              .sort((a, b) => a.order_position - b.order_position)
+              .sort((a, b) => a.order_index - b.order_index)
               .map((banner) => (
               <div key={banner.id} className="p-6 hover:bg-gray-50">
                 <div className="flex items-center space-x-4">
@@ -317,8 +316,8 @@ export default function BannersAdmin() {
                           {banner.description}
                         </p>
                         <div className="flex items-center text-xs text-gray-400 mt-2 space-x-4">
-                          <span>Sorrend: {banner.order_position}</span>
-                          <span>{banner.visible_from} - {banner.visible_until || 'Nincs határidő'}</span>
+                          <span>Sorrend: {banner.order_index}</span>
+                          <span>Létrehozva: {new Date(banner.created_at).toLocaleDateString('hu-HU')}</span>
                         </div>
                       </div>
                     </div>
@@ -329,12 +328,12 @@ export default function BannersAdmin() {
                     <button
                       onClick={() => handleToggleActive(banner.id)}
                       className={`px-3 py-1 text-xs font-medium rounded-full ${
-                        banner.active === 1
+                        banner.active === true
                           ? 'bg-green-100 text-green-800 hover:bg-green-200'
                           : 'bg-red-100 text-red-800 hover:bg-red-200'
                       }`}
                     >
-                      {banner.active === 1 ? 'Aktív' : 'Inaktív'}
+                      {banner.active === true ? 'Aktív' : 'Inaktív'}
                     </button>
                   </div>
 

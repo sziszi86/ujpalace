@@ -88,8 +88,8 @@ export default function Banner() {
             active: banner.active,
             visibleFrom: banner.visible_from,
             visibleUntil: banner.visible_until,
-            order: banner.order_position,
-            url: banner.url,
+            order: banner.order_index,
+            url: banner.link_url,
             customUrl: banner.custom_url,
             openInNewTab: banner.open_in_new_tab
           })).sort((a: BannerData, b: BannerData) => a.order - b.order);

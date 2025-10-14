@@ -77,23 +77,23 @@ export default function EditBanner() {
           
           if (banner) {
             console.log('Banner loaded from database:', banner);
-            console.log('Banner image URL:', banner.image);
+            console.log('Banner image URL:', banner.image_url);
             
             // Initialize ref with loaded image
-            currentImageUrlRef.current = banner.image;
+            currentImageUrlRef.current = banner.image_url || '';
             
             setFormData({
-              title: banner.title,
-              description: banner.description,
-              image: banner.image,
-              active: banner.active,
-              visibleFrom: banner.visibleFrom,
-              visibleUntil: banner.visibleUntil,
-              order: banner.order.toString(),
-              url: banner.url || '',
-              customUrl: banner.customUrl || '',
-              openInNewTab: banner.openInNewTab || false,
-              hasExpiryDate: banner.hasExpiryDate || false
+              title: banner.title || '',
+              description: banner.description || '',
+              image: banner.image_url || '',
+              active: banner.active || false,
+              visibleFrom: '',
+              visibleUntil: '',
+              order: banner.order_index?.toString() || '1',
+              url: banner.link_url || '',
+              customUrl: '',
+              openInNewTab: false,
+              hasExpiryDate: false
             });
           } else {
             showAlert('Banner nem található!', 'error');
@@ -181,7 +181,7 @@ export default function EditBanner() {
           title: formData.title,
           description: formData.description,
           image_url: finalImageUrl,
-          url: formData.customUrl || null,
+          url: formData.customUrl || formData.url || null,
           order_index: parseInt(formData.order),
           active: formData.active,
         }),

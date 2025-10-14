@@ -130,15 +130,18 @@ export default function AdminPlayersPage() {
     if (!selectedPlayer || !transactionAmount) return;
 
     try {
+      const token = localStorage.getItem('authToken');
       const response = await fetch('/api/admin/transactions', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({
           player_id: selectedPlayer.id,
           transaction_type: transactionType,
           amount: parseFloat(transactionAmount),
-          transaction_date: transactionDate,
-          notes: transactionNotes || null
+          description: transactionNotes || null
         })
       });
 

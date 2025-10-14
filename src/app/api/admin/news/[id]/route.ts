@@ -28,7 +28,9 @@ export async function GET(
     const article = await executeQuerySingle(`
       SELECT 
         n.*,
-        n.publish_date,
+        n.featured_image as image_url,
+        CASE WHEN n.published THEN 'published' ELSE 'draft' END as status,
+        n.created_at as publish_date,
         n.created_at,
         n.updated_at
       FROM news n
@@ -96,17 +98,16 @@ export async function PUT(
 
     const affectedRows = await executeUpdate(`
       UPDATE news 
-      SET title = $1, content = $2, excerpt = $3, image_url = $4, author = $5,
-          publish_date = $6, status = $7, featured = $8, updated_at = CURRENT_TIMESTAMP
-      WHERE id = $9
+      SET title = $1, content = $2, excerpt = $3, featured_image = $4, author = $5,
+          published = $6, featured = $7, updated_at = CURRENT_TIMESTAMP
+      WHERE id = $8
     `, [
       title,
       content,
       excerpt || null,
       image_url || null,
       author || 'Palace Poker',
-      publish_date,
-      status || 'draft',
+      status === 'published' ? true : false,
       featured ? true : false,
       newsId
     ]);
