@@ -115,30 +115,43 @@ export default function EditTournamentPage() {
         
         if (tournament) {
           // Convert API format to form format
+          // Extract date and time from tournament_date
+          let dateValue = '';
+          let timeValue = '20:00';
+          
+          if (tournament.tournament_date || tournament.date) {
+            const fullDate = new Date(tournament.tournament_date || tournament.date);
+            dateValue = fullDate.toISOString().split('T')[0];
+            // Get hours and minutes
+            const hours = fullDate.getHours().toString().padStart(2, '0');
+            const minutes = fullDate.getMinutes().toString().padStart(2, '0');
+            timeValue = `${hours}:${minutes}`;
+          }
+          
           setFormData({
             title: tournament.title || '',
             description: tournament.description || '',
-            longDescription: tournament.longDescription || '',
-            date: tournament.date || '',
-            time: tournament.time || '20:00',
-            buyIn: tournament.buyIn?.toString() || '',
-            rebuyPrice: tournament.rebuyPrice?.toString() || '',
-            rebuyChips: tournament.rebuyChips?.toString() || '',
-            addonPrice: tournament.addonPrice?.toString() || '',
-            addonChips: tournament.addonChips?.toString() || '',
-            rebuyCount: '1',
-            rebuyAmounts: '',
+            longDescription: tournament.long_description || tournament.longDescription || '',
+            date: dateValue,
+            time: timeValue,
+            buyIn: (tournament.buyin_amount || tournament.buyIn || tournament.buy_in || '').toString(),
+            rebuyPrice: (tournament.rebuy_price || tournament.rebuyPrice || '').toString(),
+            rebuyChips: (tournament.rebuy_chips || tournament.rebuyChips || '').toString(),
+            addonPrice: (tournament.addon_price || tournament.addonPrice || '').toString(),
+            addonChips: (tournament.addon_chips || tournament.addonChips || '').toString(),
+            rebuyCount: (tournament.rebuy_count || tournament.rebuyCount || '1').toString(),
+            rebuyAmounts: tournament.rebuy_amounts || tournament.rebuyAmounts || '',
             structure: tournament.structure || 'Freeze-out',
             category: tournament.category || '',
             venue: tournament.venue || 'Palace Poker Szombathely',
-            startingChips: tournament.startingChips?.toString() || '',
-            imageUrl: tournament.image || '',
-            specialNotes: tournament.specialNotes || '',
-            visibleFrom: tournament.visibleFrom || new Date().toISOString().split('T')[0],
-            visibleUntil: tournament.visibleUntil || tournament.date || '',
+            startingChips: (tournament.starting_chips || tournament.startingChips || '').toString(),
+            imageUrl: tournament.image_url || tournament.image || tournament.imageUrl || '',
+            specialNotes: tournament.special_notes || tournament.specialNotes || '',
+            visibleFrom: tournament.visible_from || tournament.visibleFrom || new Date().toISOString().split('T')[0],
+            visibleUntil: tournament.visible_until || tournament.visibleUntil || dateValue || '',
             featured: tournament.featured || false,
             status: tournament.status || 'upcoming',
-            guarantee: tournament.guarantee?.toString() || '',
+            guarantee: (tournament.guarantee || '').toString(),
           });
         } else {
           showAlert('Verseny nem található!', 'error');
@@ -211,32 +224,47 @@ export default function EditTournamentPage() {
 
     try {
       // Convert form data to API format
+      // Combine date and time into a proper timestamp
+      const tournamentDateTime = formData.date && formData.time 
+        ? `${formData.date} ${formData.time}:00` 
+        : formData.date;
+      
       const tournamentData = {
         id: parseInt(params.id as string),
         title: formData.title,
         description: formData.description,
-        longDescription: formData.longDescription,
-        date: formData.date,
-        time: formData.time,
-        buyIn: parseInt(formData.buyIn) || 0,
-        rebuyPrice: parseInt(formData.rebuyPrice) || 0,
-        rebuyChips: parseInt(formData.rebuyChips) || 0,
-        addonPrice: parseInt(formData.addonPrice) || 0,
-        addonChips: parseInt(formData.addonChips) || 0,
+        long_description: formData.longDescription,
+        date: tournamentDateTime,
+        tournament_date: tournamentDateTime,
+        tournament_time: formData.time,
+        buyin_amount: parseInt(formData.buyIn) || 0,
+        buy_in: parseInt(formData.buyIn) || 0,
+        rebuy_price: parseInt(formData.rebuyPrice) || 0,
+        rebuy_chips: parseInt(formData.rebuyChips) || 0,
+        addon_price: parseInt(formData.addonPrice) || 0,
+        addon_chips: parseInt(formData.addonChips) || 0,
         structure: formData.structure,
         category: formData.category,
         venue: formData.venue,
+        starting_chips: parseInt(formData.startingChips) || 0,
         startingChips: parseInt(formData.startingChips) || 0,
+        image_url: formData.imageUrl,
         image: formData.imageUrl,
-        specialNotes: formData.specialNotes,
+        special_notes: formData.specialNotes,
         featured: formData.featured,
         status: formData.status,
+        max_players: 80,
         maxPlayers: 80,
+        current_players: 0,
         currentPlayers: 0,
         guarantee: parseInt(formData.guarantee) || 0,
+        late_registration: false,
         lateRegistration: false,
+        blind_structure: '20 perc szintek',
         blindStructure: '20 perc szintek',
+        contact_phone: '+36 30 971 5832',
         contactPhone: '+36 30 971 5832',
+        contact_email: 'tournaments@palace-poker.hu',
         contactEmail: 'tournaments@palace-poker.hu',
       };
 
