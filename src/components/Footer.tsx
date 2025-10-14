@@ -131,6 +131,20 @@ export default function Footer() {
         </div>
       </div>
 
+      {/* Company Details Bar */}
+      <div className="border-t border-gray-700 bg-poker-secondary/20">
+        <div className="container mx-auto px-4 py-4">
+          <div className="text-center space-y-2">
+            <p className="text-white font-semibold text-sm">
+              ÜZEMELTETŐ GAZDASÁGI TÁRSASÁG: PANNON PÓKER KFT, 9700 SZOMBATHELY SEMMELWEIS U. 2.
+            </p>
+            <p className="text-poker-gold font-medium text-sm">
+              Kártyaterem hivatalos neve: All-In Póker Club
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Bottom Bar */}
       <div className="border-t border-gray-700">
         <div className="container mx-auto px-4 py-4">
@@ -150,7 +164,7 @@ export default function Footer() {
             </div>
             <div className="flex items-center space-x-2">
               <span className="text-gray-400 text-sm">Powered by</span>
-              <span className="text-poker-gold font-semibold text-sm">Next.js</span>
+              <span className="text-poker-gold font-semibold text-sm">Salamon Szilard</span>
             </div>
           </div>
         </div>

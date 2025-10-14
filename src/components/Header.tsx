@@ -47,12 +47,14 @@ export default function Header() {
               <span className="font-medium text-white/95">📍 9700 Szombathely, Semmelweis u. 2.</span>
             </div>
             <div className="flex items-center space-x-2 animate-fade-in" style={{animationDelay: '0.1s'}}>
-              <span className="w-2 h-2 bg-white rounded-full animate-pulse opacity-80"></span>
-              <span className="font-medium text-white/95">📞 +36 30 971 5832</span>
+              <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+              <span className="font-bold text-white text-lg bg-gradient-to-r from-green-200 to-white bg-clip-text text-transparent">
+                📞 PALACE POKER: +36 30 971 5832
+              </span>
             </div>
             <div className="flex items-center space-x-2 animate-fade-in" style={{animationDelay: '0.2s'}}>
               <span className="w-2 h-2 bg-orange-300 rounded-full animate-pulse"></span>
-              <span className="font-medium text-white/95">⚠️ 18+ | Játékosvédelem: 
+              <span className="font-medium text-white/95">⚠️ Szerencsejátékban csak 18 éven felüliek vehetnek részt! A túlzásba vitt szerencsejáték ártalmas, függőséget okozhat! Kérje bejegyzését a játékosvédelmi nyilvántartásba! | Játékosvédelem: 
                 <Link href="/jatekosvedelm" className="ml-1 text-poker-accent hover:text-white underline transition-colors">
                   36 80 205 352
                 </Link>
