@@ -271,8 +271,8 @@ export async function getAllCashGames(activeOnly: boolean = true) {
            COALESCE(cgt.name, 'Texas Hold''em') as game_type_name, 
            null as game_type_icon,
            cg.small_blind || '/' || cg.big_blind as stakes,
-           cg.min_buyin as min_buy_in,
-           cg.max_buyin as max_buy_in,
+           cg.min_buyin,
+           cg.max_buyin,
            COALESCE(cg.name, 'Cash Game') as name,
            cg.description,
            cg.schedule
@@ -295,8 +295,8 @@ export async function getCashGameById(id: number) {
            COALESCE(cgt.name, 'Texas Hold''em') as game_type_name, 
            null as game_type_icon,
            cg.small_blind || '/' || cg.big_blind as stakes,
-           cg.min_buyin as min_buy_in,
-           cg.max_buyin as max_buy_in
+           cg.min_buyin,
+           cg.max_buyin
     FROM cash_games cg 
     LEFT JOIN cash_game_types cgt ON cg.game_type_id = cgt.id
     WHERE cg.id = $1
@@ -307,7 +307,7 @@ export async function getCashGameById(id: number) {
 export async function createCashGame(data: any) {
   const query = `
     INSERT INTO cash_games 
-    (name, game_type_id, stakes, min_buy_in, max_buy_in, description, schedule, active) 
+    (name, game_type_id, stakes, min_buyin, max_buyin, description, schedule, active) 
     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
   `;
   const params = [
@@ -326,7 +326,7 @@ export async function createCashGame(data: any) {
 export async function updateCashGame(id: number, data: any) {
   const query = `
     UPDATE cash_games 
-    SET name = $1, game_type_id = $2, stakes = $3, min_buy_in = $4, max_buy_in = $5, 
+    SET name = $1, game_type_id = $2, stakes = $3, min_buyin = $4, max_buyin = $5, 
         description = $6, schedule = $7, active = $8, updated_at = CURRENT_TIMESTAMP
     WHERE id = $9
   `;

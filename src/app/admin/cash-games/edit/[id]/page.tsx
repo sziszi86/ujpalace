@@ -62,8 +62,8 @@ export default function EditCashGame() {
           setFormData({
             name: cashGameData.name || '',
             stakes: cashGameData.stakes || '',
-            minBuyIn: cashGameData.minBuyIn?.toString() || '',
-            maxBuyIn: cashGameData.maxBuyIn?.toString() || '',
+            minBuyIn: cashGameData.min_buyin?.toString() || '',
+            maxBuyIn: cashGameData.max_buyin?.toString() || '',
             schedule: cashGameData.schedule || '',
             active: cashGameData.active !== undefined ? cashGameData.active : true,
             description: cashGameData.description || '',
@@ -189,8 +189,8 @@ export default function EditCashGame() {
         id: parseInt(cashGameId),
         name: formData.name,
         stakes: formData.stakes,
-        minBuyIn: parseInt(formData.minBuyIn) || 0,
-        maxBuyIn: parseInt(formData.maxBuyIn) || 0,
+        min_buy_in: formData.minBuyIn ? parseInt(formData.minBuyIn) : null,
+        max_buy_in: formData.maxBuyIn ? parseInt(formData.maxBuyIn) : null,
         schedule: formData.schedule,
         active: formData.active,
         description: formData.description,
@@ -298,7 +298,7 @@ export default function EditCashGame() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Min. buy-in (Ft) *
+                Min. buy-in (Ft)
               </label>
               <input
                 type="number"
@@ -306,14 +306,13 @@ export default function EditCashGame() {
                 value={formData.minBuyIn}
                 onChange={handleInputChange}
                 className="admin-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-poker-green focus:border-transparent"
-                required
                 placeholder="20000"
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Max. buy-in (Ft) *
+                Max. buy-in (Ft)
               </label>
               <input
                 type="number"
@@ -321,7 +320,6 @@ export default function EditCashGame() {
                 value={formData.maxBuyIn}
                 onChange={handleInputChange}
                 className="admin-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-poker-green focus:border-transparent"
-                required
                 placeholder="40000"
               />
             </div>

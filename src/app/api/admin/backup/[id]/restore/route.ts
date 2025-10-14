@@ -9,9 +9,10 @@ const execAsync = promisify(exec);
 const BACKUP_DIR = path.join(process.cwd(), 'backups');
 
 // Restore backup
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const backupId = params.id;
+    const resolvedParams = await params;
+    const backupId = resolvedParams.id;
     
     if (!backupId) {
       return NextResponse.json(

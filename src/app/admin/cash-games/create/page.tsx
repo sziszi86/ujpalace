@@ -75,8 +75,8 @@ export default function CreateCashGame() {
         name: formData.name,
         stakes: formData.stakes,
         game_type_id: 1, // Default game type ID
-        min_buy_in: parseInt(formData.minBuyIn) || 0,
-        max_buy_in: parseInt(formData.maxBuyIn) || 0,
+        min_buy_in: formData.minBuyIn ? parseInt(formData.minBuyIn) : null,
+        max_buy_in: formData.maxBuyIn ? parseInt(formData.maxBuyIn) : null,
         description: formData.description,
         schedule: formData.schedule,
         start_date: formData.startDate,
@@ -187,7 +187,7 @@ export default function CreateCashGame() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Min. buy-in (Ft) *
+                Min. buy-in (Ft)
               </label>
               <input
                 type="number"
@@ -195,14 +195,13 @@ export default function CreateCashGame() {
                 value={formData.minBuyIn}
                 onChange={handleInputChange}
                 className="admin-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-poker-green focus:border-transparent"
-                required
                 placeholder="20000"
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Max. buy-in (Ft) *
+                Max. buy-in (Ft)
               </label>
               <input
                 type="number"
@@ -210,7 +209,6 @@ export default function CreateCashGame() {
                 value={formData.maxBuyIn}
                 onChange={handleInputChange}
                 className="admin-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-poker-green focus:border-transparent"
-                required
                 placeholder="40000"
               />
             </div>
