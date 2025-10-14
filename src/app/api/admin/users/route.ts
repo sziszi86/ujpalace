@@ -51,7 +51,7 @@ export async function POST(request: Request) {
 
     // Check if user already exists
     const existingUser = await executeQuery(`
-      SELECT id FROM admin_users WHERE username = $1 OR email = $1
+      SELECT id FROM admin_users WHERE username = $1 OR email = $2
     `, [username, email]);
 
     if (existingUser.length > 0) {
@@ -66,7 +66,7 @@ export async function POST(request: Request) {
 
     const result = await executeInsert(`
       INSERT INTO admin_users (username, email, password_hash)
-      VALUES (?, ?, ?)
+      VALUES ($1, $2, $3)
     `, [username, email, passwordHash]);
 
     return NextResponse.json({
