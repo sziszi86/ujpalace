@@ -84,13 +84,13 @@ export default function CookieBanner({ onAccept, onDecline }: CookieBannerProps)
 
             {/* Message */}
             <div className="text-center mb-8">
-              <p className="text-poker-muted leading-relaxed mb-4">
+              <p className="text-black leading-relaxed mb-4">
                 A Palace Poker weboldalunk sütiket használ a legjobb felhasználói élmény biztosítása érdekében. 
                 A sütik segítenek személyre szabni a tartalmat és elemezni a forgalmat.
               </p>
               <div className="bg-poker-light/50 rounded-xl p-4 border border-poker-primary/10">
-                <p className="text-sm text-poker-muted">
-                  <strong className="text-poker-dark">Fontos:</strong> Csak a működéshez szükséges sütiket használjuk. 
+                <p className="text-sm text-black">
+                  <strong className="text-black">Fontos:</strong> Csak a működéshez szükséges sütiket használjuk. 
                   Személyes adatokat nem gyűjtünk harmadik félnek.
                 </p>
               </div>
@@ -125,7 +125,7 @@ export default function CookieBanner({ onAccept, onDecline }: CookieBannerProps)
 
             {/* Footer Info */}
             <div className="mt-6 pt-6 border-t border-poker-light/50">
-              <p className="text-xs text-poker-muted text-center">
+              <p className="text-xs text-black text-center">
                 További információért olvassa el{' '}
                 <a href="/privacy" className="text-poker-primary hover:text-poker-secondary transition-colors underline">
                   Adatvédelmi szabályzatunkat

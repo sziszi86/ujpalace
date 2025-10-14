@@ -5,7 +5,7 @@ export default function Footer() {
     <footer className="bg-poker-black text-white">
       {/* Main Footer Content */}
       <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {/* Company Info */}
           <div>
             <div className="flex items-center mb-4">
@@ -50,19 +50,6 @@ export default function Footer() {
               <li><Link href="/about" className="text-gray-300 hover:text-white transition-colors">Rólunk</Link></li>
               <li><Link href="/gallery" className="text-gray-300 hover:text-white transition-colors">Galéria</Link></li>
               <li><Link href="/contact" className="text-gray-300 hover:text-white transition-colors">Kapcsolat</Link></li>
-            </ul>
-          </div>
-
-          {/* Services */}
-          <div>
-            <h4 className="text-lg font-semibold mb-4 text-poker-gold">Szolgáltatások</h4>
-            <ul className="space-y-3">
-              <li><span className="text-gray-300">Texas Hold'em</span></li>
-              <li><span className="text-gray-300">Pot Limit Omaha</span></li>
-              <li><span className="text-gray-300">Tornament Poker</span></li>
-              <li><span className="text-gray-300">Cash Game</span></li>
-              <li><span className="text-gray-300">Private Parties</span></li>
-              <li><span className="text-gray-300">Poker Oktatás</span></li>
             </ul>
           </div>
 
