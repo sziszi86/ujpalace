@@ -198,6 +198,9 @@ export async function createTournament(data: any) {
 }
 
 export async function updateTournament(id: number, data: any) {
+  console.log('updateTournament called with ID:', id);
+  console.log('updateTournament data:', JSON.stringify(data, null, 2));
+  
   const query = `
     UPDATE tournaments 
     SET title = $1, description = $2, date = $3, buyin_amount = $4, starting_chips = $5,
@@ -231,7 +234,18 @@ export async function updateTournament(id: number, data: any) {
     data.image_url || data.imageUrl || null,
     id
   ];
-  return executeUpdate(query, params);
+  
+  console.log('updateTournament params:', params);
+  console.log('updateTournament params count:', params.length);
+  
+  try {
+    const result = await executeUpdate(query, params);
+    console.log('updateTournament result:', result);
+    return result;
+  } catch (error) {
+    console.error('updateTournament error:', error);
+    throw error;
+  }
 }
 
 export async function deleteTournament(id: number) {
