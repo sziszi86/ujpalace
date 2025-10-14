@@ -45,7 +45,7 @@ export default function BannerImageUploader({
 
         if (response.ok) {
           const result = await response.json();
-          const imageUrl = `/images/banners/${result.data.filename}`;
+          const imageUrl = `/api/image/${result.data.filename}`;
           
           // Update with the final image URL
           onImageChange?.(file, imageUrl);
