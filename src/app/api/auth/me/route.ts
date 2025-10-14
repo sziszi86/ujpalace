@@ -15,7 +15,7 @@ export async function GET(request: Request) {
     const token = authHeader.substring(7);
     
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'default-secret-key') as any;
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || process.env.NEXTAUTH_SECRET || 'palace-poker-secret-key-2025') as any;
       
       // Teszt admin esetén
       if (decoded.email === 'admin@palace-poker.hu') {

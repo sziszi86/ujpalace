@@ -6,26 +6,21 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const limit = searchParams.get('limit');
-    const published = searchParams.get('status') === 'published' ? true : false;
+    const status = searchParams.get('status') || 'published';
     const featured = searchParams.get('featured');
 
     let query = `
       SELECT id, title, 
-             LOWER(REPLACE(title, ' ', '-')) as slug,
              content, excerpt, 
-             featured_image as image, 
-             created_at as publish_date,
-             CASE WHEN published = true THEN 'published' ELSE 'draft' END as status,
-             'general' as category, 
-             '' as tags, 
+             image as image_url, 
+             publish_date,
+             status,
              featured, author, 
-             CEIL(LENGTH(content) / 1000.0) as read_time,
              created_at, updated_at
       FROM news 
       WHERE published = $1
     `;
-    const params: any[] = [published];
-    let paramIndex = 2;
+    const params: any[] = [status === 'published'];
 
     if (featured === 'true') {
       query += ' AND featured = true';
@@ -34,7 +29,7 @@ export async function GET(request: Request) {
     query += ' ORDER BY created_at DESC';
 
     if (limit) {
-      query += ` LIMIT $${paramIndex++}`;
+      query += ' LIMIT $2';
       params.push(parseInt(limit));
     }
 
@@ -100,21 +95,16 @@ export async function POST(request: Request) {
 
     const result = await executeInsert(`
       INSERT INTO news 
-      (title, slug, content, excerpt, image, publish_date, status, category, tags, featured, author, read_time)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      (title, content, excerpt, image, status, featured, author)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
     `, [
       title,
-      finalSlug,
       content,
       excerpt || null,
       image || null,
-      publish_date || new Date().toISOString().split('T')[0],
-      status,
-      category || null,
-      tags || null,
-      featured ? 1 : 0,
-      author || authResult.user.username,
-      read_time || Math.ceil(content.length / 1000) // Rough estimate: 1000 chars per minute
+      status === 'published',
+      featured ? true : false,
+      author || authResult.user.username
     ]);
 
     return NextResponse.json({ 

@@ -19,11 +19,12 @@ export async function GET(
     const article = await executeQuerySingle(`
       SELECT 
         n.*,
-        n.publish_date,
+        n.featured_image as image_url,
+        n.created_at as publish_date,
         n.created_at,
         n.updated_at
       FROM news n
-      WHERE n.id = $1 AND n.status = 'published'
+      WHERE n.id = $1 AND n.published = true
     `, [newsId]);
 
     if (!article) {
