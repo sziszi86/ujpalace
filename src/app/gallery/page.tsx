@@ -156,7 +156,7 @@ export default function GalleryPage() {
             >
               <div className="relative h-64">
                 <Image
-                  src={`/images/gallery/${image.filename}`}
+                  src={`/api/image/${image.filename}`}
                   alt={image.alt_text || image.title}
                   fill
                   className="object-cover"
@@ -196,7 +196,7 @@ export default function GalleryPage() {
                 ✕
               </button>
               <Image
-                src={`/images/gallery/${selectedImage.filename}`}
+                src={`/api/image/${selectedImage.filename}`}
                 alt={selectedImage.alt_text || selectedImage.title}
                 width={800}
                 height={600}

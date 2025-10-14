@@ -292,7 +292,7 @@ export default function AdminGalleryPage() {
           <div key={image.id} className="bg-white rounded-xl shadow-lg overflow-hidden">
             <div className="relative h-48">
               <Image
-                src={`/images/gallery/${image.filename}`}
+                src={`/api/image/${image.filename}`}
                 alt={image.alt_text || image.title}
                 fill
                 className="object-cover"
