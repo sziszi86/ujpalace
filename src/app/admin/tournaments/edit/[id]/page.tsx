@@ -41,6 +41,14 @@ interface TournamentFormData {
   guarantee: string;
 }
 
+interface Structure {
+  id: number;
+  name: string;
+  description: string;
+  starting_chips: number;
+  is_active: boolean;
+}
+
 export default function EditTournamentPage() {
   const router = useRouter();
   const params = useParams();
@@ -48,6 +56,7 @@ export default function EditTournamentPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [duplicating, setDuplicating] = useState(false);
+  const [structures, setStructures] = useState<Structure[]>([]);
   const [formData, setFormData] = useState<TournamentFormData>({
     title: '',
     description: '',
@@ -145,6 +154,24 @@ export default function EditTournamentPage() {
 
     loadTournament();
   }, [params.id, router]);
+
+  // Struktúrák betöltése
+  useEffect(() => {
+    const loadStructures = async () => {
+      try {
+        const response = await fetch('/api/structures');
+        if (response.ok) {
+          const structuresData = await response.json();
+          // Only show active structures
+          setStructures(structuresData.filter((s: Structure) => s.is_active));
+        }
+      } catch (error) {
+        console.error('Error loading structures:', error);
+      }
+    };
+
+    loadStructures();
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;

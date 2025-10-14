@@ -23,13 +23,13 @@ export async function POST(
 
     // Get original levels
     const originalLevels = await executeQuery(`
-      SELECT * FROM structure_levels WHERE structure_id = $1 ORDER BY level
+      SELECT * FROM structure_levels WHERE structure_id = $1 ORDER BY level_number
     `, [structureId]);
 
     // Create new structure
     const newStructureName = `${originalStructure.name} (másolat)`;
     const structureResult = await executeInsert(
-      'INSERT INTO structures (name, description, starting_chips, is_active) VALUES (?, ?, ?, ?)',
+      'INSERT INTO structures (name, description, starting_chips, is_active) VALUES ($1, $2, $3, $4)',
       [newStructureName, originalStructure.description, originalStructure.starting_chips, false]
     );
 
@@ -39,11 +39,11 @@ export async function POST(
     for (const level of originalLevels) {
       await executeQuery(
         `INSERT INTO structure_levels 
-         (structure_id, level, small_blind, big_blind, ante, duration_minutes, break_after, break_duration_minutes) 
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+         (structure_id, level_number, small_blind, big_blind, ante, duration_minutes, break_after, break_duration_minutes) 
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
         [
           newStructureId,
-          level.level,
+          level.level_number,
           level.small_blind,
           level.big_blind,
           level.ante,
@@ -62,7 +62,7 @@ export async function POST(
       is_active: false,
       created_at: new Date().toISOString(),
       levels: originalLevels.map(level => ({
-        level: level.level,
+        level: level.level_number,
         smallBlind: level.small_blind,
         bigBlind: level.big_blind,
         ante: level.ante,

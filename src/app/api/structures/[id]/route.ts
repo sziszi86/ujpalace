@@ -21,12 +21,12 @@ export async function GET(
     }
 
     const levels = await executeQuery(`
-      SELECT id, level, small_blind as smallBlind, big_blind as bigBlind, 
+      SELECT id, level_number as level, small_blind as smallBlind, big_blind as bigBlind, 
              ante, duration_minutes as durationMinutes, break_after as breakAfter, 
              break_duration_minutes as breakDurationMinutes
       FROM structure_levels 
       WHERE structure_id = $1 
-      ORDER BY level
+      ORDER BY level_number
     `, [structureId]);
 
     return NextResponse.json({
@@ -61,7 +61,7 @@ export async function PUT(
 
     // Update structure
     await executeQuery(
-      'UPDATE structures SET name = $1, description = $1, starting_chips = $1, is_active = $1 WHERE id = $1',
+      'UPDATE structures SET name = $1, description = $2, starting_chips = $3, is_active = $4 WHERE id = $5',
       [name, description, starting_chips, is_active, structureId]
     );
 
@@ -74,8 +74,8 @@ export async function PUT(
         const level = levels[i];
         await executeQuery(
           `INSERT INTO structure_levels 
-           (structure_id, level, small_blind, big_blind, ante, duration_minutes, break_after, break_duration_minutes) 
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+           (structure_id, level_number, small_blind, big_blind, ante, duration_minutes, break_after, break_duration_minutes) 
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
           [
             structureId,
             i + 1,
