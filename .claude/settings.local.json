@@ -7,7 +7,8 @@
       "Bash(PGPASSWORD=omxEYrIRruGJUuVONphKwkmtIBfVsbrq psql -h hopper.proxy.rlwy.net -U postgres -p 55757 -d railway -c \"\\d gallery_images\")",
       "Bash(PGPASSWORD=omxEYrIRruGJUuVONphKwkmtIBfVsbrq psql -h hopper.proxy.rlwy.net -U postgres -p 55757 -d railway -c \"\\d images\")",
       "Bash(PGPASSWORD=omxEYrIRruGJUuVONphKwkmtIBfVsbrq psql -h hopper.proxy.rlwy.net -U postgres -p 55757 -d railway -c \"SELECT COUNT(*) FROM gallery_images;\")",
-      "Bash(PGPASSWORD=omxEYrIRruGJUuVONphKwkmtIBfVsbrq psql -h hopper.proxy.rlwy.net -U postgres -p 55757 -d railway -c \"SELECT COUNT(*) FROM images;\")"
+      "Bash(PGPASSWORD=omxEYrIRruGJUuVONphKwkmtIBfVsbrq psql -h hopper.proxy.rlwy.net -U postgres -p 55757 -d railway -c \"SELECT COUNT(*) FROM images;\")",
+      "Bash(pkill:*)"
     ],
     "deny": [],
     "ask": []
