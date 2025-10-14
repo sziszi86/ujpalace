@@ -13,8 +13,10 @@ export interface Tournament {
   buy_in?: string; // API returns as string
   rebuyPrice?: number;
   rebuyChips?: number;
+  rebuyCount?: number;
   addonPrice?: number;
   addonChips?: number;
+  addonCount?: number;
   guarantee: number;
   guarantee_amount?: number; // API field compatibility
   structure: string;

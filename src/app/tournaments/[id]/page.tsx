@@ -25,6 +25,12 @@ export default function TournamentDetailPage() {
   const [structureLevels, setStructureLevels] = useState<TournamentStructureLevel[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [timeLeft, setTimeLeft] = useState<{
+    days: number;
+    hours: number;
+    minutes: number;
+    seconds: number;
+  } | null>(null);
 
   useEffect(() => {
     const fetchTournament = async () => {
@@ -72,6 +78,33 @@ export default function TournamentDetailPage() {
 
     fetchTournament();
   }, [tournamentId]);
+
+  // Countdown timer
+  useEffect(() => {
+    if (!tournament || !tournament.tournament_date || !tournament.tournament_time) return;
+
+    const updateCountdown = () => {
+      const now = new Date();
+      const tournamentDate = new Date(`${tournament.tournament_date}T${tournament.tournament_time}`);
+      const timeDiff = tournamentDate.getTime() - now.getTime();
+
+      if (timeDiff > 0) {
+        const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
+
+        setTimeLeft({ days, hours, minutes, seconds });
+      } else {
+        setTimeLeft(null); // Tournament has started or passed
+      }
+    };
+
+    updateCountdown(); // Initial call
+    const interval = setInterval(updateCountdown, 1000);
+
+    return () => clearInterval(interval);
+  }, [tournament]);
 
   if (loading) {
     return (
@@ -244,6 +277,12 @@ export default function TournamentDetailPage() {
                             <span className="text-poker-muted">Rebuy chipek:</span>
                             <span className="font-medium">{tournament.rebuyChips ? formatChips(tournament.rebuyChips) : 'N/A'}</span>
                           </div>
+                          {tournament.rebuyCount && (
+                            <div className="flex justify-between">
+                              <span className="text-poker-muted">Max rebuy-ok:</span>
+                              <span className="font-medium">{tournament.rebuyCount} db</span>
+                            </div>
+                          )}
                         </>
                       )}
                       {tournament.addonPrice && (
@@ -256,6 +295,12 @@ export default function TournamentDetailPage() {
                             <span className="text-poker-muted">Add-on chipek:</span>
                             <span className="font-medium">{tournament.addonChips ? formatChips(tournament.addonChips) : 'N/A'}</span>
                           </div>
+                          {tournament.addonCount && (
+                            <div className="flex justify-between">
+                              <span className="text-poker-muted">Max add-on-ok:</span>
+                              <span className="font-medium">{tournament.addonCount} db</span>
+                            </div>
+                          )}
                         </>
                       )}
                     </div>
@@ -356,6 +401,31 @@ export default function TournamentDetailPage() {
               </div>
               
               <div className="space-y-4">
+                {/* Countdown Timer */}
+                {timeLeft && tournament.status === 'upcoming' && (
+                  <div className="bg-gradient-to-r from-poker-primary to-poker-secondary p-4 rounded-lg text-white">
+                    <h4 className="font-semibold mb-3 text-center">Verseny kezdetéig</h4>
+                    <div className="grid grid-cols-4 gap-2 text-center">
+                      <div className="bg-white/20 rounded-lg p-2">
+                        <div className="text-lg font-bold">{timeLeft.days}</div>
+                        <div className="text-xs opacity-90">nap</div>
+                      </div>
+                      <div className="bg-white/20 rounded-lg p-2">
+                        <div className="text-lg font-bold">{timeLeft.hours}</div>
+                        <div className="text-xs opacity-90">óra</div>
+                      </div>
+                      <div className="bg-white/20 rounded-lg p-2">
+                        <div className="text-lg font-bold">{timeLeft.minutes}</div>
+                        <div className="text-xs opacity-90">perc</div>
+                      </div>
+                      <div className="bg-white/20 rounded-lg p-2">
+                        <div className="text-lg font-bold">{timeLeft.seconds}</div>
+                        <div className="text-xs opacity-90">mp</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Date & Time */}
                 <div className="flex items-center p-3 bg-poker-light/50 rounded-lg">
                   <svg className="w-5 h-5 text-poker-primary mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -417,20 +487,6 @@ export default function TournamentDetailPage() {
                   </div>
                 )}
 
-                {/* Contact */}
-                <div className="border-t pt-4">
-                  <h4 className="font-semibold text-poker-dark mb-2">Kapcsolat</h4>
-                  {tournament.contact_phone && (
-                    <p className="text-sm text-poker-muted mb-1">
-                      📞 {tournament.contact_phone}
-                    </p>
-                  )}
-                  {tournament.contact_email && (
-                    <p className="text-sm text-poker-muted">
-                      ✉️ {tournament.contact_email}
-                    </p>
-                  )}
-                </div>
               </div>
             </div>
           </div>
