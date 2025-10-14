@@ -19,8 +19,8 @@ export async function GET(
     const tournament = await executeQuerySingle(`
       SELECT 
         t.*,
-        t.date as tournament_date,
-        EXTRACT(HOUR FROM t.date) || ':' || LPAD(EXTRACT(MINUTE FROM t.date)::text, 2, '0') as tournament_time,
+        DATE(t.date) as tournament_date,
+        TO_CHAR(t.date, 'HH24:MI') as tournament_time,
         t.buyin_amount as buy_in,
         t.starting_chips,
         'Tournament' as category_name
