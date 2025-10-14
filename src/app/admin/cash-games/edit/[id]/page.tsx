@@ -25,6 +25,7 @@ interface CashGameFormData {
   description: string;
   image: string;
   weekDays: string[];
+  selectedDates: string[];
 }
 
 export default function EditCashGame() {
@@ -46,7 +47,8 @@ export default function EditCashGame() {
     visibleUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     description: '',
     image: '',
-    weekDays: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+    weekDays: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+    selectedDates: []
   });
 
   useEffect(() => {
@@ -146,7 +148,8 @@ export default function EditCashGame() {
         start_date: formData.startDate,
         active: formData.active,
         image_url: formData.image || '',
-        week_days: formData.weekDays
+        week_days: formData.weekDays,
+        selected_dates: formData.selectedDates
       };
       
       const response = await fetch(`/api/admin/cash-games/${cashGameId}`, {

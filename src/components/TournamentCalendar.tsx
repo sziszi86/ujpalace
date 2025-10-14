@@ -90,45 +90,61 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
           // Only show active cash games
           const activeCashGames = cashGameData.filter((cashGame: CashGame) => Boolean(cashGame.active));
           
-          // Generate scheduled dates for active cash games based on week_days (next 30 days)
-          const today = new Date();
+          // Generate scheduled dates for active cash games
           const enhancedCashGames = activeCashGames.map((cashGame: any) => {
-            const scheduledDates = [];
+            let scheduledDates = [];
             
-            // Parse week_days from the database
-            let weekDays = [];
-            if (cashGame.week_days) {
+            // Check if we have specific selected dates first
+            if (cashGame.selected_dates) {
               try {
-                weekDays = typeof cashGame.week_days === 'string' 
-                  ? JSON.parse(cashGame.week_days) 
-                  : cashGame.week_days;
+                scheduledDates = typeof cashGame.selected_dates === 'string' 
+                  ? JSON.parse(cashGame.selected_dates) 
+                  : cashGame.selected_dates;
               } catch (e) {
-                console.error('Error parsing week_days:', e);
-                weekDays = [];
+                console.error('Error parsing selected_dates:', e);
+                scheduledDates = [];
               }
             }
             
-            // If no week_days specified, default to all days
-            if (!weekDays || weekDays.length === 0) {
-              weekDays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-            }
-            
-            // Convert day names to numbers (0 = Sunday, 1 = Monday, etc.)
-            const dayMap: { [key: string]: number } = {
-              'sunday': 0, 'monday': 1, 'tuesday': 2, 'wednesday': 3, 
-              'thursday': 4, 'friday': 5, 'saturday': 6
-            };
-            
-            const allowedDayNumbers = weekDays.map((day: string) => dayMap[day]).filter((num: number) => num !== undefined);
-            
-            for (let i = 0; i < 30; i++) {
-              const date = new Date(today);
-              date.setDate(today.getDate() + i);
-              const dayOfWeek = date.getDay();
+            // If no specific dates, fall back to week_days logic
+            if (!scheduledDates || scheduledDates.length === 0) {
+              const today = new Date();
               
-              // Only add dates that match the selected weekdays
-              if (allowedDayNumbers.includes(dayOfWeek)) {
-                scheduledDates.push(date.toISOString().split('T')[0]);
+              // Parse week_days from the database
+              let weekDays = [];
+              if (cashGame.week_days) {
+                try {
+                  weekDays = typeof cashGame.week_days === 'string' 
+                    ? JSON.parse(cashGame.week_days) 
+                    : cashGame.week_days;
+                } catch (e) {
+                  console.error('Error parsing week_days:', e);
+                  weekDays = [];
+                }
+              }
+              
+              // If no week_days specified, default to all days
+              if (!weekDays || weekDays.length === 0) {
+                weekDays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+              }
+              
+              // Convert day names to numbers (0 = Sunday, 1 = Monday, etc.)
+              const dayMap: { [key: string]: number } = {
+                'sunday': 0, 'monday': 1, 'tuesday': 2, 'wednesday': 3, 
+                'thursday': 4, 'friday': 5, 'saturday': 6
+              };
+              
+              const allowedDayNumbers = weekDays.map((day: string) => dayMap[day]).filter((num: number) => num !== undefined);
+              
+              for (let i = 0; i < 56; i++) { // 8 weeks = 56 days
+                const date = new Date(today);
+                date.setDate(today.getDate() + i);
+                const dayOfWeek = date.getDay();
+                
+                // Only add dates that match the selected weekdays
+                if (allowedDayNumbers.includes(dayOfWeek)) {
+                  scheduledDates.push(date.toISOString().split('T')[0]);
+                }
               }
             }
             
