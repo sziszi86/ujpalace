@@ -40,7 +40,7 @@ export default function EditCashGame() {
     gameType: 'NLH',
     minBuyIn: '',
     maxBuyIn: '',
-    schedule: 'Hétfő-Vasárnap 18:00-06:00',
+    schedule: '',
     startDate: new Date().toISOString().split('T')[0],
     active: true,
     visibleFrom: new Date().toISOString().split('T')[0],
@@ -68,7 +68,7 @@ export default function EditCashGame() {
             gameType: cashGameData.game_type || 'NLH',
             minBuyIn: cashGameData.min_buyin?.toString() || '',
             maxBuyIn: cashGameData.max_buyin?.toString() || '',
-            schedule: cashGameData.schedule || 'Hétfő-Vasárnap 18:00-06:00',
+            schedule: cashGameData.schedule || '',
             startDate: cashGameData.start_date || new Date().toISOString().split('T')[0],
             active: cashGameData.active !== undefined ? cashGameData.active : true,
             visibleFrom: cashGameData.visible_from || new Date().toISOString().split('T')[0],
@@ -102,6 +102,50 @@ export default function EditCashGame() {
     });
   };
 
+  // Generate next 8 weeks of dates
+  const generateDateOptions = () => {
+    const dates = [];
+    const today = new Date();
+    
+    for (let i = 0; i < 56; i++) { // 8 weeks = 56 days
+      const date = new Date(today);
+      date.setDate(today.getDate() + i);
+      dates.push({
+        dateString: date.toISOString().split('T')[0],
+        displayDate: date.toLocaleDateString('hu-HU', { 
+          month: 'short', 
+          day: 'numeric',
+          weekday: 'short'
+        }),
+        fullDate: date.toLocaleDateString('hu-HU', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          weekday: 'long'
+        }),
+        isWeekend: date.getDay() === 0 || date.getDay() === 6
+      });
+    }
+    
+    return dates;
+  };
+
+  const handleDateToggle = (dateString: string) => {
+    const currentDates = [...formData.selectedDates];
+    const index = currentDates.indexOf(dateString);
+    
+    if (index > -1) {
+      currentDates.splice(index, 1);
+    } else {
+      currentDates.push(dateString);
+    }
+    
+    setFormData({
+      ...formData,
+      selectedDates: currentDates
+    });
+  };
+
   const handleDescriptionChange = (value: string | undefined) => {
     setFormData({
       ...formData,
@@ -109,21 +153,6 @@ export default function EditCashGame() {
     });
   };
 
-  const handleWeekDayToggle = (day: string) => {
-    const currentDays = [...formData.weekDays];
-    const index = currentDays.indexOf(day);
-    
-    if (index > -1) {
-      currentDays.splice(index, 1);
-    } else {
-      currentDays.push(day);
-    }
-    
-    setFormData({
-      ...formData,
-      weekDays: currentDays
-    });
-  };
 
   const handleImageSelect = (imageUrl: string) => {
     setFormData({
@@ -301,7 +330,7 @@ export default function EditCashGame() {
           {/* Schedule */}
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Menetrend
+              Menetrend (opcionális)
             </label>
             <input
               type="text"
@@ -311,40 +340,101 @@ export default function EditCashGame() {
               className="admin-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-poker-green focus:border-transparent"
               placeholder="pl. Hétfő-Vasárnap 18:00-06:00"
             />
+            <p className="text-xs text-gray-500 mt-1">
+              Ha üresen hagyod, nem jelenik meg menetrend a frontenden.
+            </p>
           </div>
 
-          {/* Weekly Calendar Day Selector */}
+          {/* Date Selector for next 8 weeks */}
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-3">
-              Hét napjai (válassz ki a megfelelő napokat) *
+              Dátumok kiválasztása (következő 8 hét) *
             </label>
-            <div className="grid grid-cols-7 gap-2">
-              {[
-                { key: 'monday', label: 'Hétfő' },
-                { key: 'tuesday', label: 'Kedd' },
-                { key: 'wednesday', label: 'Szerda' },
-                { key: 'thursday', label: 'Csütörtök' },
-                { key: 'friday', label: 'Péntek' },
-                { key: 'saturday', label: 'Szombat' },
-                { key: 'sunday', label: 'Vasárnap' }
-              ].map((day) => (
+            
+            <div className="space-y-4">
+              {/* Quick selection buttons */}
+              <div className="flex flex-wrap gap-2 mb-4">
                 <button
-                  key={day.key}
                   type="button"
-                  onClick={() => handleWeekDayToggle(day.key)}
-                  className={`p-3 text-center text-sm font-medium rounded-lg border-2 transition-all duration-200 ${
-                    formData.weekDays.includes(day.key)
-                      ? 'bg-poker-green text-white border-poker-green shadow-lg'
-                      : 'bg-white text-gray-700 border-gray-300 hover:border-poker-green hover:bg-poker-green/10'
-                  }`}
+                  onClick={() => setFormData({...formData, selectedDates: []})}
+                  className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded"
                 >
-                  <div className="text-xs font-bold">{day.label.substring(0, 3)}</div>
-                  <div className="text-xs mt-1">{day.label.substring(3)}</div>
+                  Összes törlése
                 </button>
-              ))}
+                <button
+                  type="button" 
+                  onClick={() => {
+                    const allDates = generateDateOptions().map(d => d.dateString);
+                    setFormData({...formData, selectedDates: allDates});
+                  }}
+                  className="px-3 py-1 text-sm bg-poker-green text-white hover:bg-poker-darkgreen rounded"
+                >
+                  Összes kiválasztása
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const weekendDates = generateDateOptions()
+                      .filter(d => d.isWeekend)
+                      .map(d => d.dateString);
+                    setFormData({...formData, selectedDates: weekendDates});
+                  }}
+                  className="px-3 py-1 text-sm bg-blue-500 text-white hover:bg-blue-600 rounded"
+                >
+                  Csak hétvégék
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const weekdayDates = generateDateOptions()
+                      .filter(d => !d.isWeekend)
+                      .map(d => d.dateString);
+                    setFormData({...formData, selectedDates: weekdayDates});
+                  }}
+                  className="px-3 py-1 text-sm bg-orange-500 text-white hover:bg-orange-600 rounded"
+                >
+                  Csak hétköznapok
+                </button>
+              </div>
+
+              {/* Date cards in weekly groups */}
+              {Array.from({ length: 8 }, (_, weekIndex) => {
+                const weekStart = weekIndex * 7;
+                const weekDates = generateDateOptions().slice(weekStart, weekStart + 7);
+                
+                return (
+                  <div key={weekIndex} className="border rounded-lg p-4">
+                    <h4 className="font-semibold text-gray-700 mb-3">
+                      {weekIndex + 1}. hét ({weekDates[0]?.fullDate.split(',')[0]} - {weekDates[6]?.fullDate.split(',')[0]})
+                    </h4>
+                    <div className="grid grid-cols-7 gap-2">
+                      {weekDates.map((date) => (
+                        <button
+                          key={date.dateString}
+                          type="button"
+                          onClick={() => handleDateToggle(date.dateString)}
+                          className={`p-3 text-center text-sm font-medium rounded-lg border-2 transition-all duration-200 ${
+                            formData.selectedDates.includes(date.dateString)
+                              ? 'bg-poker-green text-white border-poker-green shadow-lg'
+                              : date.isWeekend
+                              ? 'bg-blue-50 text-blue-700 border-blue-200 hover:border-poker-green hover:bg-poker-green/10'
+                              : 'bg-white text-gray-700 border-gray-300 hover:border-poker-green hover:bg-poker-green/10'
+                          }`}
+                          title={date.fullDate}
+                        >
+                          <div className="text-xs opacity-75 mb-1">{date.displayDate.split(' ')[0]}</div>
+                          <div className="font-bold">{date.displayDate.split(' ')[1]}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-            <p className="text-xs text-gray-500 mt-2">
-              Válaszd ki azokat a napokat, amikor ez a cash game elérhető lesz. Legalább egy napot ki kell választani.
+            
+            <p className="text-xs text-gray-500 mt-3">
+              Válaszd ki azokat a konkrét dátumokat, amikor ez a cash game elérhető lesz. 
+              Kiválasztva: {formData.selectedDates.length} nap
             </p>
           </div>
 

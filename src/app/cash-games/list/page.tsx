@@ -23,9 +23,9 @@ export default function CashGameListPage() {
             name: game.name,
             stakes: game.stakes,
             game: game.game_type || 'NLH',
-            minBuyIn: game.min_buy_in,
-            maxBuyIn: game.max_buy_in,
-            schedule: game.schedule || 'Hétfő-Vasárnap 18:00-06:00',
+            minBuyIn: game.min_buyin,
+            maxBuyIn: game.max_buyin,
+            schedule: game.schedule || '',
             startDate: game.start_date,
             active: game.active === 1 || game.active === true || game.active !== 0,
             description: game.description || '',
@@ -243,7 +243,7 @@ export default function CashGameListPage() {
                   </div>
 
                   {/* Cash Game Details Grid */}
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                  <div className={`grid gap-4 mb-4 ${cashGame.maxBuyIn ? 'grid-cols-2 md:grid-cols-4' : 'grid-cols-2 md:grid-cols-3'}`}>
                     <div className="text-center p-3 bg-gray-50 rounded-lg">
                       <p className="text-xs text-black mb-1">Játék típus</p>
                       <p className="font-bold text-sm text-poker-dark">{cashGame.game}</p>
@@ -256,10 +256,12 @@ export default function CashGameListPage() {
                       <p className="text-xs text-black mb-1">Min. beszálló</p>
                       <p className="font-bold text-sm text-poker-green">{formatCurrency(cashGame.minBuyIn)}</p>
                     </div>
-                    <div className="text-center p-3 bg-gray-50 rounded-lg">
-                      <p className="text-xs text-black mb-1">Max. beszálló</p>
-                      <p className="font-bold text-sm text-poker-gold">{formatCurrency(cashGame.maxBuyIn)}</p>
-                    </div>
+                    {cashGame.maxBuyIn && (
+                      <div className="text-center p-3 bg-gray-50 rounded-lg">
+                        <p className="text-xs text-black mb-1">Max. beszálló</p>
+                        <p className="font-bold text-sm text-poker-gold">{formatCurrency(cashGame.maxBuyIn)}</p>
+                      </div>
+                    )}
                   </div>
 
                   {/* Additional Details */}
@@ -273,11 +275,13 @@ export default function CashGameListPage() {
                     <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">
                       ✓ Ingyenes italszervíz
                     </span>
-                    <span className={`px-2 py-1 text-xs rounded-full ${
-                      isLive ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'
-                    }`}>
-                      {isLive ? '🟢 ÉLŐBEN' : 'Menetrend'}: {cashGame.schedule}
-                    </span>
+                    {cashGame.schedule && (
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        isLive ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'
+                      }`}>
+                        {isLive ? '🟢 ÉLŐBEN' : 'Menetrend'}: {cashGame.schedule}
+                      </span>
+                    )}
                     {cashGame.featured && (
                       <span className="px-2 py-1 bg-poker-red text-white text-xs rounded-full">
                         ⭐ Kiemelt

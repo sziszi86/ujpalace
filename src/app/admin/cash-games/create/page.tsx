@@ -36,7 +36,7 @@ export default function CreateCashGame() {
     gameType: 'NLH',
     minBuyIn: '',
     maxBuyIn: '',
-    schedule: 'Hétfő-Vasárnap 18:00-06:00',
+    schedule: '',
     active: true,
     visibleFrom: new Date().toISOString().split('T')[0],
     visibleUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 1 év múlva
@@ -266,7 +266,7 @@ export default function CreateCashGame() {
           {/* Schedule */}
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Menetrend
+              Menetrend (opcionális)
             </label>
             <input
               type="text"
@@ -276,6 +276,9 @@ export default function CreateCashGame() {
               className="admin-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-poker-green focus:border-transparent"
               placeholder="pl. Hétfő-Vasárnap 18:00-06:00"
             />
+            <p className="text-xs text-gray-500 mt-1">
+              Ha üresen hagyod, nem jelenik meg menetrend a frontenden.
+            </p>
           </div>
 
           {/* Date Selector for next 8 weeks */}

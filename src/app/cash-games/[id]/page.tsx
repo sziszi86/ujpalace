@@ -198,10 +198,12 @@ export default function CashGameDetailPage() {
                 <span className="text-gray-600">Min. beszálló:</span>
                 <span className="font-semibold text-green-600">{formatCurrency(cashGame.minBuyIn)}</span>
               </div>
-              <div className="flex justify-between items-center border-b pb-2">
-                <span className="text-gray-600">Max. beszálló:</span>
-                <span className="font-semibold text-poker-gold">{formatCurrency(cashGame.maxBuyIn)}</span>
-              </div>
+              {cashGame.maxBuyIn && (
+                <div className="flex justify-between items-center border-b pb-2">
+                  <span className="text-gray-600">Max. beszálló:</span>
+                  <span className="font-semibold text-poker-gold">{formatCurrency(cashGame.maxBuyIn)}</span>
+                </div>
+              )}
               <div className="flex justify-between items-center border-b pb-2">
                 <span className="text-gray-600">Helyszín:</span>
                 <span className="font-semibold">{cashGame.venue}</span>
@@ -220,16 +222,20 @@ export default function CashGameDetailPage() {
 
           {/* Schedule */}
           <div className="bg-white rounded-xl shadow-lg p-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Menetrend</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">
+              {cashGame.schedule ? 'Menetrend' : 'Részletek'}
+            </h2>
             <div className="space-y-4">
-              <div className="bg-gray-50 rounded-lg p-4">
-                <div className="text-lg font-semibold text-gray-900 mb-2">
-                  {cashGame.schedule}
+              {cashGame.schedule && (
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <div className="text-lg font-semibold text-gray-900 mb-2">
+                    {cashGame.schedule}
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    {isLive ? '🟢 Jelenleg élő asztal' : '⚪ Jelenleg nem aktív'}
+                  </div>
                 </div>
-                <div className="text-sm text-gray-600">
-                  {isLive ? '🟢 Jelenleg élő asztal' : '⚪ Jelenleg nem aktív'}
-                </div>
-              </div>
+              )}
               
               <div className="space-y-2">
                 <h3 className="font-semibold text-gray-900">Részletek:</h3>
