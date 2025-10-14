@@ -83,8 +83,8 @@ export async function GET() {
         LEFT JOIN player_transactions pt ON p.id = pt.player_id
         WHERE p.active = true
         GROUP BY p.id, p.name
-        HAVING total_deposits > 0
-        ORDER BY total_deposits DESC
+        HAVING SUM(CASE WHEN pt.transaction_type = 'deposit' THEN pt.amount ELSE 0 END) > 0
+        ORDER BY SUM(CASE WHEN pt.transaction_type = 'deposit' THEN pt.amount ELSE 0 END) DESC
         LIMIT 1
       `);
 

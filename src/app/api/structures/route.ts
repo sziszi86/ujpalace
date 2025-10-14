@@ -47,7 +47,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { name, description, starting_chips, is_active = true, levels = [] } = body;
+    const { name, description, starting_chips, level_duration = 20, late_registration_levels = 6, is_active = true, levels = [] } = body;
 
     if (!name || !description || !starting_chips) {
       return NextResponse.json(
@@ -58,8 +58,8 @@ export async function POST(request: Request) {
 
     // Insert structure
     const structureResult = await executeInsert(
-      'INSERT INTO structures (name, description, starting_chips, is_active) VALUES ($1, $2, $3, $4)',
-      [name, description, starting_chips, is_active]
+      'INSERT INTO structures (name, description, starting_chips, level_duration, late_registration_levels, is_active) VALUES ($1, $2, $3, $4, $5, $6)',
+      [name, description, starting_chips, level_duration, late_registration_levels, is_active]
     );
 
     const structureId = structureResult.insertId;
@@ -91,7 +91,9 @@ export async function POST(request: Request) {
       id: structureId, 
       name, 
       description, 
-      starting_chips, 
+      starting_chips,
+      level_duration,
+      late_registration_levels,
       is_active,
       levels 
     });

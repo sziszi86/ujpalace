@@ -84,7 +84,7 @@ export default function Header() {
                 alt="Palace Poker Logo"
                 width={80}
                 height={80}
-                className="rounded-2xl shadow-2xl animate-glow object-contain"
+                className="object-contain"
               />
             </div>
           </Link>

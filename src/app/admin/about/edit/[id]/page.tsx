@@ -95,7 +95,7 @@ export default function EditAboutPage() {
       }
 
       alert(isNew ? 'Oldal sikeresen létrehozva!' : 'Oldal sikeresen frissítve!');
-      router.push('/admin/about');
+      router.push('/admin');
     } catch (error) {
       console.error('Error saving about page:', error);
       alert('Hiba történt a mentés során!');
