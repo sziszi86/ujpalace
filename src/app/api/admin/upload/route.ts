@@ -98,20 +98,17 @@ export async function POST(request: NextRequest) {
       // Write optimized file
       await writeFile(filePath, optimizedBuffer);
 
-      // Save to database
-      const title = file.name.split('.')[0]; // Remove extension for title
-      
+      // Save to database - store image data in images table
       const result = await executeInsert(`
-        INSERT INTO gallery_images 
-        (title, filename, alt_text, category, size, active)
-        VALUES ($1, $2, $3, $4, $5, $6)
+        INSERT INTO images 
+        (filename, original_name, mime_type, size_bytes, data)
+        VALUES ($1, $2, $3, $4, $5)
       `, [
-        title,
         filename,
-        `${title} - Palace Poker Szombathely`,
-        category,
+        file.name,
+        file.type,
         optimizedSize,
-        true
+        optimizedBuffer
       ]);
 
       const uploadResult: UploadResult = {
@@ -138,19 +135,16 @@ export async function POST(request: NextRequest) {
       // Fallback: save original file without optimization
       await writeFile(filePath, buffer);
       
-      const title = file.name.split('.')[0];
-      
       const result = await executeInsert(`
-        INSERT INTO gallery_images 
-        (title, filename, alt_text, category, size, active)
-        VALUES ($1, $2, $3, $4, $5, $6)
+        INSERT INTO images 
+        (filename, original_name, mime_type, size_bytes, data)
+        VALUES ($1, $2, $3, $4, $5)
       `, [
-        title,
         filename,
-        `${title} - Palace Poker Szombathely`,
-        category,
+        file.name,
+        file.type,
         file.size,
-        true
+        buffer
       ]);
 
       return NextResponse.json({
