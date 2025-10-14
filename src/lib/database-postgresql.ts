@@ -305,17 +305,33 @@ export async function getCashGameById(id: number) {
 }
 
 export async function createCashGame(data: any) {
+  // Parse stakes to extract small_blind and big_blind
+  let small_blind = 0;
+  let big_blind = 0;
+  
+  if (data.stakes) {
+    // Handle multiple stakes (e.g., "100/200, 200/400") by taking the first one
+    const firstStake = data.stakes.split(',')[0].trim();
+    const stakesMatch = firstStake.match(/(\d+)\/(\d+)/);
+    if (stakesMatch) {
+      small_blind = parseInt(stakesMatch[1]);
+      big_blind = parseInt(stakesMatch[2]);
+    }
+  }
+  
   const query = `
     INSERT INTO cash_games 
-    (name, game_type_id, stakes, min_buyin, max_buyin, description, schedule, active, week_days) 
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+    (name, game_type_id, stakes, small_blind, big_blind, min_buyin, max_buyin, description, schedule, active, week_days) 
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
   `;
   const params = [
     data.name,
     data.game_type_id || null,
     data.stakes,
-    data.min_buy_in,
-    data.max_buy_in || null,
+    small_blind,
+    big_blind,
+    data.min_buy_in || data.min_buyin,
+    data.max_buy_in || data.max_buyin || null,
     data.description || null,
     data.schedule || null,
     data.active !== undefined ? data.active : true,
@@ -325,18 +341,35 @@ export async function createCashGame(data: any) {
 }
 
 export async function updateCashGame(id: number, data: any) {
+  // Parse stakes to extract small_blind and big_blind
+  let small_blind = 0;
+  let big_blind = 0;
+  
+  if (data.stakes) {
+    // Handle multiple stakes (e.g., "100/200, 200/400") by taking the first one
+    const firstStake = data.stakes.split(',')[0].trim();
+    const stakesMatch = firstStake.match(/(\d+)\/(\d+)/);
+    if (stakesMatch) {
+      small_blind = parseInt(stakesMatch[1]);
+      big_blind = parseInt(stakesMatch[2]);
+    }
+  }
+  
   const query = `
     UPDATE cash_games 
-    SET name = $1, game_type_id = $2, stakes = $3, min_buyin = $4, max_buyin = $5, 
-        description = $6, schedule = $7, active = $8, week_days = $9, updated_at = CURRENT_TIMESTAMP
-    WHERE id = $10
+    SET name = $1, game_type_id = $2, stakes = $3, small_blind = $4, big_blind = $5,
+        min_buyin = $6, max_buyin = $7, description = $8, schedule = $9, active = $10, 
+        week_days = $11, updated_at = CURRENT_TIMESTAMP
+    WHERE id = $12
   `;
   const params = [
     data.name,
     data.game_type_id || null,
     data.stakes,
-    data.min_buy_in,
-    data.max_buy_in || null,
+    small_blind,
+    big_blind,
+    data.min_buy_in || data.min_buyin,
+    data.max_buy_in || data.max_buyin || null,
     data.description || null,
     data.schedule || null,
     data.active !== undefined ? data.active : true,
