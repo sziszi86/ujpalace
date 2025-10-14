@@ -40,7 +40,7 @@ interface DashboardData {
   };
   systemStatus: {
     database: { status: string; lastCheck: string };
-    website: { status: string; uptime: string };
+    website: { status: string; uptime: string; currentVisitors?: number };
     backup: { status: string; lastBackup: string; nextScheduled: string };
   };
 }
@@ -429,7 +429,12 @@ export default function AdminDashboard() {
                   <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
                   <div>
                     <p className="text-sm font-medium text-gray-900">Weboldal</p>
-                    <p className="text-xs text-black">Online ({dashboardData.systemStatus.website.uptime})</p>
+                    <p className="text-xs text-black">
+                      Online ({dashboardData.systemStatus.website.uptime})
+                      {dashboardData.systemStatus.website.currentVisitors !== undefined && (
+                        <> • {dashboardData.systemStatus.website.currentVisitors} aktív látogató</>
+                      )}
+                    </p>
                   </div>
                 </div>
               </div>
