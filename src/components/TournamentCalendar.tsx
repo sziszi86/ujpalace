@@ -20,6 +20,53 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
   const [loading, setLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
 
+  const isTableLive = (schedule: string): boolean => {
+    if (!schedule) return false;
+    
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentDay = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+    
+    // Parse schedule like "Hétfő-Vasárnap 18:00-06:00" or "Péntek-Vasárnap 20:00-04:00"
+    const schedulePattern = /(\w+)-(\w+)\s+(\d{1,2}):(\d{2})-(\d{1,2}):(\d{2})/;
+    const match = schedule.match(schedulePattern);
+    
+    if (!match) return false;
+    
+    const [, startDay, endDay, startHour, startMin, endHour, endMin] = match;
+    
+    // Map Hungarian day names to numbers
+    const dayMap: { [key: string]: number } = {
+      'Hétfő': 1, 'Kedd': 2, 'Szerda': 3, 'Csütörtök': 4, 'Péntek': 5, 'Szombat': 6, 'Vasárnap': 0
+    };
+    
+    const startDayNum = dayMap[startDay];
+    const endDayNum = dayMap[endDay];
+    const startTime = parseInt(startHour) * 60 + parseInt(startMin);
+    const endTime = parseInt(endHour) * 60 + parseInt(endMin);
+    const currentTime = currentHour * 60 + now.getMinutes();
+    
+    // Check if current day is in range
+    let dayInRange = false;
+    if (startDayNum <= endDayNum) {
+      dayInRange = currentDay >= startDayNum && currentDay <= endDayNum;
+    } else {
+      // Week wraps around (e.g., Friday-Sunday)
+      dayInRange = currentDay >= startDayNum || currentDay <= endDayNum;
+    }
+    
+    if (!dayInRange) return false;
+    
+    // Check if current time is in range
+    if (endTime < startTime) {
+      // Time wraps around midnight (e.g., 18:00-06:00)
+      return currentTime >= startTime || currentTime <= endTime;
+    } else {
+      // Normal time range (e.g., 20:00-23:00)
+      return currentTime >= startTime && currentTime <= endTime;
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -497,7 +544,9 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
                     <p className="text-poker-muted">Jelenleg nincsenek aktív cash game asztalok.</p>
                   </div>
                 ) : (
-                  cashGames.map(cashGame => (
+                  cashGames.map(cashGame => {
+                    const isLive = isTableLive(cashGame.schedule);
+                    return (
                     <div key={cashGame.id} className="relative">
                       {/* Calendar Button */}
                       <button
@@ -521,12 +570,19 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
                         <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 group-hover:scale-105">
                           <div className="flex items-center justify-between mb-4">
                             <h3 className="font-bold text-poker-dark group-hover:text-poker-primary transition-colors">{cashGame.name}</h3>
-                            {cashGame.active === true && (
-                              <div className="flex items-center text-green-600">
-                                <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse" />
-                                <span className="text-xs font-medium">Aktív</span>
-                              </div>
-                            )}
+                            <div className="flex items-center">
+                              {isLive ? (
+                                <div className="flex items-center bg-green-500 text-white px-3 py-1 rounded-full">
+                                  <div className="w-2 h-2 bg-green-200 rounded-full mr-2 animate-pulse" />
+                                  <span className="text-xs font-bold">ÉLŐ ASZTAL</span>
+                                </div>
+                              ) : cashGame.active === true && (
+                                <div className="flex items-center text-green-600">
+                                  <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse" />
+                                  <span className="text-xs font-medium">Aktív</span>
+                                </div>
+                              )}
+                            </div>
                           </div>
                           
                           <p className="text-sm text-poker-muted mb-4 line-clamp-2">
@@ -552,7 +608,7 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
                         </div>
                       </Link>
                     </div>
-                  ))
+                  );}))
                 )}
               </div>
             </div>

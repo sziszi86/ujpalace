@@ -65,6 +65,53 @@ export default function CashGameListPage() {
     }
   };
 
+  const isTableLive = (schedule: string): boolean => {
+    if (!schedule) return false;
+    
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentDay = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+    
+    // Parse schedule like "Hétfő-Vasárnap 18:00-06:00" or "Péntek-Vasárnap 20:00-04:00"
+    const schedulePattern = /(\w+)-(\w+)\s+(\d{1,2}):(\d{2})-(\d{1,2}):(\d{2})/;
+    const match = schedule.match(schedulePattern);
+    
+    if (!match) return false;
+    
+    const [, startDay, endDay, startHour, startMin, endHour, endMin] = match;
+    
+    // Map Hungarian day names to numbers
+    const dayMap: { [key: string]: number } = {
+      'Hétfő': 1, 'Kedd': 2, 'Szerda': 3, 'Csütörtök': 4, 'Péntek': 5, 'Szombat': 6, 'Vasárnap': 0
+    };
+    
+    const startDayNum = dayMap[startDay];
+    const endDayNum = dayMap[endDay];
+    const startTime = parseInt(startHour) * 60 + parseInt(startMin);
+    const endTime = parseInt(endHour) * 60 + parseInt(endMin);
+    const currentTime = currentHour * 60 + now.getMinutes();
+    
+    // Check if current day is in range
+    let dayInRange = false;
+    if (startDayNum <= endDayNum) {
+      dayInRange = currentDay >= startDayNum && currentDay <= endDayNum;
+    } else {
+      // Week wraps around (e.g., Friday-Sunday)
+      dayInRange = currentDay >= startDayNum || currentDay <= endDayNum;
+    }
+    
+    if (!dayInRange) return false;
+    
+    // Check if current time is in range
+    if (endTime < startTime) {
+      // Time wraps around midnight (e.g., 18:00-06:00)
+      return currentTime >= startTime || currentTime <= endTime;
+    } else {
+      // Normal time range (e.g., 20:00-23:00)
+      return currentTime >= startTime && currentTime <= endTime;
+    }
+  };
+
   const filteredCashGames = cashGames.filter(cashGame => {
     if (filterActive === 'all') return true;
     return filterActive === 'active' ? cashGame.active : !cashGame.active;
@@ -145,7 +192,9 @@ export default function CashGameListPage() {
         {/* Cash Game List */}
         {!loading && (
           <div className="space-y-4">
-            {sortedCashGames.map((cashGame) => (
+            {sortedCashGames.map((cashGame) => {
+              const isLive = isTableLive(cashGame.schedule);
+              return (
             <div key={cashGame.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
               <div className="flex flex-col lg:flex-row">
                 {/* Game Type Header */}
@@ -155,7 +204,13 @@ export default function CashGameListPage() {
                       <div className="text-6xl mb-2">{getGameIcon(cashGame.game)}</div>
                       <div className="text-xl font-bold">{cashGame.stakes}</div>
                       <div className="text-sm opacity-90">{cashGame.game}</div>
-                      {cashGame.active && (
+                      {isLive && (
+                        <div className="absolute top-4 right-4 flex items-center bg-green-500 rounded-full px-3 py-1">
+                          <div className="w-3 h-3 bg-green-200 rounded-full mr-2 animate-pulse"></div>
+                          <span className="text-sm font-bold">ÉLŐ ASZTAL</span>
+                        </div>
+                      )}
+                      {!isLive && cashGame.active && (
                         <div className="absolute top-4 right-4 flex items-center">
                           <div className="w-3 h-3 bg-green-400 rounded-full mr-2 animate-pulse"></div>
                           <span className="text-sm font-medium">Aktív</span>
@@ -171,8 +226,11 @@ export default function CashGameListPage() {
                     <div className="mb-4 lg:mb-0">
                       <div className="flex items-center mb-2">
                         <h2 className="text-2xl font-bold text-poker-dark mr-3">{cashGame.name}</h2>
-                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${cashGame.active ? 'bg-green-500 text-white' : 'bg-gray-500 text-white'}`}>
-                          {cashGame.active ? 'Aktív' : 'Inaktív'}
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                          isLive ? 'bg-green-600 text-white animate-pulse' :
+                          cashGame.active ? 'bg-green-500 text-white' : 'bg-gray-500 text-white'
+                        }`}>
+                          {isLive ? 'ÉLŐ ASZTAL' : cashGame.active ? 'Aktív' : 'Inaktív'}
                         </span>
                         {cashGame.featured && (
                           <span className="ml-2 px-3 py-1 bg-poker-red text-white text-xs font-bold rounded-full">
@@ -215,8 +273,10 @@ export default function CashGameListPage() {
                     <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">
                       ✓ Ingyenes italszervíz
                     </span>
-                    <span className="px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full">
-                      Menetrend: {cashGame.schedule}
+                    <span className={`px-2 py-1 text-xs rounded-full ${
+                      isLive ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'
+                    }`}>
+                      {isLive ? '🟢 ÉLŐBEN' : 'Menetrend'}: {cashGame.schedule}
                     </span>
                     {cashGame.featured && (
                       <span className="px-2 py-1 bg-poker-red text-white text-xs rounded-full">
@@ -244,7 +304,8 @@ export default function CashGameListPage() {
                 </div>
               </div>
             </div>
-            ))}
+            );
+            })}
           </div>
         )}
 
