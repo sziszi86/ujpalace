@@ -70,52 +70,18 @@ export async function PUT(
     }
 
     const body = await request.json();
-    const {
-      title,
-      description,
-      category,
-      date,
-      time,
-      buy_in,
-      guarantee_amount,
-      structure,
-      max_players,
-      status,
-      featured,
-      image_url,
-      special_notes
-    } = body;
+    
+    console.log('PUT /api/admin/tournaments/[id] called with ID:', tournamentId);
+    console.log('Body:', body);
 
-    if (!title || !date || !time) {
+    if (!body.title) {
       return NextResponse.json(
-        { error: 'Title, date and time are required' },
+        { error: 'Title is required' },
         { status: 400 }
       );
     }
 
-    const affectedRows = await executeUpdate(`
-      UPDATE tournaments 
-      SET title = $1, description = $2, category = $3, date = $4, time = $5,
-          buy_in = $6, guarantee_amount = $7, structure = $8, max_players = $9,
-          status = $10, featured = $11, image_url = $12, special_notes = $13,
-          updated_at = CURRENT_TIMESTAMP
-      WHERE id = $14
-    `, [
-      title,
-      description || null,
-      category || null,
-      date,
-      time,
-      parseFloat(buy_in) || 0,
-      parseFloat(guarantee_amount) || null,
-      structure || null,
-      parseInt(max_players) || null,
-      status || 'upcoming',
-      featured ? true : false,
-      image_url || null,
-      special_notes || null,
-      tournamentId
-    ]);
+    const affectedRows = await updateTournament(tournamentId, body);
 
     if (affectedRows === 0) {
       return NextResponse.json(
@@ -159,9 +125,9 @@ export async function DELETE(
       );
     }
 
-    const affectedRows = await executeUpdate(`
-      DELETE FROM tournaments WHERE id = $1
-    `, [tournamentId]);
+    console.log('DELETE /api/admin/tournaments/[id] called with ID:', tournamentId);
+    
+    const affectedRows = await deleteTournament(tournamentId);
 
     if (affectedRows === 0) {
       return NextResponse.json(
