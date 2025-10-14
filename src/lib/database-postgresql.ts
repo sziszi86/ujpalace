@@ -273,7 +273,9 @@ export async function getAllCashGames(activeOnly: boolean = true) {
            cg.small_blind || '/' || cg.big_blind as stakes,
            cg.min_buyin as min_buy_in,
            cg.max_buyin as max_buy_in,
-           'Cash Game' as name
+           COALESCE(cg.name, 'Cash Game') as name,
+           cg.description,
+           cg.schedule
     FROM cash_games cg 
     LEFT JOIN cash_game_types cgt ON cg.game_type_id = cgt.id
   `;

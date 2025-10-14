@@ -28,6 +28,7 @@ const menuItems: MenuItem[] = [
   { id: 'about', label: 'Rólunk', href: '/rolunk' },
   { id: 'gallery', label: 'Galéria', href: '/gallery' },
   { id: 'blog', label: 'Hírek', href: '/blog' },
+  { id: 'player-protection', label: 'Játékosvédelem', href: '/jatekosvedelm' },
   { id: 'contact', label: 'Kapcsolat', href: '/contact' },
 ];
 
@@ -45,9 +46,17 @@ export default function Header() {
               <span className="w-2 h-2 bg-white rounded-full animate-pulse opacity-80"></span>
               <span className="font-medium text-white/95">📍 9700 Szombathely, Semmelweis u. 2.</span>
             </div>
-            <div className="flex items-center space-x-2 animate-fade-in" style={{animationDelay: '0.2s'}}>
+            <div className="flex items-center space-x-2 animate-fade-in" style={{animationDelay: '0.1s'}}>
               <span className="w-2 h-2 bg-white rounded-full animate-pulse opacity-80"></span>
               <span className="font-medium text-white/95">📞 +36 30 971 5832</span>
+            </div>
+            <div className="flex items-center space-x-2 animate-fade-in" style={{animationDelay: '0.2s'}}>
+              <span className="w-2 h-2 bg-orange-300 rounded-full animate-pulse"></span>
+              <span className="font-medium text-white/95">⚠️ 18+ | Játékosvédelem: 
+                <Link href="/jatekosvedelm" className="ml-1 text-poker-accent hover:text-white underline transition-colors">
+                  36 80 205 352
+                </Link>
+              </span>
             </div>
           </div>
           <div className="flex flex-col lg:flex-row items-center space-y-2 lg:space-y-0 lg:space-x-6">

@@ -470,7 +470,7 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
                           {/* Tournament Image */}
                           <div 
                             className="h-32 bg-cover bg-center relative"
-                            style={{ backgroundImage: `url(${tournament.image || 'https://images.unsplash.com/photo-1511193311914-0346f16efe90?w=400'})` }}
+                            style={{ backgroundImage: `url(${tournament.image_url || 'https://images.unsplash.com/photo-1511193311914-0346f16efe90?w=400'})` }}
                           >
                             <div className="absolute inset-0 bg-gradient-to-t from-poker-primary/80 to-transparent" />
                             <div className="absolute bottom-2 left-2 right-2">
@@ -524,7 +524,7 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
           )}
 
           {/* Cash Games */}
-          {(showCashGames && (selectedFilter === 'all' || selectedFilter === 'cash-games')) || onlyShowCashGames && (
+          {((showCashGames && (selectedFilter === 'all' || selectedFilter === 'cash-games')) || onlyShowCashGames) && (
             <div className="card-modern p-8">
               <h2 className="text-3xl font-bold text-poker-dark mb-6 flex items-center">
                 <span className="w-12 h-12 bg-gradient-to-r from-poker-green to-poker-darkgreen rounded-xl flex items-center justify-center mr-4">

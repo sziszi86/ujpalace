@@ -400,10 +400,10 @@ export default function AdminTournamentsPage() {
                     <div className="flex items-center">
                       {/* Tournament Image */}
                       <div className="flex-shrink-0 mr-4">
-                        {tournament.image_url_url ? (
+                        {tournament.image_url ? (
                           <img
                             className="h-12 w-16 object-cover rounded-lg border"
-                            src={tournament.image_url_url}
+                            src={tournament.image_url}
                             alt={tournament.title}
                             onError={(e) => {
                               const target = e.target as HTMLImageElement;
