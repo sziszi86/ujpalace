@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(PGPASSWORD=omxEYrIRruGJUuVONphKwkmtIBfVsbrq psql:*)"
+      "Bash(PGPASSWORD=omxEYrIRruGJUuVONphKwkmtIBfVsbrq psql:*)",
+      "Bash(brew search:*)",
+      "Read(//opt/homebrew/Cellar/postgresql@17/17.6/bin/**)"
     ],
     "deny": [],
     "ask": []
