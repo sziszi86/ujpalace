@@ -101,14 +101,15 @@ export async function POST(request: NextRequest) {
       // Save to database - store image data in images table
       const result = await executeInsert(`
         INSERT INTO images 
-        (filename, original_name, mime_type, size_bytes, data)
-        VALUES ($1, $2, $3, $4, $5)
+        (filename, original_name, mime_type, size_bytes, data, category)
+        VALUES ($1, $2, $3, $4, $5, $6)
       `, [
         filename,
         file.name,
         file.type,
         optimizedSize,
-        optimizedBuffer
+        optimizedBuffer,
+        category
       ]);
 
       const uploadResult: UploadResult = {
@@ -137,14 +138,15 @@ export async function POST(request: NextRequest) {
       
       const result = await executeInsert(`
         INSERT INTO images 
-        (filename, original_name, mime_type, size_bytes, data)
-        VALUES ($1, $2, $3, $4, $5)
+        (filename, original_name, mime_type, size_bytes, data, category)
+        VALUES ($1, $2, $3, $4, $5, $6)
       `, [
         filename,
         file.name,
         file.type,
         file.size,
-        buffer
+        buffer,
+        category
       ]);
 
       return NextResponse.json({

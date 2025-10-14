@@ -19,7 +19,7 @@ export async function GET(request: Request) {
         filename as title,
         original_name as alt_text,
         filename,
-        'gallery' as category,
+        COALESCE(category, 'gallery') as category,
         size_bytes as size,
         1 as active,
         created_at

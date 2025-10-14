@@ -11,7 +11,7 @@ export async function GET() {
         original_name as title,
         filename,
         original_name as alt_text,
-        'gallery' as category,
+        COALESCE(category, 'gallery') as category,
         size_bytes as size,
         created_at
       FROM images

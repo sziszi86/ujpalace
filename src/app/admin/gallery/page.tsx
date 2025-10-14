@@ -20,6 +20,7 @@ export default function AdminGalleryPage() {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [uploadCategory, setUploadCategory] = useState<string>('terem');
   const { showAlert } = useAlert();
 
   useEffect(() => {
@@ -65,7 +66,7 @@ export default function AdminGalleryPage() {
       try {
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('category', 'gallery');
+        formData.append('category', uploadCategory);
 
         const response = await fetch('/api/admin/upload', {
           method: 'POST',
@@ -174,7 +175,11 @@ export default function AdminGalleryPage() {
         {/* Category Selection */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-poker-dark mb-2">Kategória</label>
-          <select className="w-full md:w-64 px-3 py-2 border border-poker-light rounded-lg focus:outline-none focus:ring-2 focus:ring-poker-primary">
+          <select 
+            value={uploadCategory}
+            onChange={(e) => setUploadCategory(e.target.value)}
+            className="w-full md:w-64 px-3 py-2 border border-poker-light rounded-lg focus:outline-none focus:ring-2 focus:ring-poker-primary"
+          >
             <option value="terem">Terem</option>
             <option value="versenyek">Versenyek</option>
             <option value="cash-game">Cash Game</option>

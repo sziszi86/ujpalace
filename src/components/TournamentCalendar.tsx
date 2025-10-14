@@ -300,7 +300,6 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
                 `${currentDate.toLocaleDateString('hu-HU', { year: 'numeric', month: 'long' })}` :
                 monthYear
               }
-              {onlyShowCashGames && <span className="text-sm text-blue-500 ml-2">({cashGames.length} cash games)</span>}
             </h2>
             
             <button
