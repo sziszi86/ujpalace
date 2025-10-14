@@ -78,5 +78,8 @@ maintenance.html
 import-database.php
 server.js
 
+# Database backups directory
+backups/
+
 # Deployment files (keep deploy.js for deployment script)
 !deploy.js

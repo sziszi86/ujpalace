@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Image from 'next/image';
+import ImageUploader from '@/components/admin/ImageUploader';
 
 interface AboutPage {
   id: number;
@@ -31,7 +32,6 @@ export default function EditAboutPage() {
   const [newFeature, setNewFeature] = useState('');
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
-  const [imageUploading, setImageUploading] = useState(false);
 
   useEffect(() => {
     if (!isNew) {
@@ -69,12 +69,19 @@ export default function EditAboutPage() {
     setSaving(true);
 
     try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        router.push('/admin/login');
+        return;
+      }
+
       const response = await fetch(
         isNew ? '/api/admin/about' : `/api/admin/about/${params.id}`,
         {
           method: isNew ? 'POST' : 'PUT',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify(formData),
         }
@@ -111,33 +118,6 @@ export default function EditAboutPage() {
     });
   };
 
-  const handleImageUpload = async (file: File) => {
-    setImageUploading(true);
-    const formData = new FormData();
-    formData.append('image', file);
-
-    try {
-      const response = await fetch('/api/images', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setFormData(prev => ({
-          ...prev,
-          image: data.url
-        }));
-      } else {
-        alert('Hiba történt a kép feltöltése során!');
-      }
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      alert('Hiba történt a kép feltöltése során!');
-    } finally {
-      setImageUploading(false);
-    }
-  };
 
   if (loading) {
     return (
@@ -217,53 +197,11 @@ export default function EditAboutPage() {
         <div className="bg-white shadow rounded-lg p-6">
           <h2 className="text-lg font-medium text-gray-900 mb-6">Kép feltöltés</h2>
           
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Kép
-            </label>
-            <div className="flex items-center space-x-4">
-              <div className="flex-1">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      handleImageUpload(file);
-                    }
-                  }}
-                  disabled={imageUploading}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-poker-primary focus:border-transparent"
-                />
-              </div>
-              {imageUploading && (
-                <div className="text-sm text-gray-500">Feltöltés...</div>
-              )}
-            </div>
-            
-            {formData.image && (
-              <div className="mt-4">
-                <div className="relative inline-block">
-                  <Image
-                    src={formData.image}
-                    alt="Előnézet"
-                    width={200}
-                    height={150}
-                    className="rounded-lg border border-gray-300 object-cover"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setFormData({ ...formData, image: '' })}
-                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+          <ImageUploader
+            label="Rólunk oldal képe"
+            value={formData.image}
+            onChange={(url) => setFormData({ ...formData, image: url })}
+          />
         </div>
 
         <div className="bg-white shadow rounded-lg p-6">

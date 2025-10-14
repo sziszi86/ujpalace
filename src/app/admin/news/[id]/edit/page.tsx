@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAlert } from '@/components/admin/Alert';
+import ImageUploader from '@/components/admin/ImageUploader';
 
 interface NewsArticle {
   id: number;
@@ -217,21 +218,18 @@ export default function EditNewsPage() {
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Image URL */}
+          <div className="grid grid-cols-1 gap-6">
+            {/* Image Upload */}
             <div>
-              <label htmlFor="image_url" className="block text-sm font-medium text-gray-700 mb-2">
-                Kép URL
-              </label>
-              <input
-                type="url"
-                id="image_url"
+              <ImageUploader
+                label="Cikk képe"
                 value={article.image_url || ''}
-                onChange={(e) => setArticle({...article, image_url: e.target.value})}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-poker-green"
-                placeholder="https://example.com/image.jpg"
+                onChange={(url) => setArticle({...article, image_url: url})}
               />
             </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
             {/* Author */}
             <div>

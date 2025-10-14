@@ -97,8 +97,8 @@ function AdminLayoutContent({ children }: AdminLayoutProps) {
             <div key={item.name}>
               {item.submenu ? (
                 <>
-                  <button
-                    onClick={() => toggleSubmenu(item.name)}
+                  <Link
+                    href={item.href}
                     className={`w-full flex items-center justify-between px-4 py-3 text-gray-700 hover:bg-poker-green hover:text-white transition-colors ${
                       isMenuActive(item) ? 'bg-poker-green text-white' : ''
                     }`}
@@ -110,18 +110,27 @@ function AdminLayoutContent({ children }: AdminLayoutProps) {
                       )}
                     </div>
                     {sidebarOpen && (
-                      <svg
-                        className={`w-4 h-4 transition-transform ${
-                          expandedMenus.includes(item.name) ? 'rotate-180' : ''
-                        }`}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          toggleSubmenu(item.name);
+                        }}
+                        className="p-1 hover:bg-white/20 rounded"
                       >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
+                        <svg
+                          className={`w-4 h-4 transition-transform ${
+                            expandedMenus.includes(item.name) ? 'rotate-180' : ''
+                          }`}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
                     )}
-                  </button>
+                  </Link>
                   {sidebarOpen && expandedMenus.includes(item.name) && (
                     <div className="bg-gray-50">
                       {item.submenu.map((subitem) => (

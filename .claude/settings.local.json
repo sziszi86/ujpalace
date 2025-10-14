@@ -9,7 +9,9 @@
       "Bash(PGPASSWORD=omxEYrIRruGJUuVONphKwkmtIBfVsbrq psql -h hopper.proxy.rlwy.net -U postgres -p 55757 -d railway -c \"SELECT COUNT(*) FROM gallery_images;\")",
       "Bash(PGPASSWORD=omxEYrIRruGJUuVONphKwkmtIBfVsbrq psql -h hopper.proxy.rlwy.net -U postgres -p 55757 -d railway -c \"SELECT COUNT(*) FROM images;\")",
       "Bash(pkill:*)",
-      "WebFetch(domain:palace-poker.hu)"
+      "WebFetch(domain:palace-poker.hu)",
+      "Bash(brew list:*)",
+      "Bash(pg_dump:*)"
     ],
     "deny": [],
     "ask": []

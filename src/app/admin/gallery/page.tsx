@@ -19,8 +19,6 @@ export default function AdminGalleryPage() {
   const [images, setImages] = useState<GalleryImage[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [uploadCategory, setUploadCategory] = useState<string>('terem');
   const { showAlert } = useAlert();
 
   useEffect(() => {
@@ -66,7 +64,6 @@ export default function AdminGalleryPage() {
       try {
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('category', uploadCategory);
 
         const response = await fetch('/api/admin/upload', {
           method: 'POST',
@@ -148,10 +145,7 @@ export default function AdminGalleryPage() {
     }
   };
 
-  const categories = Array.from(new Set(images.map(img => img.category).filter(Boolean)));
-  const filteredImages = selectedCategory === 'all' 
-    ? images 
-    : images.filter(img => img.category === selectedCategory);
+  // Show all images, no categories
 
   if (loading) {
     return (
@@ -172,22 +166,6 @@ export default function AdminGalleryPage() {
       <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
         <h2 className="text-xl font-semibold text-poker-dark mb-4">Új képek feltöltése</h2>
         
-        {/* Category Selection */}
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-poker-dark mb-2">Kategória</label>
-          <select 
-            value={uploadCategory}
-            onChange={(e) => setUploadCategory(e.target.value)}
-            className="w-full md:w-64 px-3 py-2 border border-poker-light rounded-lg focus:outline-none focus:ring-2 focus:ring-poker-primary"
-          >
-            <option value="terem">Terem</option>
-            <option value="versenyek">Versenyek</option>
-            <option value="cash-game">Cash Game</option>
-            <option value="csapat">Csapat</option>
-            <option value="események">Események</option>
-            <option value="egyéb">Egyéb</option>
-          </select>
-        </div>
 
         <div className="border-2 border-dashed border-poker-light rounded-lg p-8 text-center">
           <input
@@ -253,47 +231,21 @@ export default function AdminGalleryPage() {
           <div className="flex items-center">
             <div className="w-12 h-12 bg-orange-500/20 rounded-xl flex items-center justify-center mr-4">
               <svg className="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
             </div>
             <div>
-              <p className="text-sm font-medium text-poker-muted">Kategóriák</p>
-              <p className="text-2xl font-bold text-poker-dark">{categories.length}</p>
+              <p className="text-sm font-medium text-poker-muted">Galéria</p>
+              <p className="text-2xl font-bold text-poker-dark">Összes kép</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Category Filter */}
-      <div className="flex flex-wrap gap-2 mb-6">
-        <button
-          onClick={() => setSelectedCategory('all')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            selectedCategory === 'all'
-              ? 'bg-poker-primary text-white'
-              : 'bg-white text-poker-dark hover:bg-poker-light border border-poker-light'
-          }`}
-        >
-          Összes ({images.length})
-        </button>
-        {categories.map(category => (
-          <button
-            key={category}
-            onClick={() => setSelectedCategory(category || 'all')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors capitalize ${
-              selectedCategory === category
-                ? 'bg-poker-primary text-white'
-                : 'bg-white text-poker-dark hover:bg-poker-light border border-poker-light'
-            }`}
-          >
-            {category} ({images.filter(img => img.category === category).length})
-          </button>
-        ))}
-      </div>
 
       {/* Images Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {filteredImages.map((image) => (
+        {images.map((image) => (
           <div key={image.id} className="bg-white rounded-xl shadow-lg overflow-hidden">
             <div className="relative h-48">
               <Image
@@ -319,11 +271,6 @@ export default function AdminGalleryPage() {
             
             <div className="p-4">
               <h3 className="font-semibold text-poker-dark mb-1 truncate">{image.title}</h3>
-              {image.category && (
-                <span className="inline-block bg-poker-light text-poker-primary text-xs px-2 py-1 rounded-full capitalize mb-2">
-                  {image.category}
-                </span>
-              )}
               {image.size && (
                 <p className="text-xs text-poker-muted mb-2">
                   Méret: {(image.size / 1024 / 1024).toFixed(2)} MB
@@ -342,7 +289,7 @@ export default function AdminGalleryPage() {
         ))}
       </div>
 
-      {filteredImages.length === 0 && (
+      {images.length === 0 && (
         <div className="text-center py-12">
           <div className="text-poker-muted mb-4">
             <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -351,10 +298,7 @@ export default function AdminGalleryPage() {
           </div>
           <h3 className="text-lg font-medium text-poker-dark mb-2">Nincsenek képek</h3>
           <p className="text-poker-muted mb-4">
-            {selectedCategory === 'all' 
-              ? 'Még nincsenek feltöltött képek.' 
-              : `Nincsenek képek a "${selectedCategory}" kategóriában.`
-            }
+            Még nincsenek feltöltött képek a galériában.
           </p>
         </div>
       )}

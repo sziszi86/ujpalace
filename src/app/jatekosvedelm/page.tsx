@@ -30,66 +30,142 @@ export default function PlayerProtectionPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Main Content */}
           <div className="space-y-8">
-            {/* Warning Section */}
+            {/* Age Restrictions */}
             <div className="bg-white rounded-xl shadow-lg p-6">
               <h3 className="text-2xl font-bold text-poker-dark mb-4 flex items-center">
-                <span className="text-3xl mr-3">⚠️</span>
-                Fontos Figyelmeztetés
+                <span className="text-3xl mr-3">🔞</span>
+                Korhatár Megkötések
               </h3>
               <div className="space-y-4 text-gray-700">
-                <p className="font-semibold text-red-600">
-                  • Szerencsejátékban csak 18 éven felüliek vehetnek részt!
-                </p>
-                <p className="font-semibold text-red-600">
-                  • A túlzásba vitt szerencsejáték ártalmas, függőséget okozhat!
+                <p className="font-semibold text-red-600 text-lg">
+                  • Szerencsejátékban kizárólag 18 éven felüliek vehetnek részt!
                 </p>
                 <p>
-                  Ha úgy érzi, hogy a szerencsejáték problémát jelent az életében, 
-                  vagy szeretne segítséget kérni, ne habozzon kapcsolatba lépni 
-                  a játékosvédelmi szolgálatokkal.
+                  A szerencsejáték szervezők kötelesek a regisztráció és belépési pontokon 
+                  ellenőrizni a résztvevők életkorát. A 18 éven aluliak számára a 
+                  szerencsejáték tevékenységek szigorúan tilosak.
+                </p>
+                <p className="bg-red-50 p-4 rounded-lg border-l-4 border-red-500">
+                  <strong>Figyelem:</strong> A korhatár ellenőrzés minden esetben kötelező, 
+                  és a szervezők felelősek ennek betartásáért.
                 </p>
               </div>
             </div>
 
-            {/* Player Protection Measures */}
+            {/* Responsible Gambling Helpline */}
             <div className="bg-white rounded-xl shadow-lg p-6">
               <h3 className="text-2xl font-bold text-poker-dark mb-4 flex items-center">
-                <span className="text-3xl mr-3">🛡️</span>
-                Játékosvédelmi Intézkedések
+                <span className="text-3xl mr-3">📞</span>
+                Felelős Szerencsejáték Segélyvonal
               </h3>
               <div className="space-y-4 text-gray-700">
-                <div>
-                  <h4 className="font-semibold text-poker-dark mb-2">Önkizárás</h4>
-                  <p>Lehetőség van arra, hogy saját maga kérje kizárását a szerencsejáték szervezőknél.</p>
+                <div className="text-center bg-green-50 p-6 rounded-lg">
+                  <h4 className="text-3xl font-bold text-green-600 mb-2">80/205-352</h4>
+                  <p className="text-lg font-semibold text-green-800">Zöld Szám - Ingyenes Országos Segélyvonal</p>
+                  <p className="text-green-700 mt-2">24 órában elérhető • Anonim bejelentés lehetséges</p>
                 </div>
-                <div>
-                  <h4 className="font-semibold text-poker-dark mb-2">Játékidő korlátozás</h4>
-                  <p>Beállíthatja a maximális játékidőt és tét összegeket.</p>
+                <p>
+                  A segélyvonal 2 perces időkeretet biztosít a problémák bejelentésére. 
+                  A szolgáltatás ingyenes, országosan elérhető, és lehetőség van 
+                  anonim bejelentésre is.
+                </p>
+              </div>
+            </div>
+
+            {/* Self-Exclusion Options */}
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h3 className="text-2xl font-bold text-poker-dark mb-4 flex items-center">
+                <span className="text-3xl mr-3">🚫</span>
+                Önkizárási Lehetőségek
+              </h3>
+              <div className="space-y-4 text-gray-700">
+                <p>
+                  A játékosok önkéntesen korlátozhatják szerencsejáték hozzáférésüket. 
+                  Az alábbi opciók állnak rendelkezésre:
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="bg-blue-50 p-4 rounded-lg text-center">
+                    <h4 className="font-bold text-blue-800">1 év</h4>
+                    <p className="text-sm text-blue-600">Rövid távú kizárás</p>
+                  </div>
+                  <div className="bg-orange-50 p-4 rounded-lg text-center">
+                    <h4 className="font-bold text-orange-800">3 év</h4>
+                    <p className="text-sm text-orange-600">Középtávú kizárás</p>
+                  </div>
+                  <div className="bg-red-50 p-4 rounded-lg text-center">
+                    <h4 className="font-bold text-red-800">5 év</h4>
+                    <p className="text-sm text-red-600">Hosszú távú kizárás</p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-semibold text-poker-dark mb-2">Családi védelem</h4>
-                  <p>Családtagok kérhetik szerettük kizárását megfelelő eljárás keretében.</p>
+                <ul className="list-disc list-inside space-y-2">
+                  <li>Korlátozható specifikus játéktípusok vagy szerencsejáték szervezők</li>
+                  <li>Vonatkozik kaszinókra, kártyatermekre és online szerencsejátékra</li>
+                  <li>A kizárás időtartama alatt nem változtatható meg</li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Support Resources */}
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h3 className="text-2xl font-bold text-poker-dark mb-4 flex items-center">
+                <span className="text-3xl mr-3">🤝</span>
+                Támogató Források
+              </h3>
+              <div className="space-y-4 text-gray-700">
+                <p>
+                  5 szervezet nyújt segítséget szerencsejáték függőség esetén:
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="border border-gray-200 p-4 rounded-lg">
+                    <h4 className="font-semibold text-poker-dark mb-2">Emberbarát Alapítvány</h4>
+                    <p className="text-sm">Szerencsejáték függőség kezelése és megelőzése</p>
+                  </div>
+                  <div className="border border-gray-200 p-4 rounded-lg">
+                    <h4 className="font-semibold text-poker-dark mb-2">Nemzeti Játékos Jogok Egyesülete</h4>
+                    <p className="text-sm">Játékosok jogainak védelme és támogatása</p>
+                  </div>
+                  <div className="border border-gray-200 p-4 rounded-lg">
+                    <h4 className="font-semibold text-poker-dark mb-2">Lucky Help Közhasznú Alapítvány</h4>
+                    <p className="text-sm">Szakszerű segítségnyújtás és rehabilitáció</p>
+                  </div>
+                  <div className="border border-gray-200 p-4 rounded-lg">
+                    <h4 className="font-semibold text-poker-dark mb-2">Walnut Alapítvány</h4>
+                    <p className="text-sm">Családi támogatás és tanácsadás</p>
+                  </div>
+                </div>
+                <div className="border border-gray-200 p-4 rounded-lg">
+                  <h4 className="font-semibold text-poker-dark mb-2">Játékos Barát Kft.</h4>
+                  <p className="text-sm">Komplex szolgáltatások szerencsejáték problémák esetén</p>
                 </div>
               </div>
             </div>
 
-            {/* Legal Information */}
+            {/* Legal Protection Mechanisms */}
             <div className="bg-white rounded-xl shadow-lg p-6">
               <h3 className="text-2xl font-bold text-poker-dark mb-4 flex items-center">
                 <span className="text-3xl mr-3">⚖️</span>
-                Jogi Információk
+                Jogi Védelmi Mechanizmusok
               </h3>
               <div className="space-y-4 text-gray-700">
+                <div className="bg-amber-50 p-4 rounded-lg border-l-4 border-amber-500">
+                  <h4 className="font-semibold text-amber-800 mb-2">Bírósági Gondnokság</h4>
+                  <p className="text-amber-700">
+                    Súlyos szerencsejáték függőség esetén lehetőség van bírósági 
+                    gondnokság alá helyezésre, amely korlátozza az egyén pénzügyi 
+                    döntéshozatali képességét.
+                  </p>
+                </div>
                 <p>
-                  A szerencsejáték szervezése és lebonyolítása szigorú jogszabályi 
-                  keretek között történik Magyarországon. A játékosvédelem 
-                  biztosítása minden szerencsejáték szervező kötelessége.
+                  Ez a mechanizmus védelmet nyújt azoknak, akik elvesztették az 
+                  irányítást szerencsejáték szokásaik felett, és családjuk vagy 
+                  önmaguk védelmére van szükség.
                 </p>
                 <div>
                   <h4 className="font-semibold text-poker-dark mb-2">Kapcsolódó jogszabályok:</h4>
                   <ul className="list-disc list-inside space-y-1 text-sm">
                     <li>1991. évi XXXIV. törvény a szerencsejáték szervezéséről</li>
                     <li>Az Európai Unió vonatkozó irányelvei</li>
+                    <li>Ptk. gondnokságra vonatkozó szabályai</li>
                     <li>Adatvédelmi és fogyasztóvédelmi jogszabályok</li>
                   </ul>
                 </div>
@@ -130,19 +206,23 @@ export default function PlayerProtectionPage() {
               <div className="space-y-3 text-gray-700">
                 <div>
                   <h4 className="font-semibold text-poker-dark">Emberbarát Alapítvány</h4>
-                  <p className="text-sm">Szenvedélybetegek segítése</p>
+                  <p className="text-sm">Szerencsejáték függőség kezelése és megelőzése</p>
                 </div>
                 <div>
-                  <h4 className="font-semibold text-poker-dark">Szerencsés Segítség Alapítvány</h4>
-                  <p className="text-sm">Játékfüggőség kezelése</p>
+                  <h4 className="font-semibold text-poker-dark">Nemzeti Játékos Jogok Egyesülete</h4>
+                  <p className="text-sm">Játékosok jogainak védelme és támogatása</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-poker-dark">Lucky Help Közhasznú Alapítvány</h4>
+                  <p className="text-sm">Szakszerű segítségnyújtás és rehabilitáció</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-poker-dark">Walnut Alapítvány</h4>
+                  <p className="text-sm">Családi támogatás és tanácsadás</p>
                 </div>
                 <div>
                   <h4 className="font-semibold text-poker-dark">Játékos Barát Kft.</h4>
-                  <p className="text-sm">Felelős szerencsejáték támogatása</p>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-poker-dark">Diótörés Alapítvány</h4>
-                  <p className="text-sm">Család- és függőségvédelem</p>
+                  <p className="text-sm">Komplex szolgáltatások szerencsejáték problémák esetén</p>
                 </div>
               </div>
             </div>

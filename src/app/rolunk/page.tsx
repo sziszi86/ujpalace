@@ -14,14 +14,15 @@ interface AboutPage {
 }
 
 export default function AboutPage() {
-  const [aboutData, setAboutData] = useState<AboutPage[]>([]);
+  const [aboutData, setAboutData] = useState<AboutPage | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchAboutData = async () => {
       try {
-        const response = await fetch('/api/about');
+        // Fetch only the first about page (ID 1)
+        const response = await fetch('/api/admin/about/1');
         if (response.ok) {
           const data = await response.json();
           setAboutData(data);
@@ -71,7 +72,7 @@ export default function AboutPage() {
       </div>
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {aboutData.length === 0 ? (
+        {!aboutData ? (
           <div className="space-y-12">
             {/* Main Content */}
             <div className="card-modern p-8">
@@ -169,44 +170,82 @@ export default function AboutPage() {
           </div>
         ) : (
           <div className="space-y-8">
-            {aboutData.map((page, index) => (
-              <div key={page.id}>
-                <div className="card-modern overflow-hidden">
-                  {page.image && (
-                    <div className="h-64 bg-gray-200 relative overflow-hidden">
-                      <img 
-                        src={page.image} 
-                        alt={page.title}
-                        className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
-                    </div>
-                  )}
-                  <div className="p-8">
-                    <h2 className="text-3xl font-bold gradient-text mb-6">{page.title}</h2>
-                    <div className="prose prose-lg max-w-none">
-                      <div 
-                        className="text-poker-muted leading-relaxed prose-strong:text-poker-primary"
-                        dangerouslySetInnerHTML={{ __html: page.content }}
-                      />
-                    </div>
-                    {page.features && page.features.length > 0 && (
-                      <div className="mt-8 bg-poker-primary/5 rounded-lg p-6">
-                        <h3 className="text-xl font-semibold text-poker-primary mb-6">✨ Szolgáltatásaink</h3>
-                        <div className="grid md:grid-cols-2 gap-4">
-                          {page.features.map((feature, idx) => (
-                            <div key={idx} className="flex items-start space-x-3">
-                              <div className="flex-shrink-0 w-2 h-2 bg-poker-primary rounded-full mt-2"></div>
-                              <span className="text-poker-muted">{feature}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+            <div className="card-modern overflow-hidden">
+              {aboutData.image && (
+                <div className="h-80 bg-gray-200 relative overflow-hidden">
+                  <img 
+                    src={aboutData.image} 
+                    alt={aboutData.title}
+                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                  <div className="absolute bottom-6 left-6 right-6">
+                    <h2 className="text-4xl font-bold text-white mb-2 drop-shadow-lg">
+                      {aboutData.title}
+                    </h2>
                   </div>
                 </div>
+              )}
+              
+              <div className="p-8">
+                {!aboutData.image && (
+                  <h2 className="text-4xl font-bold gradient-text mb-8 text-center">
+                    {aboutData.title}
+                  </h2>
+                )}
+                
+                <div className="prose prose-lg max-w-none mb-8">
+                  <div 
+                    className="text-poker-muted leading-relaxed prose-strong:text-poker-primary prose-p:mb-6 prose-headings:text-poker-primary"
+                    dangerouslySetInnerHTML={{ __html: aboutData.content }}
+                  />
+                </div>
+                
+                {aboutData.features && aboutData.features.length > 0 && (
+                  <div className="bg-gradient-to-br from-poker-primary/5 to-poker-secondary/5 rounded-2xl p-8">
+                    <h3 className="text-2xl font-bold text-poker-primary mb-8 text-center">
+                      ✨ Szolgáltatásaink és jellemzőink
+                    </h3>
+                    <div className="grid md:grid-cols-2 gap-6">
+                      {aboutData.features.map((feature, idx) => (
+                        <div key={idx} className="flex items-start space-x-4 bg-white/50 rounded-lg p-4">
+                          <div className="flex-shrink-0 w-3 h-3 bg-poker-primary rounded-full mt-1.5"></div>
+                          <span className="text-poker-dark font-medium">{feature}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
-            ))}
+            </div>
+
+            {/* Additional info sections */}
+            <div className="grid md:grid-cols-2 gap-8">
+              <div className="card-modern p-6">
+                <h3 className="text-xl font-bold text-poker-primary mb-4 flex items-center">
+                  <span className="text-2xl mr-3">📍</span>
+                  Elérhetőség
+                </h3>
+                <div className="space-y-3 text-poker-muted">
+                  <p><strong>Cím:</strong> 9700 Szombathely, Semmelweis u. 2.</p>
+                  <p><strong>Telefon:</strong> +36 30 971 5832</p>
+                  <p><strong>Nyitva:</strong> Sze, P-Szo: 19:00-04:00</p>
+                </div>
+              </div>
+              
+              <div className="card-modern p-6">
+                <h3 className="text-xl font-bold text-poker-primary mb-4 flex items-center">
+                  <span className="text-2xl mr-3">⚠️</span>
+                  Fontos tudnivalók
+                </h3>
+                <div className="space-y-2 text-poker-muted text-sm">
+                  <p>• 18 éven aluliak nem játszhatnak</p>
+                  <p>• Első alkalommal hozd magaddal a személyigazolványod</p>
+                  <p>• A túlzásba vitt szerencsejáték ártalmas</p>
+                  <p>• <a href="/jatekosvedelm" className="text-poker-primary hover:underline">Játékosvédelmi információk</a></p>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>

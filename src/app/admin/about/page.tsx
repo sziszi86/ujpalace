@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import ImageUploader from '@/components/admin/ImageUploader';
 
 interface AboutPage {
   id: number;
@@ -15,252 +16,257 @@ interface AboutPage {
 }
 
 export default function AdminAboutPage() {
-  const [aboutPages, setAboutPages] = useState<AboutPage[]>([]);
+  const router = useRouter();
+  const [formData, setFormData] = useState({
+    title: '',
+    content: '',
+    features: [] as string[],
+    image: '',
+    active: true
+  });
+  
+  const [newFeature, setNewFeature] = useState('');
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [aboutId, setAboutId] = useState<number | null>(null);
 
   useEffect(() => {
-    const fetchAboutPages = async () => {
+    const fetchAboutPage = async () => {
       try {
-        const response = await fetch('/api/admin/about');
+        // Always fetch the first about page (ID 1)
+        const response = await fetch('/api/admin/about/1');
         if (response.ok) {
           const data = await response.json();
-          setAboutPages(data);
+          setAboutId(data.id);
+          setFormData({
+            title: data.title || '',
+            content: data.content || '',
+            features: data.features || [],
+            image: data.image || '',
+            active: data.active
+          });
         } else {
-          console.error('Failed to fetch about pages');
+          // If no about page exists, we'll create a new one
+          setAboutId(null);
         }
       } catch (error) {
-        console.error('Error fetching about pages:', error);
+        console.error('Error fetching about page:', error);
+        setAboutId(null);
       } finally {
         setLoading(false);
       }
     };
     
-    fetchAboutPages();
+    fetchAboutPage();
   }, []);
 
-  const handleDelete = async (id: number) => {
-    if (window.confirm('Biztosan törölni szeretnéd ezt az oldalt?')) {
-      try {
-        const response = await fetch(`/api/admin/about/${id}`, {
-          method: 'DELETE',
-        });
-        
-        if (!response.ok) {
-          throw new Error('Failed to delete about page');
-        }
-        
-        setAboutPages(aboutPages.filter(page => page.id !== id));
-        alert('Oldal sikeresen törölve!');
-      } catch (error) {
-        alert('Hiba történt a törlés során!');
-      }
-    }
-  };
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
 
-  const toggleActive = async (id: number) => {
     try {
-      const page = aboutPages.find(p => p.id === id);
-      if (!page) return;
-      
-      const response = await fetch(`/api/admin/about/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          title: page.title,
-          content: page.content,
-          features: page.features,
-          image: page.image,
-          active: !page.active,
-        }),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to toggle page status');
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        router.push('/admin/login');
+        return;
       }
-      
-      setAboutPages(aboutPages.map(p => 
-        p.id === id ? { ...p, active: !p.active } : p
-      ));
+
+      const response = await fetch(
+        aboutId ? `/api/admin/about/${aboutId}` : '/api/admin/about',
+        {
+          method: aboutId ? 'PUT' : 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(formData),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to save about page');
+      }
+
+      const result = await response.json();
+      if (!aboutId) {
+        setAboutId(result.id);
+      }
+
+      alert('Rólunk oldal sikeresen mentve!');
     } catch (error) {
-      alert('Hiba történt a frissítés során!');
+      console.error('Error saving about page:', error);
+      alert('Hiba történt a mentés során!');
+    } finally {
+      setSaving(false);
     }
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-    
-    return `${year}. ${month.toString().padStart(2, '0')}. ${day.toString().padStart(2, '0')}.`;
+  const addFeature = () => {
+    if (newFeature.trim()) {
+      setFormData({
+        ...formData,
+        features: [...formData.features, newFeature.trim()]
+      });
+      setNewFeature('');
+    }
+  };
+
+  const removeFeature = (index: number) => {
+    setFormData({
+      ...formData,
+      features: formData.features.filter((_, i) => i !== index)
+    });
   };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-poker-primary"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-poker-green"></div>
       </div>
     );
   }
 
   return (
     <div>
-      <div className="mb-8 flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Rólunk oldalak kezelése</h1>
-          <p className="text-gray-600 mt-2">Rólunk oldal tartalmát adhatsz hozzá, szerkesztheted és törölheted</p>
-        </div>
-        <Link
-          href="/admin/about/edit/new"
-          className="bg-poker-primary text-white px-6 py-3 rounded-lg hover:bg-poker-secondary transition-colors font-medium"
-        >
-          + Új oldal hozzáadása
-        </Link>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">Rólunk oldal szerkesztése</h1>
+        <p className="text-gray-600 mt-2">
+          Itt szerkesztheted a főoldalon megjelenő "Rólunk" szekció tartalmát
+        </p>
       </div>
 
-      <div className="bg-white shadow rounded-lg overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Oldal
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Tartalom
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Tulajdonságok
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Státusz
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Műveletek
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {aboutPages.map((page) => (
-                <tr key={page.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">
-                    <div>
-                      <div className="text-sm font-medium text-gray-900">
-                        {page.title}
-                      </div>
-                      <div className="text-xs text-gray-400">
-                        Létrehozva: {formatDate(page.created_at)}
-                      </div>
-                      <div className="text-xs text-gray-400">
-                        Frissítve: {formatDate(page.updated_at)}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900 max-w-xs">
-                      <div className="truncate">
-                        {page.content.replace(/<[^>]*>/g, '').substring(0, 100)}...
-                      </div>
-                      {page.image && (
-                        <div className="text-xs text-green-600 mt-1">
-                          Kép csatolva
-                        </div>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="text-sm text-gray-900">
-                      {page.features && page.features.length > 0 ? (
-                        <div>
-                          <div className="font-medium">Tulajdonságok: {page.features.length}</div>
-                          <div className="text-xs text-gray-500 mt-1">
-                            {page.features.slice(0, 2).map((feature, idx) => (
-                              <div key={idx} className="truncate">• {feature}</div>
-                            ))}
-                            {page.features.length > 2 && (
-                              <div className="text-gray-400">...és {page.features.length - 2} további</div>
-                            )}
-                          </div>
-                        </div>
-                      ) : (
-                        <span className="text-gray-400">Nincs tulajdonság</span>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      page.active 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-red-100 text-red-800'
-                    }`}>
-                      {page.active ? 'Aktív' : 'Inaktív'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <div className="flex justify-end space-x-1">
+      <form onSubmit={handleSubmit} className="space-y-8">
+        <div className="bg-white shadow rounded-lg p-6">
+          <h2 className="text-lg font-medium text-gray-900 mb-6">Alapadatok</h2>
+          
+          <div className="grid grid-cols-1 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Cím *
+              </label>
+              <input
+                type="text"
+                required
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-poker-green focus:border-transparent"
+                placeholder="pl. Palace Poker - Magyarország Legjobb Pókerklubja"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Leírás *
+              </label>
+              <textarea
+                required
+                rows={12}
+                value={formData.content}
+                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-poker-green focus:border-transparent"
+                placeholder="Írj egy részletes leírást a klubról, történetéről, szolgáltatásairól..."
+              />
+              <p className="mt-2 text-sm text-gray-500">
+                HTML tageket is használhatsz a formázáshoz (pl. &lt;p&gt;, &lt;strong&gt;, &lt;br&gt;).
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Státusz
+              </label>
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="active"
+                  checked={formData.active}
+                  onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
+                  className="h-4 w-4 text-poker-green focus:ring-poker-green border-gray-300 rounded"
+                />
+                <label htmlFor="active" className="ml-2 text-sm text-gray-700">
+                  Aktív (megjelenik a weboldalon)
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white shadow rounded-lg p-6">
+          <h2 className="text-lg font-medium text-gray-900 mb-6">Kép feltöltés</h2>
+          
+          <ImageUploader
+            label="Rólunk oldal főképe"
+            value={formData.image}
+            onChange={(url) => setFormData({ ...formData, image: url })}
+          />
+        </div>
+
+        <div className="bg-white shadow rounded-lg p-6">
+          <h2 className="text-lg font-medium text-gray-900 mb-6">Szolgáltatások / Jellemzők</h2>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Új szolgáltatás hozzáadása
+              </label>
+              <div className="flex space-x-2">
+                <input
+                  type="text"
+                  value={newFeature}
+                  onChange={(e) => setNewFeature(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addFeature())}
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-poker-green focus:border-transparent"
+                  placeholder="pl. Professzionális dílereink, 24 órás kiszolgálás, VIP szobák"
+                />
+                <button
+                  type="button"
+                  onClick={addFeature}
+                  className="px-4 py-2 bg-poker-green text-white rounded-md hover:bg-poker-darkgreen transition-colors"
+                >
+                  Hozzáad
+                </button>
+              </div>
+            </div>
+
+            {formData.features.length > 0 && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Jelenlegi szolgáltatások
+                </label>
+                <div className="space-y-2">
+                  {formData.features.map((feature, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-3 bg-gray-50 rounded-md"
+                    >
+                      <span className="text-sm text-gray-700">• {feature}</span>
                       <button
-                        onClick={() => toggleActive(page.id)}
-                        className={`p-2 rounded-lg transition-colors ${
-                          page.active
-                            ? 'bg-red-100 text-red-800 hover:bg-red-200'
-                            : 'bg-green-100 text-green-800 hover:bg-green-200'
-                        }`}
-                        title={page.active ? 'Inaktiválás' : 'Aktiválás'}
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          {page.active ? (
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728" />
-                          ) : (
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                          )}
-                        </svg>
-                      </button>
-                      <Link
-                        href={`/admin/about/edit/${page.id}`}
-                        className="p-2 rounded-lg bg-poker-primary/10 text-poker-primary hover:bg-poker-primary/20 transition-colors"
-                        title="Szerkesztés"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                      </Link>
-                      <button
-                        onClick={() => handleDelete(page.id)}
-                        className="p-2 rounded-lg bg-red-100 text-red-800 hover:bg-red-200 transition-colors"
-                        title="Törlés"
+                        type="button"
+                        onClick={() => removeFeature(index)}
+                        className="text-red-600 hover:text-red-800"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
                       </button>
                     </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
-        {aboutPages.length === 0 && (
-          <div className="text-center py-12">
-            <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-            </svg>
-            <h3 className="mt-2 text-sm font-medium text-gray-900">Nincsenek oldalak</h3>
-            <p className="mt-1 text-sm text-gray-500">Kezdd el az első oldal hozzáadásával.</p>
-            <div className="mt-6">
-              <Link
-                href="/admin/about/edit/new"
-                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-poker-primary hover:bg-poker-secondary"
-              >
-                + Új oldal hozzáadása
-              </Link>
-            </div>
-          </div>
-        )}
-      </div>
+        <div className="flex justify-end">
+          <button
+            type="submit"
+            disabled={saving}
+            className="px-6 py-3 bg-poker-green text-white rounded-lg hover:bg-poker-darkgreen transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {saving ? 'Mentés...' : 'Rólunk oldal mentése'}
+          </button>
+        </div>
+      </form>
     </div>
   );
 }

@@ -16,7 +16,6 @@ export default function GalleryPage() {
   const [images, setImages] = useState<GalleryImage[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
   // Sample static images for now
   const staticImages: GalleryImage[] = [
@@ -93,11 +92,7 @@ export default function GalleryPage() {
     fetchImages();
   }, []);
 
-  const categories = Array.from(new Set(images.map(img => img.category).filter(Boolean))) as string[];
-
-  const filteredImages = selectedCategory === 'all' 
-    ? images 
-    : images.filter(img => img.category === selectedCategory);
+  // Show all images, no filtering needed
 
   if (loading) {
     return (
@@ -119,36 +114,10 @@ export default function GalleryPage() {
           </p>
         </div>
 
-        {/* Category Filter */}
-        <div className="flex flex-wrap justify-center gap-4 mb-8">
-          <button
-            onClick={() => setSelectedCategory('all')}
-            className={`px-6 py-2 rounded-full transition-all duration-200 ${
-              selectedCategory === 'all'
-                ? 'bg-poker-primary text-white'
-                : 'bg-white text-poker-dark hover:bg-poker-light border border-poker-muted'
-            }`}
-          >
-            Összes
-          </button>
-          {categories.map(category => (
-            <button
-              key={category}
-              onClick={() => setSelectedCategory(category)}
-              className={`px-6 py-2 rounded-full transition-all duration-200 capitalize ${
-                selectedCategory === category
-                  ? 'bg-poker-primary text-white'
-                  : 'bg-white text-poker-dark hover:bg-poker-light border border-poker-muted'
-              }`}
-            >
-              {category}
-            </button>
-          ))}
-        </div>
 
         {/* Gallery Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredImages.map((image) => (
+          {images.map((image) => (
             <div
               key={image.id}
               className="card-modern overflow-hidden cursor-pointer hover:scale-105 transition-all duration-200"
@@ -165,20 +134,15 @@ export default function GalleryPage() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                 <div className="absolute bottom-4 left-4 right-4">
                   <h3 className="text-white font-bold text-lg mb-1">{image.title}</h3>
-                  {image.category && (
-                    <span className="inline-block bg-poker-primary text-white text-xs px-2 py-1 rounded-full capitalize">
-                      {image.category}
-                    </span>
-                  )}
                 </div>
               </div>
             </div>
           ))}
         </div>
 
-        {filteredImages.length === 0 && (
+        {images.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-poker-muted text-lg">Nincs megjeleníthető kép ebben a kategóriában.</p>
+            <p className="text-poker-muted text-lg">Nincs megjeleníthető kép a galériában.</p>
           </div>
         )}
 
@@ -206,11 +170,6 @@ export default function GalleryPage() {
                 <h3 className="text-white font-bold text-xl mb-2">{selectedImage.title}</h3>
                 {selectedImage.alt_text && (
                   <p className="text-gray-300">{selectedImage.alt_text}</p>
-                )}
-                {selectedImage.category && (
-                  <span className="inline-block bg-poker-primary text-white text-sm px-3 py-1 rounded-full capitalize mt-2">
-                    {selectedImage.category}
-                  </span>
                 )}
               </div>
             </div>
