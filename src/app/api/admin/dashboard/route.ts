@@ -37,24 +37,21 @@ export async function GET() {
     // Get popular content
     const popularTournaments = await executeQuery(`
       SELECT 
-        COALESCE(category, 'Egyéb') as category,
+        'Egyéb' as category,
         COUNT(*) as count,
-        AVG(buy_in) as avgBuyIn
+        AVG(buyin_amount) as avgBuyIn
       FROM tournaments t
-      WHERE category IS NOT NULL
-      GROUP BY category
-      ORDER BY count DESC
       LIMIT 5
     `);
 
     const popularCashGames = await executeQuery(`
       SELECT 
-        stakes,
+        (small_blind || '/' || big_blind) as stakes,
         COUNT(*) as count,
-        AVG(min_buy_in) as avgMinBuyIn
+        AVG(min_buyin) as avgMinBuyIn
       FROM cash_games
       WHERE active = true
-      GROUP BY stakes
+      GROUP BY small_blind, big_blind
       ORDER BY count DESC
       LIMIT 5
     `);
@@ -64,13 +61,13 @@ export async function GET() {
       SELECT 
         t.title,
         t.date,
-        t.time,
-        t.buy_in as buyIn,
-        COALESCE(t.category, 'Egyéb') as category,
+        EXTRACT(HOUR FROM t.date) || ':' || LPAD(EXTRACT(MINUTE FROM t.date)::text, 2, '0') as time,
+        t.buyin_amount as buyIn,
+        'Egyéb' as category,
         'tournament' as type
       FROM tournaments t
       WHERE t.date >= CURRENT_DATE
-      ORDER BY t.date ASC, t.time ASC
+      ORDER BY t.date ASC
       LIMIT 10
     `);
 

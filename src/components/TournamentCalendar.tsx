@@ -547,7 +547,7 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
                   cashGames.map(cashGame => {
                     const isLive = isTableLive(cashGame.schedule);
                     return (
-                    <div key={cashGame.id} className="relative">
+                      <div key={cashGame.id} className="relative">
                       {/* Calendar Button */}
                       <button
                         onClick={(e) => {
@@ -607,8 +607,9 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
                           </div>
                         </div>
                       </Link>
-                    </div>
-                  );}))
+                      </div>
+                    );
+                  })
                 )}
               </div>
             </div>

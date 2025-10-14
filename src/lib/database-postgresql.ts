@@ -177,24 +177,50 @@ export async function getTournamentById(id: number) {
 }
 
 export async function createTournament(data: any) {
+  console.log('createTournament called with data:', JSON.stringify(data, null, 2));
+  
+  // Combine date and time into timestamp if separate
+  let tournamentTimestamp;
+  if (data.date && data.time) {
+    tournamentTimestamp = `${data.date} ${data.time}`;
+  } else if (data.tournament_date && data.tournament_time) {
+    tournamentTimestamp = `${data.tournament_date} ${data.tournament_time}`;
+  } else if (data.date) {
+    tournamentTimestamp = data.date;
+  } else {
+    tournamentTimestamp = new Date().toISOString();
+  }
+  
   const query = `
     INSERT INTO tournaments 
-    (title, description, category_id, tournament_date, tournament_time, buy_in, guarantee_amount, structure, max_players, rules) 
+    (title, description, date, buyin_amount, starting_chips, structure_id, max_players, status, featured, image_url) 
     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+    RETURNING id
   `;
   const params = [
     data.title,
     data.description || null,
-    data.category_id || null,
-    data.tournament_date,
-    data.tournament_time,
-    data.buy_in,
-    data.guarantee_amount || null,
-    data.structure || null,
-    data.max_players || null,
-    data.rules || null
+    tournamentTimestamp,
+    data.buyin_amount || data.buy_in || data.buyIn || 0,
+    data.starting_chips || data.startingChips || 15000,
+    data.structure_id || null,
+    data.max_players || data.maxPlayers || 80,
+    data.status || 'upcoming',
+    data.featured || false,
+    data.image_url || data.image || null
   ];
-  return executeInsert(query, params);
+  
+  console.log('createTournament query:', query);
+  console.log('createTournament params:', params);
+  
+  try {
+    const result = await executeInsert(query, params);
+    console.log('createTournament result:', result);
+    return result;
+  } catch (error) {
+    console.error('createTournament error:', error);
+    throw error;
+  }
 }
 
 export async function updateTournament(id: number, data: any) {
