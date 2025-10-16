@@ -136,44 +136,39 @@ export default function CashGamesAdmin() {
 
   const handleDuplicate = async (cashGame: CashGame) => {
     try {
-      const response = await fetch('/api/admin/cash-games', {
+      const response = await fetch(`/api/admin/cash-games/${cashGame.id}/duplicate`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-        },
-        body: JSON.stringify({
-          name: `${cashGame.name} (másolat)`,
-          game_type_id: 1,
-          stakes: cashGame.stakes,
-          min_buy_in: cashGame.minBuyIn,
-          max_buy_in: cashGame.maxBuyIn,
-          description: cashGame.description,
-          schedule: cashGame.schedule
-        })
+        }
       });
       if (response.ok) {
         const newCashGameData = await response.json();
+        // Convert API response to frontend format
         const newCashGame = {
           id: newCashGameData.id,
-          name: `${cashGame.name} (másolat)`,
-          stakes: cashGame.stakes,
+          name: newCashGameData.name,
+          stakes: newCashGameData.stakes,
           game: cashGame.game,
-          minBuyIn: cashGame.minBuyIn,
-          maxBuyIn: cashGame.maxBuyIn,
-          schedule: cashGame.schedule,
-          active: false,
+          minBuyIn: newCashGameData.min_buyin,
+          maxBuyIn: newCashGameData.max_buyin,
+          schedule: newCashGameData.schedule,
+          active: newCashGameData.active,
           visibleFrom: '2025-01-01',
           visibleUntil: '2025-12-31',
-          description: cashGame.description,
+          description: newCashGameData.description,
           image: ''
         };
         setCashGames([...cashGames, newCashGame]);
+        alert('Cash game sikeresen duplikálva!');
       } else {
         console.error('Failed to duplicate cash game');
+        alert('Hiba történt a duplikálás során!');
       }
     } catch (error) {
       console.error('Error duplicating cash game:', error);
+      alert('Hiba történt a duplikálás során!');
     }
   };
 
