@@ -29,8 +29,8 @@ export async function POST(
     // Create new structure
     const newStructureName = `${originalStructure.name} (másolat)`;
     const structureResult = await executeInsert(
-      'INSERT INTO structures (name, description, starting_chips, level_duration, late_registration_levels, is_active) VALUES ($1, $2, $3, $4, $5, $6)',
-      [newStructureName, originalStructure.description, originalStructure.starting_chips, originalStructure.level_duration || 20, originalStructure.late_registration_levels || 0, false]
+      'INSERT INTO structures (name, description, starting_chips, is_active) VALUES ($1, $2, $3, $4)',
+      [newStructureName, originalStructure.description, originalStructure.starting_chips, false]
     );
 
     const newStructureId = structureResult.insertId;
@@ -59,8 +59,6 @@ export async function POST(
       name: newStructureName,
       description: originalStructure.description,
       starting_chips: originalStructure.starting_chips,
-      level_duration: originalStructure.level_duration,
-      late_registration_levels: originalStructure.late_registration_levels,
       is_active: false,
       created_at: new Date().toISOString(),
       levels: originalLevels.map(level => ({

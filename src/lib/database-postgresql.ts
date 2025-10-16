@@ -405,8 +405,8 @@ export async function createCashGame(data: any) {
   
   const query = `
     INSERT INTO cash_games 
-    (name, game_type_id, stakes, small_blind, big_blind, min_buyin, max_buyin, description, schedule, active, week_days, image_url, selected_dates) 
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+    (name, game_type_id, stakes, small_blind, big_blind, min_buyin, max_buyin, description, schedule, active) 
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
   `;
   const params = [
     data.name,
@@ -418,10 +418,7 @@ export async function createCashGame(data: any) {
     data.max_buy_in || data.max_buyin || null,
     data.description || null,
     data.schedule || null,
-    data.active !== undefined ? data.active : true,
-    data.week_days ? JSON.stringify(data.week_days) : null,
-    data.image_url || null,
-    data.selected_dates ? JSON.stringify(data.selected_dates) : null
+    data.active !== undefined ? data.active : true
   ];
   return executeInsert(query, params);
 }
@@ -445,8 +442,8 @@ export async function updateCashGame(id: number, data: any) {
     UPDATE cash_games 
     SET name = $1, game_type_id = $2, stakes = $3, small_blind = $4, big_blind = $5,
         min_buyin = $6, max_buyin = $7, description = $8, schedule = $9, active = $10, 
-        week_days = $11, image_url = $12, selected_dates = $13, updated_at = CURRENT_TIMESTAMP
-    WHERE id = $14
+        updated_at = CURRENT_TIMESTAMP
+    WHERE id = $11
   `;
   const params = [
     data.name,
@@ -459,9 +456,6 @@ export async function updateCashGame(id: number, data: any) {
     data.description || null,
     data.schedule || null,
     data.active !== undefined ? data.active : true,
-    data.week_days ? JSON.stringify(data.week_days) : null,
-    data.image_url || null,
-    data.selected_dates ? JSON.stringify(data.selected_dates) : null,
     id
   ];
   return executeUpdate(query, params);
