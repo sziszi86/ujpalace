@@ -55,11 +55,15 @@ export async function GET(
     }
 
     // Return the image data with proper headers
+    // Remove non-ASCII characters from filename for header safety
+    const safeFilename = (image.original_name || image.filename)
+      .replace(/[^\x00-\x7F]/g, "_"); // Replace non-ASCII chars with underscore
+    
     return new NextResponse(image.data, {
       headers: {
         'Content-Type': image.mime_type,
         'Cache-Control': 'public, max-age=31536000, immutable',
-        'Content-Disposition': `inline; filename="${image.original_name || image.filename}"`
+        'Content-Disposition': `inline; filename="${safeFilename}"`
       }
     });
 
