@@ -307,12 +307,16 @@ export default function EditTournamentPage() {
     setDuplicating(true);
     
     try {
+      // Set date to tomorrow by default to avoid validation error
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      
       // Convert form data to API format for duplication
       const duplicateData = {
         title: formData.title + ' (Másolat)',
         description: formData.description,
         longDescription: formData.longDescription,
-        date: '', // Clear date for duplicate
+        date: tomorrow.toISOString().split('T')[0], // Tomorrow's date instead of empty string
         time: formData.time,
         buyIn: parseInt(formData.buyIn) || 0,
         entryFee: parseInt(formData.entryFee) || 0,

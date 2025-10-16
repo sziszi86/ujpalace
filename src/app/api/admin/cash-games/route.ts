@@ -25,28 +25,39 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    console.log('POST /api/admin/cash-games called');
+    
     const authResult = await verifyAuth(request);
     if (!authResult.success) {
+      console.log('Auth failed:', authResult.error);
       return NextResponse.json(
         { error: authResult.error },
         { status: 401 }
       );
     }
 
+    console.log('Auth successful, user:', authResult.user);
+
     const cashGameData = await request.json();
+    console.log('Received cash game data:', JSON.stringify(cashGameData, null, 2));
     
     // Validation
     if (!cashGameData.name || !cashGameData.stakes) {
+      console.log('Validation failed - missing required fields');
       return NextResponse.json(
         { error: 'Name and stakes are required' },
         { status: 400 }
       );
     }
 
+    console.log('Validation passed, calling createCashGame...');
     const result = await createCashGame(cashGameData);
+    console.log('Cash game created successfully:', result);
+    
     return NextResponse.json({ id: result.insertId, ...cashGameData }, { status: 201 });
   } catch (error) {
     console.error('Error creating cash game:', error);
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace available');
     return NextResponse.json(
       { error: 'Failed to create cash game' },
       { status: 500 }
