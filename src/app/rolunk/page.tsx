@@ -104,7 +104,7 @@ export default function AboutPage() {
                       </div>
                       <div className="flex items-start space-x-3">
                         <span className="text-poker-primary text-xl">👨‍💼</span>
-                        <span className="text-poker-muted">tapasztalt, barátságos személyzet</span>
+                        <span className="text-poker-muted">Tapasztalt, barátságos személyzet</span>
                       </div>
                     </div>
                     <div className="space-y-4">

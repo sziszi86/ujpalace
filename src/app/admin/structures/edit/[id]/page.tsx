@@ -20,6 +20,8 @@ interface Structure {
   name: string;
   description: string;
   starting_chips: number;
+  level_duration: number;
+  late_registration_levels: number;
   is_active: boolean;
   levels: StructureLevel[];
 }
@@ -33,6 +35,8 @@ export default function StructureEditPage({ params }: { params: Promise<{ id: st
     name: '',
     description: '',
     starting_chips: 10000,
+    level_duration: 20,
+    late_registration_levels: 0,
     is_active: true,
     levels: [
       {
@@ -256,7 +260,7 @@ export default function StructureEditPage({ params }: { params: Promise<{ id: st
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label htmlFor="starting_chips" className="block text-sm font-medium text-gray-700 mb-2">
                   Kezdő chipek *
@@ -273,18 +277,47 @@ export default function StructureEditPage({ params }: { params: Promise<{ id: st
                 />
               </div>
 
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="is_active"
-                  checked={structure.is_active}
-                  onChange={(e) => setStructure(prev => ({ ...prev, is_active: e.target.checked }))}
-                  className="h-4 w-4 text-poker-primary focus:ring-poker-primary border-gray-300 rounded"
-                />
-                <label htmlFor="is_active" className="ml-2 block text-sm text-gray-700">
-                  Aktív struktúra
+              <div>
+                <label htmlFor="level_duration" className="block text-sm font-medium text-gray-700 mb-2">
+                  Szint időtartam (perc) *
                 </label>
+                <input
+                  type="number"
+                  id="level_duration"
+                  required
+                  min="1"
+                  value={structure.level_duration}
+                  onChange={(e) => setStructure(prev => ({ ...prev, level_duration: parseInt(e.target.value) }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-poker-primary focus:border-transparent"
+                />
               </div>
+
+              <div>
+                <label htmlFor="late_registration_levels" className="block text-sm font-medium text-gray-700 mb-2">
+                  Késői jelentkezés szintjei
+                </label>
+                <input
+                  type="number"
+                  id="late_registration_levels"
+                  min="0"
+                  value={structure.late_registration_levels}
+                  onChange={(e) => setStructure(prev => ({ ...prev, late_registration_levels: parseInt(e.target.value) }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-poker-primary focus:border-transparent"
+                />
+              </div>
+            </div>
+            
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="is_active"
+                checked={structure.is_active}
+                onChange={(e) => setStructure(prev => ({ ...prev, is_active: e.target.checked }))}
+                className="h-4 w-4 text-poker-primary focus:ring-poker-primary border-gray-300 rounded"
+              />
+              <label htmlFor="is_active" className="ml-2 block text-sm text-gray-700">
+                Aktív struktúra
+              </label>
             </div>
           </div>
         </div>

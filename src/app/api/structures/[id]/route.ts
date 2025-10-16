@@ -21,9 +21,9 @@ export async function GET(
     }
 
     const levels = await executeQuery(`
-      SELECT id, level_number as level, small_blind as smallBlind, big_blind as bigBlind, 
-             ante, duration_minutes as durationMinutes, break_after as breakAfter, 
-             break_duration_minutes as breakDurationMinutes
+      SELECT id, level_number as level, small_blind as "smallBlind", big_blind as "bigBlind", 
+             ante, duration_minutes as "durationMinutes", break_after as "breakAfter", 
+             break_duration_minutes as "breakDurationMinutes"
       FROM structure_levels 
       WHERE structure_id = $1 
       ORDER BY level_number
@@ -50,7 +50,7 @@ export async function PUT(
     const resolvedParams = await params;
     const structureId = resolvedParams.id;
     const body = await request.json();
-    const { name, description, starting_chips, is_active, levels = [] } = body;
+    const { name, description, starting_chips, level_duration, late_registration_levels, is_active, levels = [] } = body;
 
     if (!name || !description || starting_chips === undefined) {
       return NextResponse.json(
@@ -61,8 +61,8 @@ export async function PUT(
 
     // Update structure
     await executeQuery(
-      'UPDATE structures SET name = $1, description = $2, starting_chips = $3, is_active = $4 WHERE id = $5',
-      [name, description, starting_chips, is_active, structureId]
+      'UPDATE structures SET name = $1, description = $2, starting_chips = $3, level_duration = $4, late_registration_levels = $5, is_active = $6 WHERE id = $7',
+      [name, description, starting_chips, level_duration || 20, late_registration_levels || 0, is_active, structureId]
     );
 
     // Delete existing levels
@@ -94,7 +94,9 @@ export async function PUT(
       id: structureId, 
       name, 
       description, 
-      starting_chips, 
+      starting_chips,
+      level_duration,
+      late_registration_levels,
       is_active,
       levels 
     });
