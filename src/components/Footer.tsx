@@ -1,6 +1,32 @@
+'use client';
+
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
+
+interface AboutData {
+  opening_hours?: string;
+}
 
 export default function Footer() {
+  const [aboutData, setAboutData] = useState<AboutData | null>(null);
+
+  useEffect(() => {
+    const fetchAboutData = async () => {
+      try {
+        const response = await fetch('/api/about');
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data.length > 0) {
+            setAboutData(data[0]); // Get the first about page
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching about data:', error);
+      }
+    };
+
+    fetchAboutData();
+  }, []);
   return (
     <footer className="bg-poker-black text-white">
       {/* Main Footer Content */}
@@ -88,9 +114,19 @@ export default function Footer() {
                 </svg>
                 <div className="text-sm">
                   <p className="text-poker-gold font-medium mb-1">Nyitvatartás:</p>
-                  <p className="text-gray-300">Szerda: 19:00-04:00</p>
-                  <p className="text-gray-300">Péntek-Szombat: 19:30-04:00</p>
-                  <p className="text-gray-400 text-xs mt-1">Játék kezdés: 20:00</p>
+                  {aboutData?.opening_hours ? (
+                    aboutData.opening_hours.split('\n').map((line, index) => (
+                      <p key={index} className={line.includes('ZÁRVA') ? 'text-gray-400 text-xs' : 'text-gray-300'}>
+                        {line}
+                      </p>
+                    ))
+                  ) : (
+                    <>
+                      <p className="text-gray-300">Szerda: 19:00-04:00</p>
+                      <p className="text-gray-300">Péntek-Szombat: 19:30-04:00</p>
+                      <p className="text-gray-400 text-xs mt-1">Játék kezdés: 20:00</p>
+                    </>
+                  )}
                 </div>
               </div>
             </div>

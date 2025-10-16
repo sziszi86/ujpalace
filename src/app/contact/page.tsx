@@ -1,51 +1,32 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+
+interface AboutData {
+  opening_hours?: string;
+}
 
 export default function ContactPage() {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    subject: '',
-    message: ''
-  });
-  
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitMessage, setSubmitMessage] = useState('');
+  const [aboutData, setAboutData] = useState<AboutData | null>(null);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
+  useEffect(() => {
+    const fetchAboutData = async () => {
+      try {
+        const response = await fetch('/api/about');
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data.length > 0) {
+            setAboutData(data[0]); // Get the first about page
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching about data:', error);
+      }
+    };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setSubmitMessage('');
+    fetchAboutData();
+  }, []);
 
-    try {
-      // Here you would typically send the form data to your backend
-      // For now, we'll just simulate a successful submission
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setSubmitMessage('Köszönjük az üzenetet! Hamarosan felvesszük Önnel a kapcsolatot.');
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        subject: '',
-        message: ''
-      });
-    } catch (error) {
-      setSubmitMessage('Hiba történt az üzenet küldése során. Kérjük, próbálja újra.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-poker-light py-8">
@@ -59,11 +40,11 @@ export default function ContactPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div className="max-w-4xl mx-auto">
           {/* Contact Information */}
-          <div className="space-y-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
             <div className="card-modern p-8">
-              <h2 className="text-2xl font-bold text-poker-dark mb-6">Elérhetőségek</h2>
+              <h2 className="text-3xl font-bold text-poker-dark mb-8 text-center">Elérhetőségek</h2>
               
               <div className="space-y-6">
                 <div className="flex items-start space-x-4">
@@ -117,9 +98,19 @@ export default function ContactPage() {
                   <div>
                     <h3 className="font-semibold text-poker-dark mb-1">Nyitvatartás</h3>
                     <div className="text-poker-muted space-y-1">
-                      <p className="font-medium text-poker-primary">Szerda: 19:00 - 04:00</p>
-                      <p className="font-medium text-poker-primary">Péntek-Szombat: 19:30 - 04:00</p>
-                      <p className="text-red-600">Vasárnap-Hétfő-Kedd-Csütörtök: ZÁRVA</p>
+                      {aboutData?.opening_hours ? (
+                        aboutData.opening_hours.split('\n').map((line, index) => (
+                          <p key={index} className={line.includes('ZÁRVA') ? 'text-red-600' : 'font-medium text-poker-primary'}>
+                            {line}
+                          </p>
+                        ))
+                      ) : (
+                        <>
+                          <p className="font-medium text-poker-primary">Szerda: 19:00 - 04:00</p>
+                          <p className="font-medium text-poker-primary">Péntek-Szombat: 19:30 - 04:00</p>
+                          <p className="text-red-600">Vasárnap-Hétfő-Kedd-Csütörtök: ZÁRVA</p>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -127,9 +118,10 @@ export default function ContactPage() {
             </div>
 
             <div className="card-modern p-8">
-              <h2 className="text-2xl font-bold text-poker-dark mb-6">Közösségi média</h2>
+              <h2 className="text-3xl font-bold text-poker-dark mb-4 text-center">Közösségi média</h2>
+              <p className="text-poker-muted text-center mb-8">Kövess minket és maradj naprakész a legfrissebb híreinkkel!</p>
               
-              <div className="flex space-x-4">
+              <div className="flex space-x-6 justify-center">
                 <a
                   href="https://www.facebook.com/PalacePokerClubSzombathely"
                   target="_blank"
@@ -165,135 +157,12 @@ export default function ContactPage() {
             </div>
           </div>
 
-          {/* Contact Form */}
-          <div className="card-modern p-8">
-            <h2 className="text-2xl font-bold text-poker-dark mb-6">Üzenet küldése</h2>
-            
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-poker-dark mb-2">
-                    Név *
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    required
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-poker-primary focus:border-poker-primary transition-colors"
-                    placeholder="Az Ön neve"
-                  />
-                </div>
-                
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-poker-dark mb-2">
-                    Email cím *
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    required
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-poker-primary focus:border-poker-primary transition-colors"
-                    placeholder="pelda@email.com"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-poker-dark mb-2">
-                  Telefonszám
-                </label>
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-poker-primary focus:border-poker-primary transition-colors"
-                  placeholder="+36 30 123 4567"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="subject" className="block text-sm font-medium text-poker-dark mb-2">
-                  Tárgy *
-                </label>
-                <select
-                  id="subject"
-                  name="subject"
-                  required
-                  value={formData.subject}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-poker-primary focus:border-poker-primary transition-colors"
-                >
-                  <option value="">Válasszon témát</option>
-                  <option value="general">Általános kérdés</option>
-                  <option value="tournament">Verseny információ</option>
-                  <option value="cashgame">Cash game információ</option>
-                  <option value="membership">Tagság</option>
-                  <option value="complaint">Panasz</option>
-                  <option value="suggestion">Javaslat</option>
-                  <option value="other">Egyéb</option>
-                </select>
-              </div>
-
-              <div>
-                <label htmlFor="message" className="block text-sm font-medium text-poker-dark mb-2">
-                  Üzenet *
-                </label>
-                <textarea
-                  id="message"
-                  name="message"
-                  required
-                  rows={6}
-                  value={formData.message}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-poker-primary focus:border-poker-primary transition-colors resize-vertical"
-                  placeholder="Írja ide az üzenetét..."
-                />
-              </div>
-
-              {submitMessage && (
-                <div className={`p-4 rounded-lg ${
-                  submitMessage.includes('Köszönjük') 
-                    ? 'bg-green-50 text-green-800 border border-green-200' 
-                    : 'bg-red-50 text-red-800 border border-red-200'
-                }`}>
-                  {submitMessage}
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full btn-primary py-3 text-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isSubmitting ? (
-                  <div className="flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                    Küldés...
-                  </div>
-                ) : (
-                  'Üzenet elküldése'
-                )}
-              </button>
-              
-              <p className="text-sm text-poker-muted text-center">
-                Az üzenet elküldésével elfogadja az adatvédelmi szabályzatunkat.
-              </p>
-            </form>
-          </div>
         </div>
 
         {/* Map Section */}
-        <div className="mt-12">
+        <div className="mt-12 max-w-4xl mx-auto">
           <div className="card-modern p-8">
-            <h2 className="text-2xl font-bold text-poker-dark mb-6 text-center">Helyszín és Útvonaltervező</h2>
+            <h2 className="text-3xl font-bold text-poker-dark mb-8 text-center">Helyszín és Útvonaltervező</h2>
             
             {/* Route Planning Buttons */}
             <div className="mb-6 flex flex-wrap gap-4 justify-center">

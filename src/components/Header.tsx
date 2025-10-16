@@ -52,16 +52,12 @@ export default function Header() {
                 📞 +36 30 971 5832
               </span>
             </div>
-            <div className="flex items-center space-x-2 animate-fade-in max-w-lg" style={{animationDelay: '0.2s'}}>
+            <div className="flex items-center space-x-2 animate-fade-in flex-1 max-w-none" style={{animationDelay: '0.2s'}}>
               <span className="w-2 h-2 bg-orange-300 rounded-full animate-pulse"></span>
               <span className="font-medium text-white/95 text-xs lg:text-sm leading-tight">⚠️ Szerencsejátékban csak 18 éven felüliek vehetnek részt! A túlzásba vitt szerencsejáték ártalmas, függőséget okozhat! Kérje bejegyzését a játékosvédelmi nyilvántartásba! | Játékosvédelem:<Link href="/jatekosvedelm" className="ml-1 text-poker-accent hover:text-white underline transition-colors">36 80 205 352</Link></span>
             </div>
           </div>
           <div className="flex flex-col lg:flex-row items-center space-y-2 lg:space-y-0 lg:space-x-6">
-            <div className="flex items-center space-x-2 animate-fade-in" style={{animationDelay: '0.4s'}}>
-              <span className="w-2 h-2 bg-green-300 rounded-full animate-pulse"></span>
-              <span className="font-medium text-white/95">🕒 Sze, P-Szo: 19:00-04:00</span>
-            </div>
             <div className="flex space-x-3 animate-fade-in" style={{animationDelay: '0.6s'}}>
               <Link href="https://www.facebook.com/PalacePokerClubSzombathely" className="p-2 rounded-full bg-white/10 hover:bg-white/20 hover:text-poker-accent transition-all duration-300 transform hover:scale-110 hover:rotate-12">
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
