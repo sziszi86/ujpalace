@@ -3,8 +3,15 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { useAlert } from '@/components/admin/Alert';
 import ImageUploader from '@/components/admin/ImageUploader';
+
+// Rich text editor dinamikus betöltése (SSR problémák elkerülésére)
+const MDEditor = dynamic(() => import('@uiw/react-md-editor'), { 
+  ssr: false,
+  loading: () => <div className="border rounded-lg h-32 flex items-center justify-center">Editor betöltése...</div>
+});
 
 interface NewsArticle {
   id: number;
@@ -205,17 +212,17 @@ export default function EditNewsPage() {
           {/* Content */}
           <div>
             <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-2">
-              Tartalom *
+              Tartalom * (Markdown Editor)
             </label>
-            <textarea
-              id="content"
-              value={article.content}
-              onChange={(e) => setArticle({...article, content: e.target.value})}
-              rows={12}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-poker-green"
-              required
-              placeholder="A cikk teljes tartalma..."
-            />
+            <div data-color-mode="light" style={{color: '#000000'}}>
+              <MDEditor
+                value={article.content}
+                onChange={(content) => setArticle({...article, content: content || ''})}
+                preview="edit"
+                height={400}
+                data-color-mode="light"
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-1 gap-6">
