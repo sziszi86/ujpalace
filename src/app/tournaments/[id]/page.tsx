@@ -218,8 +218,15 @@ export default function TournamentDetailPage() {
                         <p className="text-2xl font-bold drop-shadow-lg">{tournament.tournament_time}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm opacity-90 drop-shadow-lg">Buy-in</p>
-                        <p className="text-2xl font-bold drop-shadow-lg">{formatCurrency(Number(tournament.buy_in))}</p>
+                        <p className="text-sm opacity-90 drop-shadow-lg">Buy-in / nevezési díj</p>
+                        <div className="text-2xl font-bold drop-shadow-lg">
+                          {formatCurrency(Number(tournament.buy_in))}
+                          {(tournament.entry_fee || tournament.entryFee) && Number(tournament.entry_fee || tournament.entryFee) > 0 && (
+                            <span className="text-lg text-poker-accent ml-2">
+                              (+{formatCurrency(Number(tournament.entry_fee || tournament.entryFee))} nevezési díj)
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -430,8 +437,15 @@ export default function TournamentDetailPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                   </svg>
                   <div>
-                    <p className="font-semibold text-poker-dark">Buy-in</p>
-                    <p className="text-lg font-bold text-poker-primary">{formatCurrency(Number(tournament.buy_in))}</p>
+                    <p className="font-semibold text-poker-dark">Buy-in / nevezési díj</p>
+                    <div className="text-lg font-bold text-poker-primary">
+                      {formatCurrency(Number(tournament.buy_in))}
+                      {(tournament.entry_fee || tournament.entryFee) && Number(tournament.entry_fee || tournament.entryFee) > 0 && (
+                        <span className="text-sm text-poker-secondary ml-2">
+                          (+{formatCurrency(Number(tournament.entry_fee || tournament.entryFee))} nevezési díj)
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
 
@@ -495,7 +509,12 @@ export default function TournamentDetailPage() {
               <div className="flex justify-center items-center space-x-8">
                 <button
                   onClick={() => {
-                    const shareText = `${tournament.title}\n📅 ${tournament.tournament_date ? formatDate(tournament.tournament_date) : ''} ${tournament.tournament_time}\n💰 Buy-in: ${formatCurrency(Number(tournament.buy_in))}${tournament.rebuyPrice && Number(tournament.rebuyPrice) > 0 ? `\n🔄 Rebuy: ${formatCurrency(Number(tournament.rebuyPrice))}` : ''}${tournament.addonPrice && Number(tournament.addonPrice) > 0 ? `\n➕ Add-on: ${formatCurrency(Number(tournament.addonPrice))}` : ''}\n${tournament.image_url ? `\n🖼️ Kép: ${tournament.image_url}` : ''}\n\nRészletek: ${window.location.href}`;
+                    const totalCost = Number(tournament.buy_in) + Number(tournament.entry_fee || tournament.entryFee || 0);
+                    const costText = (tournament.entry_fee || tournament.entryFee) && Number(tournament.entry_fee || tournament.entryFee) > 0 
+                      ? `💰 Buy-in: ${formatCurrency(Number(tournament.buy_in))} (+${formatCurrency(Number(tournament.entry_fee || tournament.entryFee))} nevezési díj) = ${formatCurrency(totalCost)}`
+                      : `💰 Buy-in: ${formatCurrency(Number(tournament.buy_in))}`;
+                    
+                    const shareText = `${tournament.title}\n📅 ${tournament.tournament_date ? formatDate(tournament.tournament_date) : ''} ${tournament.tournament_time}\n${costText}${tournament.rebuyPrice && Number(tournament.rebuyPrice) > 0 ? `\n🔄 Rebuy: ${formatCurrency(Number(tournament.rebuyPrice))}` : ''}${tournament.addonPrice && Number(tournament.addonPrice) > 0 ? `\n➕ Add-on: ${formatCurrency(Number(tournament.addonPrice))}` : ''}\n${tournament.image_url ? `\n🖼️ Kép: ${tournament.image_url}` : ''}\n\nRészletek: ${window.location.href}`;
                     const shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}&quote=${encodeURIComponent(shareText)}`;
                     window.open(shareUrl, '_blank', 'width=600,height=400');
                   }}
@@ -509,7 +528,12 @@ export default function TournamentDetailPage() {
 
                 <button
                   onClick={() => {
-                    const shareText = `${tournament.title}\n📅 ${tournament.tournament_date ? formatDate(tournament.tournament_date) : ''} ${tournament.tournament_time}\n💰 Buy-in: ${formatCurrency(Number(tournament.buy_in))}${tournament.rebuyPrice && Number(tournament.rebuyPrice) > 0 ? `\n🔄 Rebuy: ${formatCurrency(Number(tournament.rebuyPrice))}` : ''}${tournament.addonPrice && Number(tournament.addonPrice) > 0 ? `\n➕ Add-on: ${formatCurrency(Number(tournament.addonPrice))}` : ''}\n\n#PalacePoker #PokerTournament\n\nRészletek: ${window.location.href}`;
+                    const totalCost = Number(tournament.buy_in) + Number(tournament.entry_fee || tournament.entryFee || 0);
+                    const costText = (tournament.entry_fee || tournament.entryFee) && Number(tournament.entry_fee || tournament.entryFee) > 0 
+                      ? `💰 Buy-in: ${formatCurrency(Number(tournament.buy_in))} (+${formatCurrency(Number(tournament.entry_fee || tournament.entryFee))} nevezési díj) = ${formatCurrency(totalCost)}`
+                      : `💰 Buy-in: ${formatCurrency(Number(tournament.buy_in))}`;
+                    
+                    const shareText = `${tournament.title}\n📅 ${tournament.tournament_date ? formatDate(tournament.tournament_date) : ''} ${tournament.tournament_time}\n${costText}${tournament.rebuyPrice && Number(tournament.rebuyPrice) > 0 ? `\n🔄 Rebuy: ${formatCurrency(Number(tournament.rebuyPrice))}` : ''}${tournament.addonPrice && Number(tournament.addonPrice) > 0 ? `\n➕ Add-on: ${formatCurrency(Number(tournament.addonPrice))}` : ''}\n\n#PalacePoker #PokerTournament\n\nRészletek: ${window.location.href}`;
                     navigator.clipboard.writeText(shareText).then(() => {
                       alert('Szöveg másolva a vágólapra! Oszd meg Instagramon!');
                     });

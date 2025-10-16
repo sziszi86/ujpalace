@@ -545,7 +545,7 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
                             
                             <div className="flex items-center justify-between">
                               <div>
-                                <p className="text-xs text-poker-muted">Buy-in</p>
+                                <p className="text-xs text-poker-muted">Buy-in / nevezési díj</p>
                                 <p className="font-bold text-poker-primary">
                                   {formatCurrency(Number(tournament.buyIn || tournament.buy_in || 0))}
                                 </p>
@@ -660,7 +660,7 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
                               <span className="font-semibold text-poker-dark">{cashGame.stakes}</span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-poker-muted">Buy-in:</span>
+                              <span className="text-poker-muted">Buy-in / nevezési díj:</span>
                               <span className="font-semibold text-poker-dark">
                                 {formatCurrency(cashGame.minBuyIn)} - {formatCurrency(cashGame.maxBuyIn)}
                               </span>

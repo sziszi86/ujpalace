@@ -9,6 +9,7 @@ interface StructureLevel {
   smallBlind: number;
   bigBlind: number;
   ante: number;
+  bigBlindAnte: number;
   durationMinutes: number;
   breakAfter: boolean;
   breakDurationMinutes: number;

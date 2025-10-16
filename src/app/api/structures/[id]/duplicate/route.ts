@@ -39,14 +39,15 @@ export async function POST(
     for (const level of originalLevels) {
       await executeQuery(
         `INSERT INTO structure_levels 
-         (structure_id, level_number, small_blind, big_blind, ante, duration_minutes, break_after, break_duration_minutes) 
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+         (structure_id, level_number, small_blind, big_blind, ante, big_blind_ante, duration_minutes, break_after, break_duration_minutes) 
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
         [
           newStructureId,
           level.level_number,
           level.small_blind,
           level.big_blind,
           level.ante,
+          level.big_blind_ante || 0,
           level.duration_minutes,
           level.break_after,
           level.break_duration_minutes
@@ -66,6 +67,7 @@ export async function POST(
         smallBlind: level.small_blind,
         bigBlind: level.big_blind,
         ante: level.ante,
+        bigBlindAnte: level.big_blind_ante || 0,
         durationMinutes: level.duration_minutes,
         breakAfter: level.break_after,
         breakDurationMinutes: level.break_duration_minutes

@@ -209,7 +209,7 @@ export default function TournamentListPage() {
                         <p className="text-xs text-gray-600">{tournament.tournament_time || tournament.time}</p>
                       </div>
                       <div className="text-center p-3 bg-gray-50 rounded-lg">
-                        <p className="text-xs text-black mb-1">Buy-in</p>
+                        <p className="text-xs text-black mb-1">Buy-in / nevezési díj</p>
                         <p className="font-bold text-sm text-poker-primary">{formatCurrency(Number(tournament.buy_in || tournament.buyIn))}</p>
                         {(tournament.starting_chips || tournament.startingChips) && (
                           <p className="text-xs text-gray-600">{formatChips(Number(tournament.starting_chips || tournament.startingChips || 0))}</p>

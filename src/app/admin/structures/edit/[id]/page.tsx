@@ -62,7 +62,23 @@ export default function StructureEditPage({ params }: { params: Promise<{ id: st
       const response = await fetch(`/api/structures/${id}`);
       if (response.ok) {
         const data = await response.json();
-        setStructure(data);
+        
+        // Ensure levels have the correct structure and defaults
+        const mappedStructure = {
+          ...data,
+          levels: (data.levels || []).map((level: any) => ({
+            id: level.id,
+            level: level.level,
+            smallBlind: level.smallBlind || 0,
+            bigBlind: level.bigBlind || 0,
+            ante: level.ante || 0,
+            durationMinutes: level.durationMinutes || 15,
+            breakAfter: level.breakAfter || false,
+            breakDurationMinutes: level.breakDurationMinutes || 0
+          }))
+        };
+        
+        setStructure(mappedStructure);
       } else {
         setError('Struktúra nem található');
       }
@@ -83,12 +99,28 @@ export default function StructureEditPage({ params }: { params: Promise<{ id: st
       const url = isNew ? '/api/structures' : `/api/structures/${id}`;
       const method = isNew ? 'POST' : 'PUT';
 
+      // Ensure proper data format before sending
+      const structureData = {
+        ...structure,
+        levels: structure.levels.map((level, index) => ({
+          level: index + 1,
+          smallBlind: Number(level.smallBlind) || 0,
+          bigBlind: Number(level.bigBlind) || 0,
+          ante: Number(level.ante) || 0,
+          durationMinutes: Number(level.durationMinutes) || 15,
+          breakAfter: Boolean(level.breakAfter),
+          breakDurationMinutes: Number(level.breakDurationMinutes) || 0
+        }))
+      };
+
+      console.log('Sending structure data:', structureData);
+
       const response = await fetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(structure),
+        body: JSON.stringify(structureData),
       });
 
       if (response.ok) {
@@ -135,9 +167,21 @@ export default function StructureEditPage({ params }: { params: Promise<{ id: st
   const updateLevel = (index: number, field: keyof StructureLevel, value: any) => {
     setStructure(prev => ({
       ...prev,
-      levels: prev.levels.map((level, i) => 
-        i === index ? { ...level, [field]: value } : level
-      )
+      levels: prev.levels.map((level, i) => {
+        if (i === index) {
+          let processedValue = value;
+          
+          // Handle different field types properly
+          if (field === 'breakAfter') {
+            processedValue = Boolean(value);
+          } else if (['smallBlind', 'bigBlind', 'ante', 'durationMinutes', 'breakDurationMinutes'].includes(field)) {
+            processedValue = Number(value) || 0;
+          }
+          
+          return { ...level, [field]: processedValue };
+        }
+        return level;
+      })
     }));
   };
 

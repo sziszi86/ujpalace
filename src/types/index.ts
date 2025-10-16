@@ -11,6 +11,8 @@ export interface Tournament {
   tournament_time?: string;
   buyIn: number;
   buy_in?: string; // API returns as string
+  entryFee?: number;
+  entry_fee?: number; // API field compatibility
   rebuyPrice?: number;
   rebuyChips?: number;
   rebuyCount?: number;

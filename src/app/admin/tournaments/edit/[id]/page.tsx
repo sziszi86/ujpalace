@@ -22,6 +22,7 @@ interface TournamentFormData {
   date: string;
   time: string;
   buyIn: string;
+  entryFee: string;
   rebuyPrice: string;
   rebuyChips: string;
   addonPrice: string;
@@ -64,6 +65,7 @@ export default function EditTournamentPage() {
     date: '',
     time: '20:00',
     buyIn: '',
+    entryFee: '',
     rebuyPrice: '',
     rebuyChips: '',
     addonPrice: '',
@@ -132,6 +134,7 @@ export default function EditTournamentPage() {
             date: dateValue,
             time: timeValue,
             buyIn: (tournament.buyin_amount || tournament.buyIn || tournament.buy_in || '').toString(),
+            entryFee: (tournament.entry_fee || tournament.entryFee || '').toString(),
             rebuyPrice: (tournament.rebuy_price || tournament.rebuyPrice || '').toString(),
             rebuyChips: (tournament.rebuy_chips || tournament.rebuyChips || '').toString(),
             addonPrice: (tournament.addon_price || tournament.addonPrice || '').toString(),
@@ -238,6 +241,7 @@ export default function EditTournamentPage() {
         tournament_time: formData.time,
         buyin_amount: parseInt(formData.buyIn) || 0,
         buy_in: parseInt(formData.buyIn) || 0,
+        entry_fee: parseInt(formData.entryFee) || 0,
         rebuy_price: parseInt(formData.rebuyPrice) || 0,
         rebuy_chips: parseInt(formData.rebuyChips) || 0,
         rebuy_count: parseInt(formData.rebuyCount) || 1,
@@ -311,6 +315,7 @@ export default function EditTournamentPage() {
         date: '', // Clear date for duplicate
         time: formData.time,
         buyIn: parseInt(formData.buyIn) || 0,
+        entryFee: parseInt(formData.entryFee) || 0,
         rebuyPrice: parseInt(formData.rebuyPrice) || 0,
         rebuyChips: parseInt(formData.rebuyChips) || 0,
         addonPrice: parseInt(formData.addonPrice) || 0,
@@ -375,6 +380,7 @@ export default function EditTournamentPage() {
         date: formData.date,
         time: formData.time,
         buyIn: parseInt(formData.buyIn) || 0,
+        entryFee: parseInt(formData.entryFee) || 0,
         rebuyPrice: parseInt(formData.rebuyPrice) || 0,
         rebuyChips: parseInt(formData.rebuyChips) || 0,
         addonPrice: parseInt(formData.addonPrice) || 0,
@@ -654,6 +660,23 @@ export default function EditTournamentPage() {
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-poker-primary admin-input"
                 required
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Nevezési díj (Ft)
+              </label>
+              <input
+                type="number"
+                name="entryFee"
+                value={formData.entryFee}
+                onChange={handleInputChange}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-poker-primary admin-input"
+                placeholder="0"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                A buy-in összegen felül fizetendő nevezési díj (ha van)
+              </p>
             </div>
 
             <div>

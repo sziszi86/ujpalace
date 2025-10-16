@@ -291,10 +291,25 @@ export default function TournamentCard({ tournament }: TournamentCardProps) {
 
         {/* Registration Fee */}
         <div className="mb-6 p-4 bg-gradient-to-br from-poker-primary to-poker-secondary text-white rounded-xl shadow-lg text-center">
-          <p className="text-white/90 text-sm mb-1 font-medium">Nevezési díj</p>
-          <p className="font-bold text-2xl">
+          <p className="text-white/90 text-sm mb-1 font-medium">Buy-in / nevezési díj</p>
+          <div className="font-bold text-2xl">
             {formatCurrency(Number(tournament.buy_in || tournament.buyIn || 0))}
-          </p>
+            {(tournament.entry_fee || tournament.entryFee) && Number(tournament.entry_fee || tournament.entryFee) > 0 && (
+              <span className="text-lg text-poker-accent ml-2">
+                (+{formatCurrency(Number(tournament.entry_fee || tournament.entryFee || 0))} nevezési díj)
+              </span>
+            )}
+          </div>
+          
+          {/* Show total if entry fee exists */}
+          {(tournament.entry_fee || tournament.entryFee) && Number(tournament.entry_fee || tournament.entryFee) > 0 && (
+            <div className="mt-2 text-poker-gold font-semibold">
+              Összesen: {formatCurrency(
+                Number(tournament.buy_in || tournament.buyIn || 0) + 
+                Number(tournament.entry_fee || tournament.entryFee || 0)
+              )}
+            </div>
+          )}
         </div>
 
 

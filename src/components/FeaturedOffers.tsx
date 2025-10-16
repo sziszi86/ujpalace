@@ -629,7 +629,7 @@ export default function FeaturedOffers() {
                           {formatStakes(cashGame.name, cashGame.stakes)}
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-poker-muted">Buy-in:</span>
+                          <span className="text-poker-muted">Buy-in / nevezési díj:</span>
                           <span className="font-semibold text-poker-dark">
                             {formatCurrency(cashGame.minBuyIn)} - {formatCurrency(cashGame.maxBuyIn)}
                           </span>
