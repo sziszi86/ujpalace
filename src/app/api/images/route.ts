@@ -54,10 +54,10 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Validate file size (3MB limit)
-    if (file.size > 3 * 1024 * 1024) {
+    // Validate file size (500KB limit for Vercel)
+    if (file.size > 500 * 1024) {
       return NextResponse.json(
-        { error: 'File too large. Maximum size is 3MB' },
+        { error: 'File too large. Maximum size is 500KB' },
         { status: 400 }
       );
     }
@@ -71,18 +71,12 @@ export async function POST(request: NextRequest) {
     let mimeType = file.type;
     
     try {
-      // Convert to WebP for better compression if not already
-      if (file.type !== 'image/webp') {
-        processedBuffer = await sharp(processedBuffer)
-          .webp({ quality: 85 })
-          .toBuffer();
-        mimeType = 'image/webp';
-      } else {
-        // Just optimize the existing WebP
-        processedBuffer = await sharp(processedBuffer)
-          .webp({ quality: 85 })
-          .toBuffer();
-      }
+      // Convert to WebP for better compression and resize for Vercel
+      processedBuffer = await sharp(processedBuffer)
+        .resize(800, 600, { fit: 'inside', withoutEnlargement: true })
+        .webp({ quality: 70 })
+        .toBuffer();
+      mimeType = 'image/webp';
     } catch (sharpError) {
       console.warn('Sharp optimization failed, using original file:', sharpError);
       // Fall back to original file if Sharp fails

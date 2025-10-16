@@ -100,9 +100,9 @@ export default function ImageUploader({ value, onChange, currentImage, onImageSe
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Fájlméret ellenőrzés (3MB)
-    if (file.size > 3 * 1024 * 1024) {
-      showAlert('A fájl túl nagy! Maximum 3MB méret engedélyezett.', 'error');
+    // Fájlméret ellenőrzés (500KB Vercel limit miatt)
+    if (file.size > 500 * 1024) {
+      showAlert('A fájl túl nagy! Maximum 500KB méret engedélyezett Vercel-en.', 'error');
       return;
     }
 
