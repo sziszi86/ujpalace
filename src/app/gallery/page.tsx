@@ -132,9 +132,6 @@ export default function GalleryPage() {
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                <div className="absolute bottom-4 left-4 right-4">
-                  <h3 className="text-white font-bold text-lg mb-1">{image.title}</h3>
-                </div>
               </div>
             </div>
           ))}
@@ -166,12 +163,6 @@ export default function GalleryPage() {
                 height={600}
                 className="max-w-full max-h-[80vh] object-contain"
               />
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
-                <h3 className="text-white font-bold text-xl mb-2">{selectedImage.title}</h3>
-                {selectedImage.alt_text && (
-                  <p className="text-gray-300">{selectedImage.alt_text}</p>
-                )}
-              </div>
             </div>
           </div>
         )}

@@ -531,6 +531,7 @@ export default function NewTournamentPage() {
                 label="Verseny képe"
                 value={formData.imageUrl}
                 onChange={(url) => setFormData(prev => ({ ...prev, imageUrl: url }))}
+                category="tournament"
               />
             </div>
 

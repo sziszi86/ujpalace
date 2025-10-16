@@ -37,6 +37,7 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const file = formData.get('image') as File;
+    const category = (formData.get('category') as string) || 'gallery';
     
     if (!file) {
       return NextResponse.json(
@@ -91,9 +92,9 @@ export async function POST(request: NextRequest) {
     
     // Save to database
     const result = await executeInsert(`
-      INSERT INTO images (filename, original_name, mime_type, size_bytes, data)
-      VALUES ($1, $2, $3, $4, $5)
-    `, [filename, file.name, mimeType, processedBuffer.length, processedBuffer]);
+      INSERT INTO images (filename, original_name, mime_type, size_bytes, data, category)
+      VALUES ($1, $2, $3, $4, $5, $6)
+    `, [filename, file.name, mimeType, processedBuffer.length, processedBuffer, category]);
     
     return NextResponse.json({
       id: result.insertId,

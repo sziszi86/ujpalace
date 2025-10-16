@@ -9,9 +9,10 @@ interface ImageUploaderProps {
   currentImage?: string;
   onImageSelect?: (url: string) => void;
   label?: string;
+  category?: string;
 }
 
-export default function ImageUploader({ value, onChange, currentImage, onImageSelect, label = "Kép" }: ImageUploaderProps) {
+export default function ImageUploader({ value, onChange, currentImage, onImageSelect, label = "Kép", category = "gallery" }: ImageUploaderProps) {
   // Simple state management - use currentImage or value directly
   const imageValue = currentImage !== undefined ? currentImage : (value || '');
   
@@ -122,6 +123,7 @@ export default function ImageUploader({ value, onChange, currentImage, onImageSe
       // FormData létrehozása az API híváshoz
       const formData = new FormData();
       formData.append('image', file);
+      formData.append('category', category);
 
       // Kép feltöltése az API-n keresztül
       const response = await fetch('/api/images', {

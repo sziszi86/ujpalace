@@ -15,7 +15,8 @@ export async function GET() {
         size_bytes as size,
         created_at
       FROM images
-      WHERE mime_type LIKE 'image/%'
+      WHERE mime_type LIKE 'image/%' 
+        AND COALESCE(category, 'gallery') != 'tournament'
       ORDER BY created_at DESC
     `);
 
