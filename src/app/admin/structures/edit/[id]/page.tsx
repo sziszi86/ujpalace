@@ -107,6 +107,7 @@ export default function StructureEditPage({ params }: { params: Promise<{ id: st
       const structureData = {
         ...structure,
         levels: structure.levels.map((level, index) => ({
+          id: level.id,
           level: index + 1,
           smallBlind: Number(level.smallBlind) || 0,
           bigBlind: Number(level.bigBlind) || 0,
@@ -159,11 +160,49 @@ export default function StructureEditPage({ params }: { params: Promise<{ id: st
     }));
   };
 
+  const insertLevel = (insertIndex: number) => {
+    const currentLevel = structure.levels[insertIndex];
+    const previousLevel = insertIndex > 0 ? structure.levels[insertIndex - 1] : null;
+    
+    // Calculate reasonable values for the new level
+    const newLevel: StructureLevel = {
+      level: insertIndex + 1,
+      smallBlind: previousLevel ? 
+        Math.floor((previousLevel.bigBlind + currentLevel.smallBlind) / 2) : 
+        Math.floor(currentLevel.smallBlind / 2) || 25,
+      bigBlind: previousLevel ? 
+        Math.floor((previousLevel.bigBlind + currentLevel.bigBlind) / 2) : 
+        currentLevel.smallBlind || 50,
+      ante: currentLevel.ante,
+      durationMinutes: currentLevel.durationMinutes,
+      breakAfter: false,
+      breakDurationMinutes: 0
+    };
+
+    // Ensure minimum values
+    if (newLevel.smallBlind < 25) newLevel.smallBlind = 25;
+    if (newLevel.bigBlind < 50) newLevel.bigBlind = 50;
+    if (newLevel.bigBlind <= newLevel.smallBlind) {
+      newLevel.bigBlind = newLevel.smallBlind * 2;
+    }
+    
+    setStructure(prev => ({
+      ...prev,
+      levels: [
+        ...prev.levels.slice(0, insertIndex),
+        newLevel,
+        ...prev.levels.slice(insertIndex)
+      ].map((level, i) => ({ ...level, level: i + 1 }))
+    }));
+  };
+
   const removeLevel = (index: number) => {
     if (structure.levels.length > 1) {
       setStructure(prev => ({
         ...prev,
-        levels: prev.levels.filter((_, i) => i !== index)
+        levels: prev.levels
+          .filter((_, i) => i !== index)
+          .map((level, i) => ({ ...level, level: i + 1 }))
       }));
     }
   };
@@ -326,13 +365,23 @@ export default function StructureEditPage({ params }: { params: Promise<{ id: st
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold text-gray-900">Szintek</h2>
-            <button
-              type="button"
-              onClick={addLevel}
-              className="bg-poker-primary text-white px-4 py-2 rounded-lg hover:bg-poker-secondary transition-colors"
-            >
-              + Szint hozzáadása
-            </button>
+            <div className="flex space-x-2">
+              <button
+                type="button"
+                onClick={() => insertLevel(0)}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                title="Új szint beszúrása az elejére"
+              >
+                + Beszúrás elejére
+              </button>
+              <button
+                type="button"
+                onClick={addLevel}
+                className="bg-poker-primary text-white px-4 py-2 rounded-lg hover:bg-poker-secondary transition-colors"
+              >
+                + Szint hozzáadása végére
+              </button>
+            </div>
           </div>
 
           <div className="space-y-4">
@@ -340,15 +389,25 @@ export default function StructureEditPage({ params }: { params: Promise<{ id: st
               <div key={index} className="border border-gray-200 rounded-lg p-4">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="font-medium text-gray-900">Szint {index + 1}</h3>
-                  {structure.levels.length > 1 && (
+                  <div className="flex items-center space-x-2">
                     <button
                       type="button"
-                      onClick={() => removeLevel(index)}
-                      className="text-red-600 hover:text-red-800"
+                      onClick={() => insertLevel(index)}
+                      className="text-blue-600 hover:text-blue-800 text-sm"
+                      title="Új szint beszúrása ide"
                     >
-                      Törlés
+                      + Beszúrás ide
                     </button>
-                  )}
+                    {structure.levels.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeLevel(index)}
+                        className="text-red-600 hover:text-red-800 text-sm"
+                      >
+                        Törlés
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
