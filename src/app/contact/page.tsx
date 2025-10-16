@@ -84,7 +84,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-poker-dark mb-1">Email</h3>
-                    <p className="text-poker-muted">palacepoker@hotmail.hu</p>
+                    <p className="text-poker-muted">palacepoker kukac hotmail.hu</p>
                     <p className="text-xs text-poker-muted mt-1">Válaszidő: 24 órán belül</p>
                   </div>
                 </div>
@@ -135,7 +135,7 @@ export default function ContactPage() {
                 </a>
                 
                 <a
-                  href="mailto:palacepoker@hotmail.hu"
+                  href="mailto:palacepoker kukac hotmail.hu"
                   className="bg-poker-primary/10 hover:bg-poker-primary hover:text-white text-poker-primary p-3 rounded-lg transition-colors duration-300"
                   title="Email küldése"
                 >

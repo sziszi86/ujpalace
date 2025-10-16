@@ -233,7 +233,7 @@ export default function AdminTournamentsPage() {
         lateRegistration: tournament.lateRegistration === true,
         blindStructure: tournament.blindStructure || '20 perc szintek',
         contactPhone: tournament.contactPhone || '+36 30 971 5832',
-        contactEmail: tournament.contactEmail || 'palacepoker@hotmail.hu',
+        contactEmail: tournament.contactEmail || 'palacepoker kukac hotmail.hu',
         visibleFrom: new Date().toISOString().split('T')[0],
         visibleUntil: tournament.visibleUntil || new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0]
       };

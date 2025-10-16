@@ -85,7 +85,7 @@ export default function RootLayout({
                 "addressCountry": "HU"
               },
               "telephone": "+36 30 971 5832",
-              "email": "palacepoker@hotmail.hu",
+              "email": "palacepoker kukac hotmail.hu",
               "openingHours": "Mo-Su 18:00-06:00",
               "url": "https://palace-poker.hu",
               "priceRange": "$$",

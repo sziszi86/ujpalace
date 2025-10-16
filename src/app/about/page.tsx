@@ -154,7 +154,7 @@ export default function AboutPage() {
               <div>
                 <h4 className="font-semibold text-poker-dark mb-2">Elérhetőség</h4>
                 <p className="text-poker-muted">📞 +36 30 123 4567</p>
-                <p className="text-poker-muted">✉️ palacepoker@hotmail.hu</p>
+                <p className="text-poker-muted">✉️ palacepoker kukac hotmail.hu</p>
               </div>
             </div>
           </div>

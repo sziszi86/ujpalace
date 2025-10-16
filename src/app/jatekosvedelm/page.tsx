@@ -416,7 +416,7 @@ export default function PlayerProtectionPage() {
                 
                 <div className="p-4 bg-blue-50 rounded-lg">
                   <h4 className="font-semibold text-blue-800 mb-2">Palace Poker Kapcsolat</h4>
-                  <p className="text-blue-700">📧 palacepoker@hotmail.hu</p>
+                  <p className="text-blue-700">📧 palacepoker kukac hotmail.hu</p>
                   <p className="text-blue-700">📞 +36 30 971 5832</p>
                   <p className="text-blue-700">📍 9700 Szombathely, Semmelweis u. 2.</p>
                 </div>

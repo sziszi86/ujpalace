@@ -206,7 +206,7 @@ export default function PrivacyPage() {
                     <p><strong>Pannon Póker Kft.</strong></p>
                     <p>📍 9700 Szombathely, Semmelweis u. 2.</p>
                     <p>📞 +36 30 971 5832</p>
-                    <p>📧 palacepoker@hotmail.hu</p>
+                    <p>📧 palacepoker kukac hotmail.hu</p>
                   </div>
                 </div>
               </div>

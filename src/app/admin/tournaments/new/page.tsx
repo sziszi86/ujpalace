@@ -158,7 +158,7 @@ export default function NewTournamentPage() {
         lateRegistration: true,
         blindStructure: '20 perc szintek',
         contactPhone: '+36 30 971 5832',
-        contactEmail: 'palacepoker@hotmail.hu',
+        contactEmail: 'palacepoker kukac hotmail.hu',
       };
 
       // API hívás

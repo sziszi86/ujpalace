@@ -238,7 +238,7 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 ## 📞 Support
 
 For support and questions:
-- Email: palacepoker@hotmail.hu
+- Email: palacepoker kukac hotmail.hu
 - Phone: +36 30 971 5832
 - Address: 9700 Szombathely, Semmelweis u. 2.
 
