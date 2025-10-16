@@ -66,9 +66,9 @@ export async function GET(
   } catch (error) {
     console.error('[Images API] Error serving image:', error);
     console.error('[Images API] Error details:', {
-      message: error.message,
-      stack: error.stack,
-      name: error.name
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      name: error instanceof Error ? error.name : typeof error
     });
     return NextResponse.json(
       { error: 'Failed to serve image' },
