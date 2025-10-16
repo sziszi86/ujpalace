@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useAlert } from './Alert';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -20,22 +21,23 @@ export default function SimpleAdminLayout({ children }: AdminLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [expandedMenus, setExpandedMenus] = useState<string[]>(['Hírek']);
   const { user, logout, loading } = useAuth();
+  const pathname = usePathname();
 
   // Egyszerű redirect window.location-nal - csak egyszer!
   useEffect(() => {
     if (!loading) {
-      if (!user && !window.location.pathname.includes('/admin/login')) {
+      if (!user && !pathname.includes('/admin/login')) {
         // Ha nincs bejelentkezve és nem login oldalon, redirect
         window.location.href = '/admin/login';
         return;
       }
-      if (user && window.location.pathname === '/admin/login') {
+      if (user && pathname === '/admin/login') {
         // Ha be van jelentkezve és login oldalon, redirect admin-ra
         window.location.href = '/admin';
         return;
       }
     }
-  }, [loading, user]);
+  }, [loading, user, pathname]);
 
   // Loading
   if (loading) {
@@ -47,12 +49,12 @@ export default function SimpleAdminLayout({ children }: AdminLayoutProps) {
   }
 
   // Ha nincs user és nem login oldal - csak loading spinner  
-  if (!user && !window.location.pathname.includes('/admin/login')) {
+  if (!user && !pathname.includes('/admin/login')) {
     return null; // Visszatérünk null-lal, hadd fusson a redirect
   }
 
   // Ha login oldal, csak a children
-  if (window.location.pathname === '/admin/login') {
+  if (pathname === '/admin/login') {
     return <>{children}</>;
   }
 
@@ -86,15 +88,14 @@ export default function SimpleAdminLayout({ children }: AdminLayoutProps) {
   };
 
   const isMenuActive = (item: MenuItem): boolean => {
-    const currentPath = window.location.pathname;
     if (item.submenu) {
-      return item.submenu.some(subitem => currentPath === subitem.href);
+      return item.submenu.some(subitem => pathname === subitem.href);
     }
-    return currentPath === item.href;
+    return pathname === item.href;
   };
 
   const isSubmenuActive = (href: string): boolean => {
-    return window.location.pathname === href;
+    return pathname === href;
   };
 
   const handleLogout = () => {
