@@ -42,35 +42,53 @@ export async function POST(
     console.log('Duplicating structure:', {
       id: structureId,
       originalName: originalStructure.name,
-      newName: newStructureName
+      newName: newStructureName,
+      originalLevelsCount: originalLevels.length
     });
     
     const structureResult = await executeInsert(
       'INSERT INTO structures (name, description, starting_chips, level_duration, late_registration_levels, is_active) VALUES ($1, $2, $3, $4, $5, $6)',
       [newStructureName, originalStructure.description, originalStructure.starting_chips, originalStructure.level_duration || 20, originalStructure.late_registration_levels || 0, false]
     );
+    
+    console.log('Structure created with ID:', structureResult.insertId);
 
     const newStructureId = structureResult.insertId;
 
     // Copy levels
+    console.log(`Copying ${originalLevels.length} levels for structure ${newStructureId}`);
+    
     for (const level of originalLevels) {
-      await executeQuery(
-        `INSERT INTO structure_levels 
-         (structure_id, level_number, small_blind, big_blind, ante, big_blind_ante, duration_minutes, break_after, break_duration_minutes) 
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-        [
-          newStructureId,
-          level.level_number,
-          level.small_blind,
-          level.big_blind,
-          level.ante,
-          level.big_blind_ante || 0,
-          level.duration_minutes,
-          level.break_after,
-          level.break_duration_minutes
-        ]
-      );
+      console.log('Copying level:', {
+        level_number: level.level_number,
+        small_blind: level.small_blind,
+        big_blind: level.big_blind,
+        ante: level.ante
+      });
+      
+      try {
+        await executeQuery(
+          `INSERT INTO structure_levels 
+           (structure_id, level_number, small_blind, big_blind, ante, duration_minutes, break_after, break_duration_minutes) 
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+          [
+            newStructureId,
+            level.level_number,
+            level.small_blind,
+            level.big_blind,
+            level.ante || 0,
+            level.duration_minutes || 20,
+            level.break_after || false,
+            level.break_duration_minutes || 0
+          ]
+        );
+      } catch (levelError) {
+        console.error('Error copying level:', levelError);
+        throw levelError;
+      }
     }
+
+    console.log('All levels copied successfully!');
 
     return NextResponse.json({
       id: newStructureId,
