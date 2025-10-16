@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { executeQuery, executeQuerySingle, executeInsert } from '@/lib/database-postgresql';
+import { verifyAuth } from '@/lib/auth';
 
 export async function POST(
   request: Request,
@@ -7,6 +8,15 @@ export async function POST(
 ) {
   const resolvedParams = await params;
   try {
+    // Verify authentication
+    const authResult = await verifyAuth(request);
+    if (!authResult.success) {
+      return NextResponse.json(
+        { error: authResult.error },
+        { status: 401 }
+      );
+    }
+
     const structureId = resolvedParams.id;
 
     // Get original structure
@@ -28,6 +38,13 @@ export async function POST(
 
     // Create new structure
     const newStructureName = `${originalStructure.name} (másolat)`;
+    
+    console.log('Duplicating structure:', {
+      id: structureId,
+      originalName: originalStructure.name,
+      newName: newStructureName
+    });
+    
     const structureResult = await executeInsert(
       'INSERT INTO structures (name, description, starting_chips, level_duration, late_registration_levels, is_active) VALUES ($1, $2, $3, $4, $5, $6)',
       [newStructureName, originalStructure.description, originalStructure.starting_chips, originalStructure.level_duration || 20, originalStructure.late_registration_levels || 0, false]

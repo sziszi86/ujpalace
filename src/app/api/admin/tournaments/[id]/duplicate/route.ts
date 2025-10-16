@@ -33,19 +33,22 @@ export async function POST(
 
     // Create new tournament with "(másolat)" suffix
     const newTournamentTitle = `${originalTournament.title} (másolat)`;
+    
+    console.log('Original tournament data:', originalTournament);
+    
+    // Use only the essential columns that definitely exist
     const tournamentResult = await executeInsert(
-      'INSERT INTO tournaments (title, description, date, buyin_amount, starting_chips, structure_id, max_players, status, featured, image_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)',
+      'INSERT INTO tournaments (title, description, date, buyin_amount, starting_chips, structure_id, max_players, status, featured) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)',
       [
         newTournamentTitle, 
-        originalTournament.description,
+        originalTournament.description || null,
         originalTournament.date,
-        originalTournament.buyin_amount,
-        originalTournament.starting_chips,
-        originalTournament.structure_id,
-        originalTournament.max_players,
+        originalTournament.buyin_amount || 0,
+        originalTournament.starting_chips || 15000,
+        originalTournament.structure_id || null,
+        originalTournament.max_players || null,
         'upcoming', // Default status
-        false, // Not featured by default
-        originalTournament.image_url
+        false // Not featured by default
       ]
     );
 
@@ -62,7 +65,6 @@ export async function POST(
       max_players: originalTournament.max_players,
       status: 'upcoming',
       featured: false,
-      image_url: originalTournament.image_url,
       created_at: new Date().toISOString()
     });
   } catch (error) {
