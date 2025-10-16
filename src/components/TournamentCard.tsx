@@ -87,6 +87,11 @@ export default function TournamentCard({ tournament }: TournamentCardProps) {
     }
   };
 
+  const truncateDescription = (text: string, maxLength: number = 180) => {
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + '...';
+  };
+
   const addToCalendar = () => {
     const dateField = tournament.tournament_date || tournament.date;
     const timeField = tournament.tournament_time || tournament.time;
@@ -160,7 +165,7 @@ export default function TournamentCard({ tournament }: TournamentCardProps) {
               {getStatusText(tournament.status)}
             </span>
           </div>
-          <p className="text-white/95 text-sm leading-relaxed drop-shadow-sm">{tournament.description}</p>
+          <p className="text-white/95 text-sm leading-relaxed drop-shadow-sm">{truncateDescription(tournament.description)}</p>
         </div>
       </div>
 
