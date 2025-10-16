@@ -312,11 +312,29 @@ export default function ImageUploader({ value, onChange, currentImage, onImageSe
                     }}
                     onError={(e) => {
                       console.log('Image failed to load:', image.url);
-                      // Ha a kép nem létezik, elrejtjük
-                      e.currentTarget.parentElement!.style.display = 'none';
+                      // Hibás kép esetén placeholder megjelenítése
+                      const target = e.currentTarget;
+                      target.style.display = 'none';
+                      const placeholder = target.parentElement!.querySelector('.image-placeholder');
+                      if (placeholder) {
+                        (placeholder as HTMLElement).style.display = 'flex';
+                      }
                     }}
                     onLoad={() => console.log('Gallery image loaded:', image.url)}
                   />
+                  {/* Placeholder hibás képek esetén */}
+                  <div 
+                    className="image-placeholder w-full h-32 bg-gray-200 rounded-lg cursor-pointer hover:bg-gray-300 transition-colors items-center justify-center text-gray-500 text-sm hidden"
+                    onClick={() => handleGallerySelect(image.url)}
+                  >
+                    <div className="text-center">
+                      <svg className="w-8 h-8 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <div>Kép betöltési hiba</div>
+                      <div className="text-xs">{image.originalName}</div>
+                    </div>
+                  </div>
                   {/* Törlésgomb - kis piros X */}
                   <button
                     onClick={(e) => {
