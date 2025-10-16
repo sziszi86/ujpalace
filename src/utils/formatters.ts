@@ -1,4 +1,9 @@
 export function formatCurrency(amount: number, currency: string = 'HUF'): string {
+  // Handle NaN, null, undefined values
+  if (isNaN(amount) || amount == null) {
+    return '0 Ft';
+  }
+  
   return new Intl.NumberFormat('hu-HU', {
     style: 'currency',
     currency: currency,
