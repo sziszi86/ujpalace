@@ -405,9 +405,6 @@ export default function AdminTournamentsPage() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Státusz
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Láthatóság
-                </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Műveletek
                 </th>
@@ -475,10 +472,6 @@ export default function AdminTournamentsPage() {
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(tournament.status)}`}>
                       {getStatusText(tournament.status)}
                     </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <div>Tól: {tournament.visibleFrom ? formatDate(tournament.visibleFrom) : 'Nincs beállítva'}</div>
-                    <div>Ig: {tournament.visibleUntil ? formatDate(tournament.visibleUntil) : 'Nincs beállítva'}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex justify-end space-x-1">
