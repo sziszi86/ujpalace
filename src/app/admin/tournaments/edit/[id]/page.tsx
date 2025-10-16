@@ -650,7 +650,7 @@ export default function EditTournamentPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Buy-in (Ft) *
+                Buy-in - Nevezési díj (Ft) *
               </label>
               <input
                 type="number"
@@ -660,23 +660,6 @@ export default function EditTournamentPage() {
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-poker-primary admin-input"
                 required
               />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Nevezési díj (Ft)
-              </label>
-              <input
-                type="number"
-                name="entryFee"
-                value={formData.entryFee}
-                onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-poker-primary admin-input"
-                placeholder="0"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                A buy-in összegen felül fizetendő nevezési díj (ha van)
-              </p>
             </div>
 
             <div>
