@@ -26,7 +26,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { title, content, features = [], image = '', active = true } = body;
+    const { title, content, features = [], image = '', opening_hours = '', active = true } = body;
 
     if (!title || !content) {
       return NextResponse.json(
@@ -36,8 +36,8 @@ export async function POST(request: Request) {
     }
 
     const result = await executeInsert(
-      'INSERT INTO about_pages (title, content, features, image, active) VALUES (?, ?, ?, ?, ?)',
-      [title, content, JSON.stringify(features), image, active]
+      'INSERT INTO about_pages (title, content, features, image, opening_hours, active) VALUES (?, ?, ?, ?, ?, ?)',
+      [title, content, JSON.stringify(features), image, opening_hours, active]
     );
 
     return NextResponse.json({
@@ -46,6 +46,7 @@ export async function POST(request: Request) {
       content,
       features,
       image,
+      opening_hours,
       active,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()

@@ -31,7 +31,7 @@ const mockTournaments: Tournament[] = [
     blindStructure: '20 perc szintek',
     startingChips: 50000,
     contactPhone: '+36 30 971 5832',
-    contactEmail: 'tournaments@palace-poker.hu',
+    contactEmail: 'palacepoker@hotmail.hu',
     image: 'https://images.unsplash.com/photo-1511193311914-0346f16efe90?w=800',
     images: [
       'https://images.unsplash.com/photo-1511193311914-0346f16efe90?w=800',
@@ -65,7 +65,7 @@ const mockTournaments: Tournament[] = [
     blindStructure: '15 perc szintek',
     startingChips: 30000,
     contactPhone: '+36 30 971 5832',
-    contactEmail: 'tournaments@palace-poker.hu',
+    contactEmail: 'palacepoker@hotmail.hu',
     image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800',
     images: [
       'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800',
@@ -94,7 +94,7 @@ const mockTournaments: Tournament[] = [
     blindStructure: '30 perc szintek',
     startingChips: 100000,
     contactPhone: '+36 30 971 5832',
-    contactEmail: 'tournaments@palace-poker.hu',
+    contactEmail: 'palacepoker@hotmail.hu',
     image: 'https://images.unsplash.com/photo-1596838132731-3301c3fd4317?w=800',
     images: [
       'https://images.unsplash.com/photo-1596838132731-3301c3fd4317?w=800',

@@ -48,7 +48,7 @@ export async function PUT(
 
     const { id } = await params;
     const body = await request.json();
-    const { title, content, features = [], hero_image = '', meta_description = '', active = true } = body;
+    const { title, content, features = [], hero_image = '', meta_description = '', opening_hours = '', active = true } = body;
 
     if (!title || !content) {
       return NextResponse.json(
@@ -58,8 +58,8 @@ export async function PUT(
     }
 
     await executeQuery(
-      'UPDATE about_pages SET title = $1, content = $2, features = $3, hero_image = $4, meta_description = $5, active = $6 WHERE id = $7',
-      [title, content, JSON.stringify(features), hero_image, meta_description, active, id]
+      'UPDATE about_pages SET title = $1, content = $2, features = $3, hero_image = $4, meta_description = $5, opening_hours = $6, active = $7 WHERE id = $8',
+      [title, content, JSON.stringify(features), hero_image, meta_description, opening_hours, active, id]
     );
 
     return NextResponse.json({
@@ -69,6 +69,7 @@ export async function PUT(
       features,
       hero_image,
       meta_description,
+      opening_hours,
       active,
       updated_at: new Date().toISOString()
     });

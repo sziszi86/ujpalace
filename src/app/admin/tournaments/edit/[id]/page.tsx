@@ -269,8 +269,8 @@ export default function EditTournamentPage() {
         blindStructure: '20 perc szintek',
         contact_phone: '+36 30 971 5832',
         contactPhone: '+36 30 971 5832',
-        contact_email: 'tournaments@palace-poker.hu',
-        contactEmail: 'tournaments@palace-poker.hu',
+        contact_email: 'palacepoker@hotmail.hu',
+        contactEmail: 'palacepoker@hotmail.hu',
       };
 
       // API mentés
@@ -338,7 +338,7 @@ export default function EditTournamentPage() {
         lateRegistration: false,
         blindStructure: '20 perc szintek',
         contactPhone: '+36 30 971 5832',
-        contactEmail: 'tournaments@palace-poker.hu',
+        contactEmail: 'palacepoker@hotmail.hu',
       };
 
       const response = await fetch('/api/admin/tournaments', {
@@ -403,7 +403,7 @@ export default function EditTournamentPage() {
         lateRegistration: false,
         blindStructure: '20 perc szintek',
         contactPhone: '+36 30 971 5832',
-        contactEmail: 'tournaments@palace-poker.hu',
+        contactEmail: 'palacepoker@hotmail.hu',
       };
 
       const response = await fetch('/api/admin/tournaments', {

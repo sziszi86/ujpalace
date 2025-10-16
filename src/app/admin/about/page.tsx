@@ -10,6 +10,7 @@ interface AboutPage {
   content: string;
   features?: string[] | null;
   image?: string;
+  opening_hours?: string;
   active: boolean;
   created_at: string;
   updated_at: string;
@@ -22,6 +23,7 @@ export default function AdminAboutPage() {
     content: '',
     features: [] as string[],
     image: '',
+    opening_hours: '',
     active: true
   });
   
@@ -43,6 +45,7 @@ export default function AdminAboutPage() {
             content: data.content || '',
             features: data.features || [],
             image: data.image || '',
+            opening_hours: data.opening_hours || '',
             active: data.active
           });
         } else {
@@ -168,6 +171,22 @@ export default function AdminAboutPage() {
               />
               <p className="mt-2 text-sm text-gray-500">
                 HTML tageket is használhatsz a formázáshoz (pl. &lt;p&gt;, &lt;strong&gt;, &lt;br&gt;).
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Nyitvatartás
+              </label>
+              <textarea
+                rows={4}
+                value={formData.opening_hours}
+                onChange={(e) => setFormData({ ...formData, opening_hours: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-poker-green focus:border-transparent"
+                placeholder="pl. Szerda: 19:00 - 04:00&#10;Péntek-Szombat: 19:30 - 04:00&#10;Vasárnap-Hétfő-Kedd-Csütörtök: zárva"
+              />
+              <p className="mt-2 text-sm text-gray-500">
+                Adj meg részletes nyitvatartási információkat. Minden sor egy külön napot/napcsoportot jelenthet.
               </p>
             </div>
 
