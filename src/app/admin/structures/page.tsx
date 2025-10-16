@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 interface StructureLevel {
   id?: number;
@@ -28,6 +29,7 @@ interface Structure {
 export default function AdminStructuresPage() {
   const [structures, setStructures] = useState<Structure[]>([]);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchStructures = async () => {
@@ -101,8 +103,18 @@ export default function AdminStructuresPage() {
 
   const handleDuplicate = async (id: number) => {
     try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        router.push('/admin/login');
+        return;
+      }
+
       const response = await fetch(`/api/structures/${id}/duplicate`, {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        }
       });
       
       if (!response.ok) {

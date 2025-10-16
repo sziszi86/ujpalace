@@ -244,13 +244,12 @@ export default function AdminTournamentsPage() {
         return;
       }
 
-      const response = await fetch('/api/admin/tournaments', {
+      const response = await fetch(`/api/admin/tournaments/${tournament.id}/duplicate`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(duplicateData)
+        }
       });
 
       if (response.ok) {
