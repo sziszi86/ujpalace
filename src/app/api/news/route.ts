@@ -10,16 +10,18 @@ export async function GET(request: Request) {
     const featured = searchParams.get('featured');
 
     let query = `
-      SELECT id, title, 
-             content, excerpt, 
-             featured_image as image_url,
-             featured_image as image, 
-             created_at as publish_date,
-             CASE WHEN published = true THEN 'published' ELSE 'draft' END as status,
-             featured, author, 
-             created_at, updated_at
-      FROM news 
-      WHERE published = $1
+      SELECT n.id, n.title, 
+             n.content, n.excerpt, 
+             n.featured_image as image_url,
+             n.featured_image as image, 
+             n.created_at as publish_date,
+             CASE WHEN n.published = true THEN 'published' ELSE 'draft' END as status,
+             n.featured, n.author, 
+             n.created_at, n.updated_at,
+             nc.name as category
+      FROM news n
+      LEFT JOIN news_categories nc ON n.category_id = nc.id
+      WHERE n.published = $1
     `;
     const params: any[] = [status === 'published'];
 
@@ -65,7 +67,7 @@ export async function POST(request: Request) {
       image,
       publish_date,
       status = 'published',
-      category,
+      category_id,
       tags,
       featured = false,
       author,
@@ -96,8 +98,8 @@ export async function POST(request: Request) {
 
     const result = await executeInsert(`
       INSERT INTO news 
-      (title, content, excerpt, image, status, featured, author)
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      (title, content, excerpt, featured_image, published, featured, author, category_id)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
     `, [
       title,
       content,
@@ -105,7 +107,8 @@ export async function POST(request: Request) {
       image || null,
       status === 'published',
       featured ? true : false,
-      author || authResult.user.username
+      author || authResult.user.username,
+      category_id ? parseInt(category_id) : null
     ]);
 
     return NextResponse.json({ 

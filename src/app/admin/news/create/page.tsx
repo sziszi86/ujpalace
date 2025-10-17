@@ -1,8 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+
+interface NewsCategory {
+  id: number;
+  name: string;
+}
 
 export default function CreateNewsPage() {
   const [formData, setFormData] = useState({
@@ -13,14 +18,31 @@ export default function CreateNewsPage() {
     image: '',
     publish_date: new Date().toISOString().split('T')[0],
     status: 'published',
-    category: '',
+    category_id: '',
     tags: '',
     featured: false,
     read_time: 5
   });
+  const [categories, setCategories] = useState<NewsCategory[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch('/api/admin/news-categories');
+      if (response.ok) {
+        const data = await response.json();
+        setCategories(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch categories:', error);
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -135,18 +157,36 @@ export default function CreateNewsPage() {
 
             {/* Category */}
             <div>
-              <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="category_id" className="block text-sm font-medium text-gray-700 mb-2">
                 Kategória
               </label>
-              <input
-                type="text"
-                id="category"
-                name="category"
-                value={formData.category}
+              <select
+                id="category_id"
+                name="category_id"
+                value={formData.category_id}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-poker-primary focus:border-transparent"
-                placeholder="pl. Versenyeink, Hírek"
-              />
+              >
+                <option value="">Válassz kategóriát...</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+              {categories.length === 0 && (
+                <p className="text-sm text-gray-500 mt-1">
+                  Először hozz létre kategóriákat a{' '}
+                  <Link 
+                    href="/admin/news-categories" 
+                    className="text-poker-primary hover:text-poker-secondary"
+                    target="_blank"
+                  >
+                    kategóriák kezelése
+                  </Link>{' '}
+                  oldalon.
+                </p>
+              )}
             </div>
 
             {/* Excerpt */}
