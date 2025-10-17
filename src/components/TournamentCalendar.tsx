@@ -12,7 +12,7 @@ interface TournamentCalendarProps {
 }
 
 export default function TournamentCalendar({ showCashGames = true, onlyShowCashGames = false }: TournamentCalendarProps) {
-  const [selectedView, setSelectedView] = useState<'calendar' | 'list' | 'week'>('calendar');
+  const [selectedView, setSelectedView] = useState<'calendar' | 'list' | 'week' | 'mobile'>('calendar');
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'tournaments' | 'cash-games'>('all');
   const [currentDate, setCurrentDate] = useState(new Date());
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
@@ -171,9 +171,9 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
   useEffect(() => {
     const checkIfMobile = () => {
       setIsMobile(window.innerWidth < 768);
-      // Auto-set to week view on mobile
+      // Auto-set to mobile view on mobile
       if (window.innerWidth < 768 && selectedView === 'calendar') {
-        setSelectedView('week');
+        setSelectedView('mobile');
       }
     };
     
@@ -207,6 +207,22 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
     const currentDay = new Date(startDate);
     
     for (let i = 0; i < 42; i++) {
+      days.push(new Date(currentDay));
+      currentDay.setDate(currentDay.getDate() + 1);
+    }
+    
+    return days;
+  };
+
+  // Generate mobile calendar days (3-day view)
+  const generateMobileCalendarDays = () => {
+    const startDate = new Date(currentDate);
+    startDate.setDate(startDate.getDate() - 1); // Start with yesterday for context
+    
+    const days = [];
+    const currentDay = new Date(startDate);
+    
+    for (let i = 0; i < 3; i++) {
       days.push(new Date(currentDay));
       currentDay.setDate(currentDay.getDate() + 1);
     }
@@ -274,6 +290,14 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
     });
   };
 
+  const navigateMobileDay = (direction: 'prev' | 'next') => {
+    setCurrentDate(prev => {
+      const newDate = new Date(prev);
+      newDate.setDate(newDate.getDate() + (direction === 'next' ? 1 : -1));
+      return newDate;
+    });
+  };
+
   const generateWeekDays = () => {
     const startOfWeek = new Date(currentDate);
     const dayOfWeek = startOfWeek.getDay();
@@ -320,11 +344,11 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
           )}
           <button
             className={`px-4 py-3 rounded-lg font-semibold transition-all duration-300 text-sm ${
-              selectedView === 'week'
+              (selectedView === 'week' || selectedView === 'mobile')
                 ? 'bg-poker-primary text-white shadow-lg'
                 : 'text-poker-muted hover:text-poker-dark'
             }`}
-            onClick={() => setSelectedView('week')}
+            onClick={() => setSelectedView(isMobile ? 'mobile' : 'week')}
           >
             📅 {isMobile ? 'Naptár' : 'Heti'}
           </button>
@@ -377,13 +401,21 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
         )}
       </div>
 
-      {selectedView === 'calendar' || selectedView === 'week' ? (
+      {selectedView === 'calendar' || selectedView === 'week' || selectedView === 'mobile' ? (
         /* Calendar/Week View */
         <div className="card-modern p-4 lg:p-8">
           {/* Calendar Header */}
           <div className="flex items-center justify-between mb-8">
             <button
-              onClick={() => selectedView === 'week' ? navigateWeek('prev') : navigateMonth('prev')}
+              onClick={() => {
+                if (selectedView === 'week') {
+                  navigateWeek('prev');
+                } else if (selectedView === 'mobile') {
+                  navigateMobileDay('prev');
+                } else {
+                  navigateMonth('prev');
+                }
+              }}
               className="p-3 rounded-xl bg-poker-light hover:bg-poker-accent/20 transition-colors"
             >
               <svg className="w-6 h-6 text-poker-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -399,7 +431,15 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
             </h2>
             
             <button
-              onClick={() => selectedView === 'week' ? navigateWeek('next') : navigateMonth('next')}
+              onClick={() => {
+                if (selectedView === 'week') {
+                  navigateWeek('next');
+                } else if (selectedView === 'mobile') {
+                  navigateMobileDay('next');
+                } else {
+                  navigateMonth('next');
+                }
+              }}
               className="p-3 rounded-xl bg-poker-light hover:bg-poker-accent/20 transition-colors"
             >
               <svg className="w-6 h-6 text-poker-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -409,24 +449,40 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
           </div>
 
           {/* Calendar Grid */}
-          <div className={`grid grid-cols-7 ${selectedView === 'week' ? 'gap-1 md:gap-2' : 'gap-2 md:gap-3'}`}>
+          <div className={`grid ${selectedView === 'mobile' ? 'grid-cols-3' : 'grid-cols-7'} ${selectedView === 'week' ? 'gap-1 md:gap-2' : selectedView === 'mobile' ? 'gap-3' : 'gap-2 md:gap-3'}`}>
             {/* Day Headers */}
-            {['Vas', 'Hét', 'Ked', 'Sze', 'Csü', 'Pén', 'Szo'].map(day => (
-              <div key={day} className={`${selectedView === 'week' ? 'p-2 text-sm md:text-base' : 'p-2 md:p-4 text-sm md:text-base'} text-center font-semibold text-poker-muted`}>
-                {day}
-              </div>
-            ))}
+            {selectedView === 'mobile' ? (
+              generateMobileCalendarDays().map(day => (
+                <div key={day.toISOString()} className="p-2 text-center font-semibold text-poker-muted">
+                  {getDayOfWeek(day)}
+                </div>
+              ))
+            ) : (
+              ['Vas', 'Hét', 'Ked', 'Sze', 'Csü', 'Pén', 'Szo'].map(day => (
+                <div key={day} className={`${selectedView === 'week' ? 'p-2 text-sm md:text-base' : 'p-2 md:p-4 text-sm md:text-base'} text-center font-semibold text-poker-muted`}>
+                  {day}
+                </div>
+              ))
+            )}
 
             {/* Calendar Days */}
-            {(selectedView === 'week' ? generateWeekDays() : calendarDays).map((day, index) => {
+            {(selectedView === 'week' ? generateWeekDays() : selectedView === 'mobile' ? generateMobileCalendarDays() : calendarDays).map((day, index) => {
               const events = getEventsForDate(day);
               const hasEvents = events.length > 0;
               
               return (
                 <div
                   key={index}
-                  className={`${selectedView === 'week' ? 'min-h-36 md:min-h-32' : 'min-h-28 md:min-h-24'} p-1 md:p-2 border border-gray-100 rounded-lg transition-all duration-200 ${
-                    selectedView === 'week' || isCurrentMonth(day)
+                  className={`${
+                    selectedView === 'mobile' 
+                      ? hasEvents 
+                        ? 'min-h-40 col-span-1' 
+                        : 'min-h-20 col-span-1'
+                      : selectedView === 'week' 
+                        ? 'min-h-36 md:min-h-32' 
+                        : 'min-h-28 md:min-h-24'
+                  } p-2 border border-gray-100 rounded-lg transition-all duration-200 ${
+                    selectedView === 'week' || selectedView === 'mobile' || isCurrentMonth(day)
                       ? hasEvents
                         ? 'bg-poker-light/30 hover:bg-poker-light/50'
                         : 'bg-white hover:bg-poker-light/20'
@@ -437,10 +493,10 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
                       : ''
                   }`}
                 >
-                  <div className={`text-xs md:text-sm font-semibold mb-1 text-center ${
+                  <div className={`${selectedView === 'mobile' ? 'text-sm' : 'text-xs md:text-sm'} font-semibold mb-1 text-center ${
                     isToday(day) ? 'text-poker-primary' : 'text-poker-dark'
                   }`}>
-                    {selectedView === 'week' ? 
+                    {selectedView === 'week' || selectedView === 'mobile' ? 
                       `${day.getMonth() + 1}/${day.getDate()}` :
                       day.getDate()
                     }
@@ -448,20 +504,30 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
                   
                   {/* Events */}
                   <div className="space-y-1">
-                    {events.slice(0, selectedView === 'week' ? 4 : (isMobile ? 1 : 2)).map(event => (
+                    {events.slice(0, selectedView === 'mobile' ? 3 : selectedView === 'week' ? 4 : 2).map(event => (
                       <Link
                         key={event.id}
                         href={(event as any).type === 'cash-game' ? `/cash-games/${event.id}` : `/tournaments/${event.id}`}
-                        className="block p-2 md:p-2 bg-poker-primary/10 hover:bg-poker-primary/20 rounded text-xs md:text-sm text-poker-dark hover:text-poker-primary transition-colors min-h-8 md:min-h-auto"
+                        className={`block p-2 bg-poker-primary/10 hover:bg-poker-primary/20 rounded text-poker-dark hover:text-poker-primary transition-colors ${
+                          selectedView === 'mobile' ? 'text-sm min-h-10' : 'text-xs md:text-sm min-h-8 md:min-h-auto'
+                        }`}
                       >
-                        <div className="font-medium truncate text-xs md:text-sm">{event.time}</div>
-                        <div className="truncate text-xs md:text-sm">{event.title}</div>
-                        {(event as any).type === 'cash-game' && <div className="text-xs text-poker-muted">{(event as any).stakes}</div>}
+                        <div className={`font-medium truncate ${selectedView === 'mobile' ? 'text-sm' : 'text-xs md:text-sm'}`}>
+                          {event.time}
+                        </div>
+                        <div className={`truncate ${selectedView === 'mobile' ? 'text-sm' : 'text-xs md:text-sm'}`}>
+                          {event.title}
+                        </div>
+                        {(event as any).type === 'cash-game' && (
+                          <div className={`text-poker-muted ${selectedView === 'mobile' ? 'text-xs' : 'text-xs'}`}>
+                            {(event as any).stakes}
+                          </div>
+                        )}
                       </Link>
                     ))}
-                    {events.length > (selectedView === 'week' ? 4 : (isMobile ? 1 : 2)) && (
+                    {events.length > (selectedView === 'mobile' ? 3 : selectedView === 'week' ? 4 : 2) && (
                       <div className="text-xs text-poker-muted text-center">
-                        +{events.length - (selectedView === 'week' ? 4 : (isMobile ? 1 : 2))} több
+                        +{events.length - (selectedView === 'mobile' ? 3 : selectedView === 'week' ? 4 : 2)} több
                       </div>
                     )}
                   </div>
