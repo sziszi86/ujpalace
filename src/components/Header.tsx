@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { MenuItem } from '@/types';
@@ -35,11 +35,22 @@ const menuItems: MenuItem[] = [
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      setIsScrolled(scrollY > 50);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
     <header className="bg-gradient-to-r from-poker-dark via-poker-secondary to-poker-dark shadow-2xl sticky top-0 z-50 backdrop-blur-md border-b border-poker-primary/20">
       {/* Info Bar */}
-      <div className="bg-gradient-to-r from-poker-primary to-poker-secondary text-white py-3 px-4 animate-slide-down">
+      <div className={`bg-gradient-to-r from-poker-primary to-poker-secondary text-white py-3 px-4 animate-slide-down transition-all duration-300 lg:block ${isScrolled ? 'hidden' : 'block'}`}>
         <div className="container mx-auto flex flex-col lg:flex-row justify-between items-center text-sm space-y-2 lg:space-y-0">
           <div className="flex flex-col lg:flex-row items-center space-y-2 lg:space-y-0 lg:space-x-6">
             <div className="flex items-center space-x-2 animate-fade-in">
@@ -71,16 +82,16 @@ export default function Header() {
 
       {/* Main Header */}
       <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center py-6">
+        <div className={`flex justify-between items-center transition-all duration-300 ${isScrolled ? 'py-3 lg:py-6' : 'py-6'}`}>
           {/* Logo */}
           <Link href="/" className="flex items-center group animate-fade-in">
-            <div className="relative w-20 h-20 flex items-center justify-center transform group-hover:scale-105 transition-all duration-300">
+            <div className={`relative flex items-center justify-center transform group-hover:scale-105 transition-all duration-300 ${isScrolled ? 'w-12 h-12 lg:w-20 lg:h-20' : 'w-20 h-20'}`}>
               <Image
                 src="/images/logo.png"
                 alt="Palace Poker Logo"
-                width={80}
-                height={80}
-                className="object-contain"
+                width={isScrolled ? 48 : 80}
+                height={isScrolled ? 48 : 80}
+                className="object-contain lg:w-20 lg:h-20"
               />
             </div>
           </Link>
