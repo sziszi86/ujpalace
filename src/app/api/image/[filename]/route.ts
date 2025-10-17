@@ -34,16 +34,63 @@ export async function GET(
       );
     }
 
-    // Return the image data with proper headers
-    return new NextResponse(image.data, {
-      status: 200,
-      headers: {
-        'Content-Type': image.mime_type,
-        'Content-Length': image.size_bytes.toString(),
-        'Cache-Control': 'public, max-age=31536000, immutable',
-        'Content-Disposition': `inline; filename="${image.original_name}"`,
-      },
-    });
+    // Check if data exists and is valid
+    if (!image.data) {
+      console.error(`[Images API] No image data for filename: ${filename}`);
+      return NextResponse.json(
+        { error: 'No image data found' },
+        { status: 404 }
+      );
+    }
+    
+    try {
+      // Always create a new Uint8Array from the data to avoid ByteString issues
+      let imageData: Uint8Array;
+      
+      if (image.data instanceof Uint8Array) {
+        imageData = image.data;
+      } else if (Buffer.isBuffer(image.data)) {
+        imageData = new Uint8Array(image.data);
+      } else if (typeof image.data === 'string') {
+        // If data is base64 encoded string
+        const buffer = Buffer.from(image.data, 'base64');
+        imageData = new Uint8Array(buffer);
+      } else if (Array.isArray(image.data)) {
+        // If data comes as array
+        imageData = new Uint8Array(image.data);
+      } else {
+        console.error(`[Images API] Unexpected data type: ${typeof image.data}`, image.data?.constructor?.name);
+        return NextResponse.json(
+          { error: 'Invalid image data format' },
+          { status: 500 }
+        );
+      }
+      
+      
+      // Create a ReadableStream to avoid any ByteString conversion issues
+      const stream = new ReadableStream({
+        start(controller) {
+          controller.enqueue(imageData);
+          controller.close();
+        },
+      });
+      
+      // Return the image data with proper headers using ReadableStream
+      return new Response(stream, {
+        status: 200,
+        headers: {
+          'Content-Type': image.mime_type || 'application/octet-stream',
+          'Cache-Control': 'public, max-age=31536000, immutable',
+        },
+      });
+      
+    } catch (bufferError) {
+      console.error(`[Images API] Error creating image data:`, bufferError);
+      return NextResponse.json(
+        { error: 'Failed to process image data' },
+        { status: 500 }
+      );
+    }
 
   } catch (error) {
     console.error('Error serving image:', error);

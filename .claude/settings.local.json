@@ -12,7 +12,8 @@
       "Bash(vercel:*)",
       "WebFetch(domain:palace-poker.hu)",
       "WebFetch(domain:localhost)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []
