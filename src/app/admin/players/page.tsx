@@ -27,6 +27,9 @@ interface Transaction {
   notes?: string;
 }
 
+type SortField = 'name' | 'total_deposits' | 'total_withdrawals' | 'balance' | 'created_at';
+type SortDirection = 'asc' | 'desc';
+
 export default function AdminPlayersPage() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,6 +42,8 @@ export default function AdminPlayersPage() {
   const [transactionAmount, setTransactionAmount] = useState('');
   const [transactionDate, setTransactionDate] = useState(new Date().toISOString().split('T')[0]);
   const [transactionNotes, setTransactionNotes] = useState('');
+  const [sortField, setSortField] = useState<SortField>('name');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const itemsPerPage = 50;
 
   const formatTooltip = (transaction: Transaction) => {
@@ -47,6 +52,34 @@ export default function AdminPlayersPage() {
     const date = new Date(transaction.transaction_date).toLocaleDateString('hu-HU');
     const notes = transaction.notes ? `\nMegjegyzés: ${transaction.notes}` : '';
     return `${type}: ${amount}\nDátum: ${date}${notes}`;
+  };
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const getSortIcon = (field: SortField) => {
+    if (sortField !== field) {
+      return (
+        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+        </svg>
+      );
+    }
+    return sortDirection === 'asc' ? (
+      <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4" />
+      </svg>
+    ) : (
+      <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+      </svg>
+    );
   };
 
   const exportToCSV = () => {
@@ -187,6 +220,41 @@ export default function AdminPlayersPage() {
                          (filter === 'inactive' && !player.active);
     
     return matchesSearch && matchesFilter;
+  }).sort((a, b) => {
+    let aValue: any;
+    let bValue: any;
+    
+    switch (sortField) {
+      case 'name':
+        aValue = a.name.toLowerCase();
+        bValue = b.name.toLowerCase();
+        break;
+      case 'total_deposits':
+        aValue = a.total_deposits || 0;
+        bValue = b.total_deposits || 0;
+        break;
+      case 'total_withdrawals':
+        aValue = a.total_withdrawals || 0;
+        bValue = b.total_withdrawals || 0;
+        break;
+      case 'balance':
+        aValue = a.balance || 0;
+        bValue = b.balance || 0;
+        break;
+      case 'created_at':
+        aValue = new Date(a.created_at);
+        bValue = new Date(b.created_at);
+        break;
+      default:
+        aValue = a.name.toLowerCase();
+        bValue = b.name.toLowerCase();
+    }
+    
+    if (sortDirection === 'asc') {
+      return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+    } else {
+      return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
+    }
   });
 
   const totalPages = Math.ceil(filteredPlayers.length / itemsPerPage);
@@ -268,19 +336,49 @@ export default function AdminPlayersPage() {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Játékos
+                    <button
+                      onClick={() => handleSort('name')}
+                      className="flex items-center space-x-1 hover:text-gray-700 transition-colors"
+                    >
+                      <span>Játékos</span>
+                      {getSortIcon('name')}
+                    </button>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Legutóbbi aktivitás
+                    <button
+                      onClick={() => handleSort('created_at')}
+                      className="flex items-center space-x-1 hover:text-gray-700 transition-colors"
+                    >
+                      <span>Legutóbbi aktivitás</span>
+                      {getSortIcon('created_at')}
+                    </button>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Befizetések
+                    <button
+                      onClick={() => handleSort('total_deposits')}
+                      className="flex items-center space-x-1 hover:text-gray-700 transition-colors"
+                    >
+                      <span>Befizetések</span>
+                      {getSortIcon('total_deposits')}
+                    </button>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Kibefizetések
+                    <button
+                      onClick={() => handleSort('total_withdrawals')}
+                      className="flex items-center space-x-1 hover:text-gray-700 transition-colors"
+                    >
+                      <span>Kibefizetések</span>
+                      {getSortIcon('total_withdrawals')}
+                    </button>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Mérleg
+                    <button
+                      onClick={() => handleSort('balance')}
+                      className="flex items-center space-x-1 hover:text-gray-700 transition-colors"
+                    >
+                      <span>Mérleg</span>
+                      {getSortIcon('balance')}
+                    </button>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Műveletek

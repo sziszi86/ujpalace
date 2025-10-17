@@ -5,9 +5,14 @@ import Link from 'next/link';
 import { formatCurrency } from '@/utils/formatters';
 import { CashGame } from '@/types';
 
+type CashGameSortField = 'name' | 'stakes' | 'minBuyIn' | 'maxBuyIn' | 'active';
+type CashGameSortDirection = 'asc' | 'desc';
+
 export default function CashGamesAdmin() {
   const [cashGames, setCashGames] = useState<CashGame[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sortField, setSortField] = useState<CashGameSortField>('name');
+  const [sortDirection, setSortDirection] = useState<CashGameSortDirection>('asc');
 
   useEffect(() => {
     const loadCashGames = async () => {
@@ -48,6 +53,68 @@ export default function CashGamesAdmin() {
     
     loadCashGames();
   }, []);
+
+  const handleSort = (field: CashGameSortField) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const getSortIcon = (field: CashGameSortField) => {
+    if (sortField !== field) {
+      return (
+        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+        </svg>
+      );
+    }
+    return sortDirection === 'asc' ? (
+      <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4" />
+      </svg>
+    ) : (
+      <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+      </svg>
+    );
+  };
+
+  const sortedCashGames = [...cashGames].sort((a, b) => {
+    let aValue: string | number | boolean;
+    let bValue: string | number | boolean;
+
+    switch (sortField) {
+      case 'name':
+        aValue = a.name.toLowerCase();
+        bValue = b.name.toLowerCase();
+        break;
+      case 'stakes':
+        aValue = a.stakes.toLowerCase();
+        bValue = b.stakes.toLowerCase();
+        break;
+      case 'minBuyIn':
+        aValue = a.minBuyIn;
+        bValue = b.minBuyIn;
+        break;
+      case 'active':
+        aValue = a.active;
+        bValue = b.active;
+        break;
+      default:
+        return 0;
+    }
+
+    if (aValue < bValue) {
+      return sortDirection === 'asc' ? -1 : 1;
+    }
+    if (aValue > bValue) {
+      return sortDirection === 'asc' ? 1 : -1;
+    }
+    return 0;
+  });
 
   const handleDelete = async (id: number) => {
     if (confirm('Biztosan törölni szeretnéd ezt a cash game-et?')) {
@@ -275,19 +342,43 @@ export default function CashGamesAdmin() {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Cash Game
+                    <button 
+                      className="flex items-center space-x-1 hover:text-gray-700"
+                      onClick={() => handleSort('name')}
+                    >
+                      <span>Cash Game</span>
+                      {getSortIcon('name')}
+                    </button>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Tétek
+                    <button 
+                      className="flex items-center space-x-1 hover:text-gray-700"
+                      onClick={() => handleSort('stakes')}
+                    >
+                      <span>Tétek</span>
+                      {getSortIcon('stakes')}
+                    </button>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Buy-in
+                    <button 
+                      className="flex items-center space-x-1 hover:text-gray-700"
+                      onClick={() => handleSort('minBuyIn')}
+                    >
+                      <span>Buy-in</span>
+                      {getSortIcon('minBuyIn')}
+                    </button>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Látható
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Állapot
+                    <button 
+                      className="flex items-center space-x-1 hover:text-gray-700"
+                      onClick={() => handleSort('active')}
+                    >
+                      <span>Állapot</span>
+                      {getSortIcon('active')}
+                    </button>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Kiemelt
@@ -298,7 +389,7 @@ export default function CashGamesAdmin() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {cashGames.map((cashGame) => (
+                {sortedCashGames.map((cashGame) => (
                   <tr key={cashGame.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div>

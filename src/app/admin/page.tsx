@@ -45,21 +45,10 @@ interface DashboardData {
   };
 }
 
-interface Backup {
-  id: string;
-  name: string;
-  date: string;
-  size: string;
-  type: string;
-}
 
 export default function AdminDashboard() {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
-  const [backups, setBackups] = useState<Backup[]>([]);
   const [loading, setLoading] = useState(true);
-  const [backupLoading, setBackupLoading] = useState(false);
-  const [restoreLoading, setRestoreLoading] = useState(false);
-  const [showBackupModal, setShowBackupModal] = useState(false);
 
   const fetchDashboardData = async () => {
     try {
@@ -75,74 +64,13 @@ export default function AdminDashboard() {
     }
   };
 
-  const fetchBackups = async () => {
-    try {
-      const response = await fetch('/api/admin/backup');
-      if (response.ok) {
-        const data = await response.json();
-        setBackups(data.backups || []);
-      }
-    } catch (error) {
-      console.error('Failed to fetch backups:', error);
-      setBackups([]);
-    }
-  };
-
   useEffect(() => {
     const loadData = async () => {
-      await Promise.all([fetchDashboardData(), fetchBackups()]);
+      await fetchDashboardData();
       setLoading(false);
     };
     loadData();
   }, []);
-
-  const createBackup = async (name?: string) => {
-    setBackupLoading(true);
-    try {
-      const response = await fetch('/api/admin/backup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name })
-      });
-      
-      if (response.ok) {
-        const result = await response.json();
-        alert(result.message);
-        await fetchBackups();
-        await fetchDashboardData(); // Refresh dashboard data
-      } else {
-        alert('Hiba a biztonsági mentés létrehozásakor');
-      }
-    } catch (error) {
-      alert('Hiba a biztonsági mentés létrehozásakor');
-    }
-    setBackupLoading(false);
-    setShowBackupModal(false);
-  };
-
-  const restoreBackup = async (backupId: string) => {
-    if (!confirm('Biztosan vissza szeretnéd állítani ezt a mentést? Ez felülírja a jelenlegi adatokat.')) {
-      return;
-    }
-
-    setRestoreLoading(true);
-    try {
-      const response = await fetch(`/api/admin/backup/${backupId}/restore`, {
-        method: 'POST'
-      });
-      
-      if (response.ok) {
-        const result = await response.json();
-        alert(result.message);
-        await fetchDashboardData(); // Refresh dashboard data
-      } else {
-        alert('Hiba a visszaállítás során');
-      }
-    } catch (error) {
-      alert('Hiba a visszaállítás során');
-    }
-    setRestoreLoading(false);
-  };
 
   const handleResetTotals = async () => {
     if (!confirm('Biztosan nullázni szeretnéd az összes pénzügyi összesítőt? Ez új számláló periódust indít, de a tranzakciók megmaradnak.')) {
@@ -163,7 +91,7 @@ export default function AdminDashboard() {
       if (response.ok) {
         const result = await response.json();
         alert(result.message);
-        await fetchDashboardData(); // Refresh dashboard data
+        await fetchDashboardData();
       } else {
         alert('Hiba a nullázás során');
       }
@@ -416,101 +344,36 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* System Management & Backup */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        {/* System Status */}
+      {/* System Status */}
+      <div className="grid grid-cols-1 lg:grid-cols-1 gap-6 mb-8">
         <div className="bg-white rounded-lg shadow">
           <div className="p-6 border-b border-gray-200">
             <h2 className="text-xl font-semibold text-gray-900">Rendszer állapot</h2>
           </div>
           <div className="p-6">
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <div className={`w-3 h-3 rounded-full mr-3 ${
-                    dashboardData.systemStatus.database.status === 'online' ? 'bg-green-500' : 'bg-red-500'
-                  }`}></div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">Adatbázis kapcsolat</p>
-                    <p className="text-xs text-black">
-                      {dashboardData.systemStatus.database.status === 'online' ? 'Működik' : 'Hiba'}
-                    </p>
-                  </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="flex items-center">
+                <div className={`w-3 h-3 rounded-full mr-3 ${
+                  dashboardData.systemStatus.database.status === 'online' ? 'bg-green-500' : 'bg-red-500'
+                }`}></div>
+                <div>
+                  <p className="text-sm font-medium text-gray-900">Adatbázis kapcsolat</p>
+                  <p className="text-xs text-black">
+                    {dashboardData.systemStatus.database.status === 'online' ? 'Működik' : 'Hiba'}
+                  </p>
                 </div>
               </div>
               
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">Weboldal</p>
-                    <p className="text-xs text-black">
-                      Online ({dashboardData.systemStatus.website.uptime})
-                      {dashboardData.systemStatus.website.currentVisitors !== undefined && (
-                        <> • {dashboardData.systemStatus.website.currentVisitors} aktív látogató</>
-                      )}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <div className="w-3 h-3 bg-yellow-500 rounded-full mr-3"></div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">Biztonsági mentés</p>
-                    <p className="text-xs text-black">
-                      Legutóbbi: {formatDate(dashboardData.systemStatus.backup.lastBackup)}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Database Backup & Restore */}
-        <div className="bg-white rounded-lg shadow">
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900">Adatbázis kezelés</h2>
-          </div>
-          <div className="p-6">
-            <div className="space-y-4">
-              <button
-                onClick={() => setShowBackupModal(true)}
-                disabled={backupLoading}
-                className="w-full flex items-center justify-center px-4 py-2 bg-poker-primary text-white rounded-lg hover:bg-poker-secondary disabled:opacity-50 transition-colors"
-              >
-                {backupLoading ? (
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                ) : (
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
-                  </svg>
-                )}
-                {backupLoading ? 'Mentés folyamatban...' : 'Új biztonsági mentés'}
-              </button>
-
-              <div className="space-y-2">
-                <h4 className="text-sm font-medium text-gray-900">Elérhető mentések:</h4>
-                <div className="max-h-48 overflow-y-auto space-y-2">
-                  {(backups || []).slice(0, 3).map((backup) => (
-                    <div key={backup.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-900">{backup.name}</p>
-                        <p className="text-xs text-black">
-                          {formatDate(backup.date)} • {backup.size}
-                        </p>
-                      </div>
-                      <button
-                        onClick={() => restoreBackup(backup.id)}
-                        disabled={restoreLoading}
-                        className="ml-2 px-3 py-1 text-xs bg-blue-100 text-blue-800 rounded hover:bg-blue-200 disabled:opacity-50 transition-colors"
-                      >
-                        {restoreLoading ? 'Visszaállítás...' : 'Visszaállítás'}
-                      </button>
-                    </div>
-                  ))}
+              <div className="flex items-center">
+                <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+                <div>
+                  <p className="text-sm font-medium text-gray-900">Weboldal</p>
+                  <p className="text-xs text-black">
+                    Online ({dashboardData.systemStatus.website.uptime})
+                    {dashboardData.systemStatus.website.currentVisitors !== undefined && (
+                      <> • {dashboardData.systemStatus.website.currentVisitors} aktív látogató</>
+                    )}
+                  </p>
                 </div>
               </div>
             </div>
@@ -601,51 +464,6 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Backup Modal */}
-      {showBackupModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Biztonsági mentés létrehozása</h3>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                const formData = new FormData(e.target as HTMLFormElement);
-                const name = formData.get('name') as string;
-                createBackup(name || undefined);
-              }}
-            >
-              <div className="mb-4">
-                <label htmlFor="backupName" className="block text-sm font-medium text-gray-700 mb-2">
-                  Mentés neve (opcionális)
-                </label>
-                <input
-                  type="text"
-                  id="backupName"
-                  name="name"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-poker-primary"
-                  placeholder="pl. Előadás előtti mentés"
-                />
-              </div>
-              <div className="flex justify-end space-x-3">
-                <button
-                  type="button"
-                  onClick={() => setShowBackupModal(false)}
-                  className="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors"
-                >
-                  Mégse
-                </button>
-                <button
-                  type="submit"
-                  disabled={backupLoading}
-                  className="px-4 py-2 bg-poker-primary text-white rounded-md hover:bg-poker-secondary disabled:opacity-50 transition-colors"
-                >
-                  {backupLoading ? 'Mentés...' : 'Mentés létrehozása'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

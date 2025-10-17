@@ -7,6 +7,9 @@ import { generateUniqueId } from '@/utils/idGenerator';
 import { formatCurrency } from '@/utils/formatters';
 import { Tournament } from '@/types';
 
+type TournamentSortField = 'title' | 'date' | 'buyIn' | 'status';
+type TournamentSortDirection = 'asc' | 'desc';
+
 export default function AdminTournamentsPage() {
   const router = useRouter();
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
@@ -14,6 +17,8 @@ export default function AdminTournamentsPage() {
   const [filter, setFilter] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortField, setSortField] = useState<TournamentSortField>('date');
+  const [sortDirection, setSortDirection] = useState<TournamentSortDirection>('desc');
   const itemsPerPage = 50;
 
   // Mock data - később API-val cseréljük
@@ -110,6 +115,34 @@ export default function AdminTournamentsPage() {
     const day = date.getDate();
     
     return `${year}. ${month.toString().padStart(2, '0')}. ${day.toString().padStart(2, '0')}.`;
+  };
+
+  const handleSort = (field: TournamentSortField) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const getSortIcon = (field: TournamentSortField) => {
+    if (sortField !== field) {
+      return (
+        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+        </svg>
+      );
+    }
+    return sortDirection === 'asc' ? (
+      <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4" />
+      </svg>
+    ) : (
+      <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+      </svg>
+    );
   };
 
   const getStatusColor = (status: string) => {
@@ -285,6 +318,37 @@ export default function AdminTournamentsPage() {
     }
     
     return matchesFilter && matchesSearch;
+  }).sort((a, b) => {
+    let aValue: any;
+    let bValue: any;
+    
+    switch (sortField) {
+      case 'title':
+        aValue = a.title.toLowerCase();
+        bValue = b.title.toLowerCase();
+        break;
+      case 'date':
+        aValue = new Date(a.date);
+        bValue = new Date(b.date);
+        break;
+      case 'buyIn':
+        aValue = a.buyIn || parseInt(a.buy_in || '0') || 0;
+        bValue = b.buyIn || parseInt(b.buy_in || '0') || 0;
+        break;
+      case 'status':
+        aValue = a.status;
+        bValue = b.status;
+        break;
+      default:
+        aValue = new Date(a.date);
+        bValue = new Date(b.date);
+    }
+    
+    if (sortDirection === 'asc') {
+      return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+    } else {
+      return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
+    }
   });
 
   // Pagination logic
@@ -394,16 +458,40 @@ export default function AdminTournamentsPage() {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Verseny
+                  <button
+                    onClick={() => handleSort('title')}
+                    className="flex items-center space-x-1 hover:text-gray-700 transition-colors"
+                  >
+                    <span>Verseny</span>
+                    {getSortIcon('title')}
+                  </button>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Dátum & Idő
+                  <button
+                    onClick={() => handleSort('date')}
+                    className="flex items-center space-x-1 hover:text-gray-700 transition-colors"
+                  >
+                    <span>Dátum & Idő</span>
+                    {getSortIcon('date')}
+                  </button>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Buy-in
+                  <button
+                    onClick={() => handleSort('buyIn')}
+                    className="flex items-center space-x-1 hover:text-gray-700 transition-colors"
+                  >
+                    <span>Buy-in</span>
+                    {getSortIcon('buyIn')}
+                  </button>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Státusz
+                  <button
+                    onClick={() => handleSort('status')}
+                    className="flex items-center space-x-1 hover:text-gray-700 transition-colors"
+                  >
+                    <span>Státusz</span>
+                    {getSortIcon('status')}
+                  </button>
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Műveletek
