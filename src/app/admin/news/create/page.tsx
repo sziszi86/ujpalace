@@ -3,6 +3,15 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
+import { useAlert } from '@/components/admin/Alert';
+import ImageUploader from '@/components/admin/ImageUploader';
+
+// Rich text editor dinamikus betöltése (SSR problémák elkerülésére)
+const MDEditor = dynamic(() => import('@uiw/react-md-editor'), { 
+  ssr: false,
+  loading: () => <div className="border rounded-lg h-32 flex items-center justify-center">Editor betöltése...</div>
+});
 
 interface NewsCategory {
   id: number;
@@ -15,18 +24,19 @@ export default function CreateNewsPage() {
     slug: '',
     content: '',
     excerpt: '',
-    image: '',
-    publish_date: new Date().toISOString().split('T')[0],
+    featured_image: '',
     status: 'published',
     category_id: '',
     tags: '',
     featured: false,
-    read_time: 5
+    read_time: 5,
+    author: 'Palace Poker'
   });
   const [categories, setCategories] = useState<NewsCategory[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
+  const { showAlert } = useAlert();
 
   useEffect(() => {
     fetchCategories();
@@ -34,7 +44,12 @@ export default function CreateNewsPage() {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch('/api/admin/news-categories');
+      const token = localStorage.getItem('authToken');
+      const response = await fetch('/api/admin/news-categories', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       if (response.ok) {
         const data = await response.json();
         setCategories(data);
@@ -82,24 +97,35 @@ export default function CreateNewsPage() {
 
     try {
       const token = localStorage.getItem('authToken');
-      const response = await fetch('/api/news', {
+      if (!token) {
+        router.push('/admin/login');
+        return;
+      }
+      
+      const response = await fetch('/api/admin/news', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          published: formData.status === 'published'
+        }),
       });
 
       if (response.ok) {
         const result = await response.json();
+        showAlert('Hír sikeresen létrehozva!', 'success');
         router.push('/admin/news');
       } else {
         const result = await response.json();
         setError(result.error || 'Hiba a hír létrehozásakor');
+        showAlert(result.error || 'Hiba a hír létrehozásakor', 'error');
       }
     } catch (error) {
       setError('Hiba a hír létrehozásakor');
+      showAlert('Hiba a hír létrehozásakor', 'error');
     } finally {
       setLoading(false);
     }
@@ -208,46 +234,39 @@ export default function CreateNewsPage() {
             {/* Content */}
             <div className="md:col-span-2">
               <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-2">
-                Tartalom *
+                Tartalom * (Markdown Editor)
               </label>
-              <textarea
-                id="content"
-                name="content"
-                value={formData.content}
-                onChange={handleChange}
-                required
-                rows={12}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-poker-primary focus:border-transparent"
-                placeholder="Hír teljes tartalma..."
+              <div data-color-mode="light" style={{color: '#000000'}}>
+                <MDEditor
+                  value={formData.content}
+                  onChange={(content) => setFormData({...formData, content: content || ''})}
+                  preview="edit"
+                  height={400}
+                  data-color-mode="light"
+                />
+              </div>
+            </div>
+
+            {/* Image Upload */}
+            <div className="md:col-span-2">
+              <ImageUploader
+                label="Cikk képe"
+                value={formData.featured_image}
+                onChange={(url) => setFormData({...formData, featured_image: url})}
+                category="news"
               />
             </div>
 
-            {/* Image URL */}
-            <div className="md:col-span-2">
-              <label htmlFor="image" className="block text-sm font-medium text-gray-700 mb-2">
-                Kép URL
+            {/* Author */}
+            <div>
+              <label htmlFor="author" className="block text-sm font-medium text-gray-700 mb-2">
+                Szerző
               </label>
               <input
                 type="text"
-                id="image"
-                name="image"
-                value={formData.image}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-poker-primary focus:border-transparent"
-                placeholder="https://example.com/image.jpg"
-              />
-            </div>
-
-            {/* Publish Date */}
-            <div>
-              <label htmlFor="publish_date" className="block text-sm font-medium text-gray-700 mb-2">
-                Publikálás dátuma
-              </label>
-              <input
-                type="date"
-                id="publish_date"
-                name="publish_date"
-                value={formData.publish_date}
+                id="author"
+                name="author"
+                value={formData.author}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-poker-primary focus:border-transparent"
               />

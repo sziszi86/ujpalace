@@ -83,9 +83,11 @@ export async function PUT(
       content,
       excerpt,
       image_url,
+      featured_image,
       author,
       publish_date,
       status,
+      category_id,
       featured
     } = body;
 
@@ -99,16 +101,17 @@ export async function PUT(
     const affectedRows = await executeUpdate(`
       UPDATE news 
       SET title = $1, content = $2, excerpt = $3, featured_image = $4, author = $5,
-          published = $6, featured = $7, updated_at = CURRENT_TIMESTAMP
-      WHERE id = $8
+          published = $6, featured = $7, category_id = $8, updated_at = CURRENT_TIMESTAMP
+      WHERE id = $9
     `, [
       title,
       content,
       excerpt || null,
-      image_url || null,
+      featured_image || image_url || null,
       author || 'Palace Poker',
       status === 'published' ? true : false,
       featured ? true : false,
+      category_id || null,
       newsId
     ]);
 

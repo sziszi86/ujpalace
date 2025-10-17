@@ -19,10 +19,19 @@ interface NewsArticle {
   content: string;
   excerpt: string;
   image_url?: string;
+  featured_image?: string;
   publish_date: string;
   author: string;
   status: string;
+  category_id?: number;
   featured: boolean;
+  published: boolean;
+}
+
+interface NewsCategory {
+  id: number;
+  name: string;
+  description?: string;
 }
 
 export default function EditNewsPage() {
@@ -37,16 +46,41 @@ export default function EditNewsPage() {
     content: '',
     excerpt: '',
     image_url: '',
+    featured_image: '',
     publish_date: new Date().toISOString().split('T')[0],
     author: 'Palace Poker',
     status: 'draft',
-    featured: false
+    category_id: undefined,
+    featured: false,
+    published: false
   });
+  
+  const [categories, setCategories] = useState<NewsCategory[]>([]);
   
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
+  const fetchCategories = async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch('/api/admin/news-categories', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setCategories(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch categories:', error);
+    }
+  };
+
   useEffect(() => {
+    fetchCategories();
+    
     const fetchArticle = async () => {
       if (!newsId) return;
       
@@ -65,7 +99,13 @@ export default function EditNewsPage() {
         
         if (response.ok) {
           const data = await response.json();
-          setArticle(data);
+          // Convert timestamps to date format for form inputs
+          const formattedData = {
+            ...data,
+            publish_date: data.created_at ? new Date(data.created_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+            status: data.published ? 'published' : 'draft'
+          };
+          setArticle(formattedData);
         } else {
           showAlert('Hiba történt a cikk betöltésekor!', 'error');
           router.push('/admin/news');
@@ -230,13 +270,38 @@ export default function EditNewsPage() {
             <div>
               <ImageUploader
                 label="Cikk képe"
-                value={article.image_url || ''}
-                onChange={(url) => setArticle({...article, image_url: url})}
+                value={article.featured_image || article.image_url || ''}
+                onChange={(url) => setArticle({...article, featured_image: url, image_url: url})}
+                category="news"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Category */}
+            <div>
+              <label htmlFor="category_id" className="block text-sm font-medium text-gray-700 mb-2">
+                Kategória
+              </label>
+              <select
+                id="category_id"
+                value={article.category_id || ''}
+                onChange={(e) => setArticle({...article, category_id: e.target.value ? parseInt(e.target.value) : undefined})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-poker-green"
+              >
+                <option value="">Nincs kategória</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+              {categories.length === 0 && (
+                <p className="text-sm text-gray-500 mt-1">
+                  Először hozz létre kategóriákat!
+                </p>
+              )}
+            </div>
 
             {/* Author */}
             <div>
@@ -252,19 +317,20 @@ export default function EditNewsPage() {
               />
             </div>
 
-            {/* Publish Date */}
+            {/* Created Date - Display Only */}
             <div>
-              <label htmlFor="publish_date" className="block text-sm font-medium text-gray-700 mb-2">
-                Publikálás dátuma *
+              <label htmlFor="created_date" className="block text-sm font-medium text-gray-700 mb-2">
+                Létrehozás dátuma
               </label>
               <input
                 type="date"
-                id="publish_date"
+                id="created_date"
                 value={article.publish_date}
-                onChange={(e) => setArticle({...article, publish_date: e.target.value})}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-poker-green"
-                required
+                readOnly
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600"
+                title="A létrehozás dátuma nem szerkeszthető"
               />
+              <p className="text-xs text-gray-500 mt-1">A dátumot nem lehet módosítani</p>
             </div>
 
             {/* Status */}
@@ -275,7 +341,14 @@ export default function EditNewsPage() {
               <select
                 id="status"
                 value={article.status}
-                onChange={(e) => setArticle({...article, status: e.target.value})}
+                onChange={(e) => {
+                  const newStatus = e.target.value;
+                  setArticle({
+                    ...article, 
+                    status: newStatus,
+                    published: newStatus === 'published'
+                  });
+                }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-poker-green"
               >
                 <option value="draft">Piszkozat</option>
