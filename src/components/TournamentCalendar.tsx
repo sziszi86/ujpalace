@@ -409,10 +409,10 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
           </div>
 
           {/* Calendar Grid */}
-          <div className={`grid grid-cols-7 ${selectedView === 'week' ? 'gap-1' : 'gap-2'}`}>
+          <div className={`grid grid-cols-7 ${selectedView === 'week' ? 'gap-1 md:gap-2' : 'gap-2 md:gap-3'}`}>
             {/* Day Headers */}
             {['Vas', 'Hét', 'Ked', 'Sze', 'Csü', 'Pén', 'Szo'].map(day => (
-              <div key={day} className={`${selectedView === 'week' ? 'p-2 text-sm' : 'p-4'} text-center font-semibold text-poker-muted`}>
+              <div key={day} className={`${selectedView === 'week' ? 'p-2 text-sm md:text-base' : 'p-2 md:p-4 text-sm md:text-base'} text-center font-semibold text-poker-muted`}>
                 {day}
               </div>
             ))}
@@ -425,7 +425,7 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
               return (
                 <div
                   key={index}
-                  className={`${selectedView === 'week' ? 'min-h-32' : 'min-h-24'} p-2 border border-gray-100 rounded-lg transition-all duration-200 ${
+                  className={`${selectedView === 'week' ? 'min-h-36 md:min-h-32' : 'min-h-28 md:min-h-24'} p-1 md:p-2 border border-gray-100 rounded-lg transition-all duration-200 ${
                     selectedView === 'week' || isCurrentMonth(day)
                       ? hasEvents
                         ? 'bg-poker-light/30 hover:bg-poker-light/50'
@@ -437,7 +437,7 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
                       : ''
                   }`}
                 >
-                  <div className={`text-sm font-semibold mb-1 text-center ${
+                  <div className={`text-xs md:text-sm font-semibold mb-1 text-center ${
                     isToday(day) ? 'text-poker-primary' : 'text-poker-dark'
                   }`}>
                     {selectedView === 'week' ? 
@@ -448,20 +448,20 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
                   
                   {/* Events */}
                   <div className="space-y-1">
-                    {events.slice(0, selectedView === 'week' ? 4 : 2).map(event => (
+                    {events.slice(0, selectedView === 'week' ? 4 : (isMobile ? 1 : 2)).map(event => (
                       <Link
                         key={event.id}
                         href={(event as any).type === 'cash-game' ? `/cash-games/${event.id}` : `/tournaments/${event.id}`}
-                        className="block p-1 bg-poker-primary/10 hover:bg-poker-primary/20 rounded text-xs text-poker-dark hover:text-poker-primary transition-colors"
+                        className="block p-2 md:p-2 bg-poker-primary/10 hover:bg-poker-primary/20 rounded text-xs md:text-sm text-poker-dark hover:text-poker-primary transition-colors min-h-8 md:min-h-auto"
                       >
-                        <div className="font-medium truncate">{event.time}</div>
-                        <div className="truncate">{event.title}</div>
+                        <div className="font-medium truncate text-xs md:text-sm">{event.time}</div>
+                        <div className="truncate text-xs md:text-sm">{event.title}</div>
                         {(event as any).type === 'cash-game' && <div className="text-xs text-poker-muted">{(event as any).stakes}</div>}
                       </Link>
                     ))}
-                    {events.length > (selectedView === 'week' ? 4 : 2) && (
+                    {events.length > (selectedView === 'week' ? 4 : (isMobile ? 1 : 2)) && (
                       <div className="text-xs text-poker-muted text-center">
-                        +{events.length - (selectedView === 'week' ? 4 : 2)} több
+                        +{events.length - (selectedView === 'week' ? 4 : (isMobile ? 1 : 2))} több
                       </div>
                     )}
                   </div>
