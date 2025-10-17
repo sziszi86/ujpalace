@@ -12,7 +12,12 @@ interface TournamentCalendarProps {
 }
 
 export default function TournamentCalendar({ showCashGames = true, onlyShowCashGames = false }: TournamentCalendarProps) {
-  const [selectedView, setSelectedView] = useState<'calendar' | 'list' | 'week' | 'mobile'>('calendar');
+  const [selectedView, setSelectedView] = useState<'calendar' | 'list' | 'week' | 'mobile'>(() => {
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      return 'list';
+    }
+    return 'calendar';
+  });
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'tournaments' | 'cash-games'>('all');
   const [currentDate, setCurrentDate] = useState(new Date());
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
@@ -171,9 +176,9 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
   useEffect(() => {
     const checkIfMobile = () => {
       setIsMobile(window.innerWidth < 768);
-      // Auto-set to mobile view on mobile
+      // Auto-set to list view on mobile
       if (window.innerWidth < 768 && selectedView === 'calendar') {
-        setSelectedView('mobile');
+        setSelectedView('list');
       }
     };
     
