@@ -122,11 +122,20 @@ export async function GET() {
           LIMIT 10
         `);
 
+        // Get the last reset date
+        const [lastReset] = await executeQuery(`
+          SELECT reset_date 
+          FROM financial_resets 
+          ORDER BY reset_date DESC 
+          LIMIT 1
+        `) || [];
+
         playerStats = {
           topDepositor: topDepositor || null,
           totalDeposits: parseInt(transactionTotals?.totaldeposits || transactionTotals?.totalDeposits || '0'),
           totalWithdrawals: parseInt(transactionTotals?.totalwithdrawals || transactionTotals?.totalWithdrawals || '0'),
-          recentTransactions: recentTransactions || []
+          recentTransactions: recentTransactions || [],
+          resetDate: lastReset?.reset_date || null
         };
       } else {
         // Provide mock data when tables don't exist

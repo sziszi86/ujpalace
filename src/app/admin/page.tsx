@@ -66,6 +66,8 @@ export default function AdminDashboard() {
       const response = await fetch('/api/admin/dashboard');
       if (response.ok) {
         const data = await response.json();
+        console.log('Dashboard data received:', data);
+        console.log('Recent transactions:', data.playerStats?.recentTransactions);
         setDashboardData(data);
       }
     } catch (error) {
@@ -307,13 +309,22 @@ export default function AdminDashboard() {
           <div className="p-6 border-b border-gray-200">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900">Pénzügyi összesítő</h2>
-              <button
-                onClick={handleResetTotals}
-                className="text-sm bg-red-100 hover:bg-red-200 text-red-800 px-3 py-1 rounded"
-                title="Összesítő nullázása"
-              >
-                Nullázás
-              </button>
+              <div className="flex space-x-2">
+                <Link
+                  href="/admin/financial-archive"
+                  className="text-sm bg-blue-100 hover:bg-blue-200 text-blue-800 px-3 py-1 rounded"
+                  title="Archívum megtekintése"
+                >
+                  📊 Archívum
+                </Link>
+                <button
+                  onClick={handleResetTotals}
+                  className="text-sm bg-red-100 hover:bg-red-200 text-red-800 px-3 py-1 rounded"
+                  title="Összesítő nullázása"
+                >
+                  Nullázás
+                </button>
+              </div>
             </div>
           </div>
           <div className="p-6">
@@ -356,34 +367,38 @@ export default function AdminDashboard() {
           </div>
           <div className="p-6">
             <div className="space-y-4">
-              {dashboardData.playerStats?.recentTransactions?.slice(0, 5).map((transaction: any, index: number) => (
-                <div key={index} className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                      transaction.type === 'deposit' ? 'bg-green-100' : 'bg-red-100'
+              {dashboardData.playerStats?.recentTransactions && dashboardData.playerStats.recentTransactions.length > 0 ? (
+                dashboardData.playerStats.recentTransactions.slice(0, 5).map((transaction: any, index: number) => (
+                  <div key={index} className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                        transaction.type === 'deposit' ? 'bg-green-100' : 'bg-red-100'
+                      }`}>
+                        {transaction.type === 'deposit' ? (
+                          <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                          </svg>
+                        ) : (
+                          <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 12H6" />
+                          </svg>
+                        )}
+                      </div>
+                      <div className="ml-3">
+                        <p className="font-medium text-gray-900">
+                          {transaction.playerName || transaction.playername || 'Ismeretlen játékos'}
+                        </p>
+                        <p className="text-sm text-gray-500">{formatDate(transaction.date)}</p>
+                      </div>
+                    </div>
+                    <p className={`font-medium ${
+                      transaction.type === 'deposit' ? 'text-green-600' : 'text-red-600'
                     }`}>
-                      {transaction.type === 'deposit' ? (
-                        <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>
-                      ) : (
-                        <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 12H6" />
-                        </svg>
-                      )}
-                    </div>
-                    <div className="ml-3">
-                      <p className="font-medium text-gray-900">{transaction.playerName}</p>
-                      <p className="text-sm text-gray-500">{formatDate(transaction.date)}</p>
-                    </div>
+                      {transaction.type === 'deposit' ? '+' : '-'}{formatCurrency(transaction.amount)}
+                    </p>
                   </div>
-                  <p className={`font-medium ${
-                    transaction.type === 'deposit' ? 'text-green-600' : 'text-red-600'
-                  }`}>
-                    {transaction.type === 'deposit' ? '+' : '-'}{formatCurrency(transaction.amount)}
-                  </p>
-                </div>
-              )) || (
+                ))
+              ) : (
                 <div className="text-center text-gray-500">
                   <p>Nincs közeli aktivitás</p>
                 </div>
