@@ -40,17 +40,28 @@ export default function Header() {
   useEffect(() => {
     const handleScroll = () => {
       const scrollY = window.scrollY;
-      setIsScrolled(scrollY > 50);
+      setIsScrolled(scrollY > 100);
     };
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [mobileMenuOpen]);
+
   return (
     <header className="bg-gradient-to-r from-poker-dark via-poker-secondary to-poker-dark shadow-2xl sticky top-0 z-50 backdrop-blur-md border-b border-poker-primary/20">
       {/* Info Bar */}
-      <div className={`bg-gradient-to-r from-poker-primary to-poker-secondary text-white py-3 px-4 animate-slide-down transition-all duration-300 lg:block ${isScrolled ? 'hidden' : 'block'}`}>
+      <div className={`bg-gradient-to-r from-poker-primary to-poker-secondary text-white px-4 transition-all duration-500 ease-in-out transform origin-top lg:block ${isScrolled ? 'h-0 py-0 opacity-0 -translate-y-full scale-y-0' : 'h-auto py-3 opacity-100 translate-y-0 scale-y-100'} overflow-hidden`}>
         <div className="container mx-auto flex flex-col lg:flex-row justify-between items-center text-sm space-y-2 lg:space-y-0">
           <div className="flex flex-col lg:flex-row items-center space-y-2 lg:space-y-0 lg:space-x-6">
             <div className="flex items-center space-x-2 animate-fade-in">
@@ -167,9 +178,8 @@ export default function Header() {
         </div>
 
         {/* Mobile Navigation */}
-        {mobileMenuOpen && (
-          <nav className="lg:hidden glass-effect mb-6 animate-slide-down">
-            <div className="p-3">
+        <nav className={`lg:hidden glass-effect mb-6 transition-all duration-300 ease-in-out transform origin-top ${mobileMenuOpen ? 'max-h-screen opacity-100 translate-y-0 scale-y-100' : 'max-h-0 opacity-0 -translate-y-4 scale-y-0'} overflow-hidden`}>
+          <div className={`p-3 transition-all duration-300 ${mobileMenuOpen ? 'opacity-100' : 'opacity-0'}`}>
               {menuItems.map((item, index) => (
                 <div key={item.id} className="mb-2">
                   {item.children ? (
@@ -218,8 +228,7 @@ export default function Header() {
                 </div>
               ))}
             </div>
-          </nav>
-        )}
+        </nav>
       </div>
     </header>
   );
