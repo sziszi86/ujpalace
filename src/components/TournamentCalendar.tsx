@@ -188,7 +188,19 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
   }, [selectedView]);
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
+    // Handle timezone issues by parsing date as local date
+    let date;
+    if (dateString.includes('T')) {
+      // If it's an ISO string, extract just the date part to avoid timezone shifts
+      const datePart = dateString.split('T')[0];
+      const [year, month, day] = datePart.split('-').map(Number);
+      date = new Date(year, month - 1, day); // month is 0-indexed
+    } else {
+      // If it's already just a date string (YYYY-MM-DD), parse as local
+      const [year, month, day] = dateString.split('-').map(Number);
+      date = new Date(year, month - 1, day); // month is 0-indexed
+    }
+    
     const month = date.getMonth();
     const day = date.getDate();
     const weekday = date.getDay();
@@ -261,7 +273,24 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
     
     return tournaments.filter(tournament => {
       // Convert tournament date to YYYY-MM-DD format for comparison
-      const tournamentDateStr = tournament.date ? new Date(tournament.date).toISOString().split('T')[0] : null;
+      // Use tournament_date field and avoid timezone issues by parsing as local date
+      let tournamentDateStr = null;
+      if (tournament.date) {
+        // If the date contains 'T', it's already an ISO string, use it directly
+        if (tournament.date.includes('T')) {
+          tournamentDateStr = tournament.date.split('T')[0];
+        } else {
+          // If it's just a date string, use it directly (YYYY-MM-DD format)
+          tournamentDateStr = tournament.date;
+        }
+      } else if (tournament.tournament_date) {
+        // Handle tournament_date field if date is not available
+        if (tournament.tournament_date.includes('T')) {
+          tournamentDateStr = tournament.tournament_date.split('T')[0];
+        } else {
+          tournamentDateStr = tournament.tournament_date;
+        }
+      }
       return tournamentDateStr === dateStr && tournament.status !== 'inactive';
     });
   };
