@@ -106,16 +106,24 @@ export default function StructureEditPage({ params }: { params: Promise<{ id: st
       // Ensure proper data format before sending
       const structureData = {
         ...structure,
-        levels: structure.levels.map((level, index) => ({
-          id: level.id,
-          level: index + 1,
-          smallBlind: Number(level.smallBlind) || 0,
-          bigBlind: Number(level.bigBlind) || 0,
-          ante: Number(level.ante) || 0,
-          durationMinutes: Number(level.durationMinutes) || 15,
-          breakAfter: Boolean(level.breakAfter),
-          breakDurationMinutes: Number(level.breakDurationMinutes) || 0
-        }))
+        levels: structure.levels.map((level, index) => {
+          const levelData: any = {
+            level: index + 1,
+            smallBlind: Number(level.smallBlind) || 0,
+            bigBlind: Number(level.bigBlind) || 0,
+            ante: Number(level.ante) || 0,
+            durationMinutes: Number(level.durationMinutes) || 15,
+            breakAfter: Boolean(level.breakAfter),
+            breakDurationMinutes: Number(level.breakDurationMinutes) || 0
+          };
+          
+          // Only include id if it exists (for existing levels)
+          if (level.id) {
+            levelData.id = level.id;
+          }
+          
+          return levelData;
+        })
       };
 
       console.log('Sending structure data:', structureData);

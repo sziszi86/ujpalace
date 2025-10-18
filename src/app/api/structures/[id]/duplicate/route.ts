@@ -55,9 +55,10 @@ export async function POST(
 
     const newStructureId = structureResult.insertId;
 
-    // Copy levels
+    // Copy levels and get their IDs for proper response
     console.log(`Copying ${originalLevels.length} levels for structure ${newStructureId}`);
     
+    const newLevels = [];
     for (const level of originalLevels) {
       console.log('Copying level:', {
         level_number: level.level_number,
@@ -67,7 +68,7 @@ export async function POST(
       });
       
       try {
-        await executeQuery(
+        const levelResult = await executeInsert(
           `INSERT INTO structure_levels 
            (structure_id, level_number, small_blind, big_blind, ante, duration_minutes, break_after, break_duration_minutes) 
            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
@@ -82,6 +83,18 @@ export async function POST(
             level.break_duration_minutes || 0
           ]
         );
+        
+        // Add the new level with proper ID to our array
+        newLevels.push({
+          id: levelResult.insertId,
+          level: level.level_number,
+          smallBlind: level.small_blind,
+          bigBlind: level.big_blind,
+          ante: level.ante || 0,
+          durationMinutes: level.duration_minutes || 20,
+          breakAfter: level.break_after || false,
+          breakDurationMinutes: level.break_duration_minutes || 0
+        });
       } catch (levelError) {
         console.error('Error copying level:', levelError);
         throw levelError;
@@ -99,15 +112,7 @@ export async function POST(
       late_registration_levels: originalStructure.late_registration_levels,
       is_active: false,
       created_at: new Date().toISOString(),
-      levels: originalLevels.map(level => ({
-        level: level.level_number,
-        smallBlind: level.small_blind,
-        bigBlind: level.big_blind,
-        ante: level.ante,
-        durationMinutes: level.duration_minutes,
-        breakAfter: level.break_after,
-        breakDurationMinutes: level.break_duration_minutes
-      }))
+      levels: newLevels
     });
   } catch (error) {
     console.error('Error duplicating structure:', error);
