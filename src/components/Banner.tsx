@@ -204,7 +204,7 @@ export default function Banner() {
                 Palace Poker Szombathely
               </h1>
               <p className="text-xl md:text-2xl text-poker-gold mb-8 leading-relaxed">
-                Szombathely legmodernebb pókerterme várja a póker szerelmeseit!
+                Szeretettel várjuk kedves vendégeinket!
               </p>
               <a href="/tournaments" className="btn-primary text-lg px-8 py-4 inline-block hover:scale-105 transform transition-all duration-200">
                 Versenyek

@@ -36,6 +36,7 @@ export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMenuTransitioning, setIsMenuTransitioning] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -49,14 +50,58 @@ export default function Header() {
 
   useEffect(() => {
     if (mobileMenuOpen) {
+      const currentScrollY = window.scrollY;
       document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${currentScrollY}px`;
+      document.body.style.left = '0';
+      document.body.style.right = '0';
+      document.body.style.width = '100%';
     } else {
-      document.body.style.overflow = 'unset';
+      const scrollY = document.body.style.top;
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      document.body.style.width = '';
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY || '0') * -1);
+      }
     }
     return () => {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      document.body.style.width = '';
     };
   }, [mobileMenuOpen]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      const mobileMenu = document.querySelector('[data-mobile-menu]');
+      const mobileMenuButton = document.querySelector('[data-mobile-menu-button]');
+      
+      if (mobileMenuOpen && mobileMenu && !mobileMenu.contains(target) && !mobileMenuButton?.contains(target)) {
+        if (!isMenuTransitioning) {
+          setIsMenuTransitioning(true);
+          setMobileMenuOpen(false);
+          setTimeout(() => setIsMenuTransitioning(false), 500);
+        }
+      }
+    };
+
+    if (mobileMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [mobileMenuOpen, isMenuTransitioning]);
 
   return (
     <header className="bg-gradient-to-r from-poker-dark via-poker-secondary to-poker-dark shadow-2xl sticky top-0 z-50 backdrop-blur-md border-b border-poker-primary/20">
@@ -165,8 +210,16 @@ export default function Header() {
 
           {/* Mobile menu button */}
           <button
+            data-mobile-menu-button
             className="lg:hidden p-3 text-white hover:text-poker-accent transition-all duration-300 rounded-xl hover:bg-white/10 backdrop-blur-sm relative overflow-hidden group"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            onClick={() => {
+              if (!isMenuTransitioning) {
+                setIsMenuTransitioning(true);
+                setMobileMenuOpen(!mobileMenuOpen);
+                setTimeout(() => setIsMenuTransitioning(false), 500);
+              }
+            }}
+            disabled={isMenuTransitioning}
           >
             <div className="relative z-10">
               <svg className={`w-6 h-6 transform transition-all duration-300 ${mobileMenuOpen ? 'rotate-45' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -178,8 +231,8 @@ export default function Header() {
         </div>
 
         {/* Mobile Navigation */}
-        <nav className={`lg:hidden glass-effect mb-6 transition-all duration-300 ease-in-out transform origin-top ${mobileMenuOpen ? 'max-h-screen opacity-100 translate-y-0 scale-y-100' : 'max-h-0 opacity-0 -translate-y-4 scale-y-0'} overflow-hidden`}>
-          <div className={`p-3 transition-all duration-300 ${mobileMenuOpen ? 'opacity-100' : 'opacity-0'}`}>
+        <nav data-mobile-menu className={`lg:hidden glass-effect mb-6 transition-all duration-500 ease-in-out transform origin-top ${mobileMenuOpen ? 'max-h-screen opacity-100 translate-y-0 scale-y-100 pointer-events-auto' : 'max-h-0 opacity-0 -translate-y-4 scale-y-0 pointer-events-none'} overflow-hidden`}>
+          <div className={`p-3 transition-all duration-500 delay-75 ${mobileMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'}`}>
               {menuItems.map((item, index) => (
                 <div key={item.id} className="mb-2">
                   {item.children ? (
@@ -204,7 +257,10 @@ export default function Header() {
                               key={child.id}
                               href={child.href || '#'}
                               className="flex items-center px-4 py-3 text-white/80 hover:text-poker-accent hover:bg-white/5 transition-all duration-200 rounded-lg animate-fade-in"
-                              onClick={() => setMobileMenuOpen(false)}
+                              onClick={() => {
+                                setMobileMenuOpen(false);
+                                setActiveDropdown(null);
+                              }}
                               style={{animationDelay: `${childIndex * 0.1}s`}}
                             >
                               <span className="w-1.5 h-1.5 bg-poker-accent rounded-full mr-3"></span>
@@ -218,7 +274,10 @@ export default function Header() {
                     <Link
                       href={item.href || '#'}
                       className="flex items-center px-4 py-4 text-white hover:text-poker-accent hover:bg-white/10 transition-all duration-300 rounded-xl font-medium animate-fade-in"
-                      onClick={() => setMobileMenuOpen(false)}
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        setActiveDropdown(null);
+                      }}
                       style={{animationDelay: `${index * 0.1}s`}}
                     >
                       <span className="w-2 h-2 bg-poker-primary rounded-full mr-3"></span>

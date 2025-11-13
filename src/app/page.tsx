@@ -75,7 +75,7 @@ export default function Home() {
             </h2>
             <div className="w-20 h-1 bg-gradient-to-r from-poker-primary to-poker-gold rounded-full mx-auto mb-4"></div>
             <p className="text-lg text-poker-muted max-w-2xl mx-auto">
-              Szombathely legmodernebb pókerterme várja a póker szerelmeseit
+              Szeretettel várjuk kedves vendégeinket
             </p>
           </div>
           

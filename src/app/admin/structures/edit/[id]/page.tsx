@@ -99,6 +99,24 @@ export default function StructureEditPage({ params }: { params: Promise<{ id: st
     setSaving(true);
     setError('');
 
+    // Validate that there is at least one level
+    if (structure.levels.length === 0) {
+      setError('Legalább egy vakszintet hozzá kell adni!');
+      setSaving(false);
+      return;
+    }
+
+    // Validate that all levels have valid blind values
+    const invalidLevels = structure.levels.filter(level => 
+      level.smallBlind <= 0 || level.bigBlind <= 0 || level.bigBlind <= level.smallBlind
+    );
+    
+    if (invalidLevels.length > 0) {
+      setError('Minden szintnek érvényes vak értékekkel kell rendelkeznie (nagy vak > kis vak > 0)!');
+      setSaving(false);
+      return;
+    }
+
     try {
       const url = isNew ? '/api/structures' : `/api/structures/${id}`;
       const method = isNew ? 'POST' : 'PUT';
@@ -137,9 +155,13 @@ export default function StructureEditPage({ params }: { params: Promise<{ id: st
       });
 
       if (response.ok) {
+        const savedData = await response.json();
+        console.log('Successfully saved structure:', savedData);
+        alert('Struktúra sikeresen mentve!');
         router.push('/admin/structures');
       } else {
         const errorData = await response.json();
+        console.error('Save failed:', errorData);
         setError(errorData.error || 'Hiba történt a mentés során');
       }
     } catch (error) {

@@ -7,8 +7,8 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXTAUTH_URL || 'https://palace-poker.hu'),
-  title: "Palace Poker Szombathely | Professzionális Pókerterem",
-  description: "Szombathely legmodernebb pókerterme. Texas Hold'em versenyek, Cash Game asztalok, professzionális környezet. Csatlakozz hozzánk minden nap 18:00-06:00 között!",
+  title: "Palace Poker Szombathely | Kiváló Pókerterem",
+  description: "Szeretettel várjuk kedves vendégeinket. Texas Hold'em versenyek, Cash Game asztalok, barátságos környezet. Csatlakozz hozzánk minden nap 18:00-06:00 között!",
   keywords: "póker, poker, szombathely, texas holdem, cash game, tournament, verseny, kártya, szerencsejáték",
   authors: [{ name: "Palace Poker Szombathely" }],
   creator: "Palace Poker Szombathely",
@@ -22,8 +22,8 @@ export const metadata: Metadata = {
     type: "website",
     locale: "hu_HU",
     url: "https://palace-poker.hu",
-    title: "Palace Poker Szombathely | Professzionális Pókerterem",
-    description: "Szombathely legmodernebb pókerterme. Texas Hold'em versenyek, Cash Game asztalok, professzionális környezet.",
+    title: "Palace Poker Szombathely | Kiváló Pókerterem",
+    description: "Szeretettel várjuk kedves vendégeinket. Texas Hold'em versenyek, Cash Game asztalok, barátságos környezet.",
     siteName: "Palace Poker Szombathely",
     images: [
       {
@@ -36,8 +36,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Palace Poker Szombathely | Professzionális Pókerterem",
-    description: "Szombathely legmodernebb pókerterme. Texas Hold'em versenyek, Cash Game asztalok, professzionális környezet.",
+    title: "Palace Poker Szombathely | Kiváló Pókerterem",
+    description: "Szeretettel várjuk kedves vendégeinket. Texas Hold'em versenyek, Cash Game asztalok, barátságos környezet.",
     images: ["/og-image.jpg"],
   },
   robots: {
@@ -76,7 +76,7 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "LocalBusiness",
               "name": "Palace Poker Szombathely",
-              "description": "Professzionális pókerterem Szombathelyen",
+              "description": "Kiváló pókerterem Szombathelyen minden szintű játékos számára",
               "address": {
                 "@type": "PostalAddress",
                 "streetAddress": "Semmelweis u. 2.",
