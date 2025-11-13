@@ -102,7 +102,9 @@ export default function EditNewsPage() {
           // Convert timestamps to date format for form inputs
           const formattedData = {
             ...data,
-            publish_date: data.created_at ? new Date(data.created_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+            publish_date: data.created_at ? 
+              data.created_at.split('T')[0] : // Just take the date part from ISO string
+              new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0], // Current local date
             status: data.published ? 'published' : 'draft'
           };
           setArticle(formattedData);

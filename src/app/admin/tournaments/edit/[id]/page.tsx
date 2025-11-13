@@ -78,7 +78,7 @@ export default function EditTournamentPage() {
     startingChips: '',
     imageUrl: '',
     specialNotes: '',
-    visibleFrom: new Date().toISOString().split('T')[0],
+    visibleFrom: new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0],
     visibleUntil: '',
     featured: false,
     status: 'upcoming',
@@ -119,12 +119,22 @@ export default function EditTournamentPage() {
           let timeValue = '20:00';
           
           if (tournament.tournament_date || tournament.date) {
-            const fullDate = new Date(tournament.tournament_date || tournament.date);
-            dateValue = fullDate.toISOString().split('T')[0];
-            // Get hours and minutes
-            const hours = fullDate.getHours().toString().padStart(2, '0');
-            const minutes = fullDate.getMinutes().toString().padStart(2, '0');
-            timeValue = `${hours}:${minutes}`;
+            // Handle timezone properly - treat as local time, not UTC
+            const dateString = tournament.tournament_date || tournament.date;
+            
+            // If it's a full timestamp, parse carefully to avoid timezone shift
+            if (dateString.includes('T') || dateString.includes(' ')) {
+              // Parse as local time by removing timezone info
+              const cleanDateString = dateString.replace('T', ' ').split('+')[0].split('Z')[0].split('.')[0];
+              const [datePart, timePart = '20:00:00'] = cleanDateString.split(' ');
+              dateValue = datePart;
+              const [hours, minutes] = timePart.split(':');
+              timeValue = `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
+            } else {
+              // It's just a date
+              dateValue = dateString;
+              timeValue = '20:00';
+            }
           }
           
           setFormData({
@@ -147,7 +157,8 @@ export default function EditTournamentPage() {
             startingChips: (tournament.starting_chips || tournament.startingChips || '').toString(),
             imageUrl: tournament.image_url || tournament.image || tournament.imageUrl || '',
             specialNotes: tournament.special_notes || tournament.specialNotes || '',
-            visibleFrom: tournament.visible_from || tournament.visibleFrom || new Date().toISOString().split('T')[0],
+            visibleFrom: tournament.visible_from || tournament.visibleFrom || 
+              new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0],
             visibleUntil: tournament.visible_until || tournament.visibleUntil || dateValue || '',
             featured: tournament.featured || false,
             status: tournament.status || 'upcoming',
@@ -196,7 +207,8 @@ export default function EditTournamentPage() {
 
     // Ha a verseny dátuma változik, akkor a látható eddig dátumot is frissítjük másnap
     if (name === 'date' && value) {
-      const tournamentDate = new Date(value);
+      // Parse date as local time and add one day
+      const tournamentDate = new Date(value + 'T00:00:00'); // Force local timezone
       const dayAfterTournament = new Date(tournamentDate.getTime() + 24 * 60 * 60 * 1000);
       updatedData.visibleUntil = dayAfterTournament.toISOString().split('T')[0];
     }
@@ -271,6 +283,10 @@ export default function EditTournamentPage() {
         contactPhone: '+36 30 971 5832',
         contact_email: 'palacepoker kukac hotmail.hu',
         contactEmail: 'palacepoker kukac hotmail.hu',
+        visible_from: formData.visibleFrom || null,
+        visibleFrom: formData.visibleFrom || null,
+        visible_until: formData.visibleUntil || null,
+        visibleUntil: formData.visibleUntil || null,
       };
 
       // API mentés
