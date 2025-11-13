@@ -29,8 +29,12 @@ export default function AdminNewsPage() {
   const fetchNews = async () => {
     try {
       setLoading(true);
-      const statusParam = filter === 'all' ? 'published' : filter;
-      const response = await fetch(`/api/news?status=${statusParam}&limit=50`);
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(`/api/admin/news?status=${filter}&limit=50`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
       
       if (response.ok) {
         const data = await response.json();
@@ -48,7 +52,7 @@ export default function AdminNewsPage() {
 
     try {
       const token = localStorage.getItem('authToken');
-      const response = await fetch(`/api/news/${id}`, {
+      const response = await fetch(`/api/admin/news/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -57,11 +61,15 @@ export default function AdminNewsPage() {
 
       if (response.ok) {
         setNews(news.filter(item => item.id !== id));
+        alert('Hír sikeresen törölve!');
       } else {
-        alert('Hiba a hír törlésekor');
+        const errorData = await response.json();
+        console.error('Delete failed:', errorData);
+        alert('Hiba a hír törlésekor: ' + (errorData.error || 'Ismeretlen hiba'));
       }
     } catch (error) {
-      alert('Hiba a hír törlésekor');
+      console.error('Delete error:', error);
+      alert('Hiba a hír törlésekor: ' + error);
     }
   };
 

@@ -12,18 +12,46 @@ export async function GET(request: Request) {
       );
     }
 
-    const articles = await executeQuery(`
+    const { searchParams } = new URL(request.url);
+    const status = searchParams.get('status');
+    const limit = searchParams.get('limit');
+
+    let query = `
       SELECT 
         n.*,
         n.featured_image as image_url,
         CASE WHEN n.published THEN 'published' ELSE 'draft' END as status,
-        nc.name as category_name,
+        nc.name as category,
+        n.created_at as publish_date,
+        n.author,
+        COALESCE(LENGTH(n.content) / 200, 5) as read_time,
         n.created_at,
         n.updated_at
       FROM news n
       LEFT JOIN news_categories nc ON n.category_id = nc.id
-      ORDER BY n.created_at DESC
-    `);
+    `;
+
+    const params: any[] = [];
+    let paramIndex = 1;
+
+    // Status filter
+    if (status && status !== 'all') {
+      if (status === 'published') {
+        query += ` WHERE n.published = true`;
+      } else if (status === 'draft') {
+        query += ` WHERE n.published = false`;
+      }
+    }
+
+    query += ` ORDER BY n.created_at DESC`;
+
+    // Limit
+    if (limit) {
+      query += ` LIMIT $${paramIndex++}`;
+      params.push(parseInt(limit));
+    }
+
+    const articles = await executeQuery(query, params);
 
     return NextResponse.json(articles);
   } catch (error) {
