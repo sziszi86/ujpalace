@@ -88,8 +88,6 @@ export default function TournamentListPage() {
         return new Date(a.tournament_date || a.date).getTime() - new Date(b.tournament_date || b.date).getTime();
       case 'buyIn':
         return Number(a.buy_in || a.buyIn || 0) - Number(b.buy_in || b.buyIn || 0);
-      case 'guarantee':
-        return Number(b.guarantee_amount || b.guarantee || 0) - Number(a.guarantee_amount || a.guarantee || 0);
       default:
         return 0;
     }
@@ -135,7 +133,6 @@ export default function TournamentListPage() {
                 >
                   <option value="date">Dátum szerint</option>
                   <option value="buyIn">Buy-in szerint</option>
-                  <option value="guarantee">Díjalap szerint</option>
                 </select>
               </div>
             </div>

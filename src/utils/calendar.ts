@@ -71,7 +71,7 @@ export function addTournamentToCalendar(tournament: any) {
     `DTSTART:${startDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z`,
     `DTEND:${endDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z`,
     `SUMMARY:${tournament.title}`,
-    `DESCRIPTION:Buy-in: ${tournament.buy_in} HUF\\nGarancia: ${tournament.guarantee_amount} HUF`,
+    `DESCRIPTION:Buy-in: ${tournament.buy_in} HUF`,
     'LOCATION:Palace Poker Szombathely',
     'END:VEVENT',
     'END:VCALENDAR'

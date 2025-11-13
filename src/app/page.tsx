@@ -84,7 +84,7 @@ export default function Home() {
               <div className="space-y-8">
                 <p className="text-lg text-poker-muted leading-relaxed">
                   Tapasztalt dealereink, barátságos légkörünk és világszínvonalú 
-                  felszerelésünk garantálja a legjobb poker élményt Szombathelyen.
+                  felszerelésünk biztosítja a legjobb poker élményt Szombathelyen.
                 </p>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

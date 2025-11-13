@@ -474,18 +474,6 @@ export default function TournamentDetailPage() {
                   </div>
                 )}
 
-                {/* Guarantee */}
-                {tournament.guarantee_amount && (
-                  <div className="flex items-center p-3 bg-poker-light/50 rounded-lg">
-                    <svg className="w-5 h-5 text-poker-green mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                    </svg>
-                    <div>
-                      <p className="font-semibold text-poker-dark">Garantált díjalap</p>
-                      <p className="text-lg font-bold text-poker-gold">{formatCurrency(Number(tournament.guarantee_amount))}</p>
-                    </div>
-                  </div>
-                )}
 
                 {/* Late Registration */}
                 {tournament.late_registration && tournament.late_registration_until && (

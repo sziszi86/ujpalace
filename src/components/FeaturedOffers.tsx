@@ -9,8 +9,8 @@ const mockTournaments: Tournament[] = [
   {
     id: 1,
     title: 'Weekend Series Main Event',
-    description: 'A hétvége fénypontja! Nagy díjalap, mély stackek, lassú struktúra.',
-    longDescription: 'A hét legkiemelkedőbb versenye! Csatlakozz hozzánk a Weekend Series Main Event-jére, ahol óriási díjalap és mély stack struktúra vár. Ez egy freeze-out verseny, amely a legjobb élő poker élményt nyújtja Szombathelyen.',
+    description: 'A hétvége fénypontja! Mély stackek, lassú struktúra.'
+    longDescription: 'A hét legkiemelkedőbb versenye! Csatlakozz hozzánk a Weekend Series Main Event-jére, ahol mély stack struktúra vár. Ez egy freeze-out verseny, amely a legjobb élő poker élményt nyújtja Szombathelyen.'
     date: '2025-12-18',
     time: '19:00',
     buyIn: 30000,
@@ -43,8 +43,8 @@ const mockTournaments: Tournament[] = [
   {
     id: 2,
     title: 'Friday Night Bounty',
-    description: 'Fejvadász verseny! Minden kiejtésért bounty + díjalap.',
-    longDescription: 'Izgalmas bounty tournament minden pénteken! Minden egyes kiejtett ellenfélért extra pénzt kapsz, miközben a fő díjalapart is megcélozhatod. Tökéletes a kezdők és a tapasztalt játékosok számára egyaránt.',
+    description: 'Fejvadász verseny! Minden kiejtésért bounty jutalom.'
+    longDescription: 'Izgalmas bounty tournament minden pénteken! Minden egyes kiejtett ellenfélért extra pénzt kapsz. Tökéletes a kezdők és a tapasztalt játékosok számára egyaránt.'
     date: '2025-12-17',
     time: '20:00',
     buyIn: 25000,
