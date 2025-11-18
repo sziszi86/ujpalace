@@ -5,6 +5,12 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { MenuItem } from '@/types';
 
+// Detect if we're on Android
+const isAndroid = () => {
+  if (typeof window === 'undefined') return false;
+  return /Android/i.test(navigator.userAgent);
+};
+
 const menuItems: MenuItem[] = [
   { id: 'home', label: 'Főoldal', href: '/' },
   {
@@ -37,8 +43,12 @@ export default function Header() {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuTransitioning, setIsMenuTransitioning] = useState(false);
+  const [isAndroidDevice, setIsAndroidDevice] = useState(false);
 
   useEffect(() => {
+    // Check if we're on Android
+    setIsAndroidDevice(isAndroid());
+
     const handleScroll = () => {
       const scrollY = window.scrollY;
       setIsScrolled(scrollY > 100);
@@ -50,34 +60,45 @@ export default function Header() {
 
   useEffect(() => {
     if (mobileMenuOpen) {
-      const currentScrollY = window.scrollY;
-      document.body.style.overflow = 'hidden';
-      document.body.style.position = 'fixed';
-      document.body.style.top = `-${currentScrollY}px`;
-      document.body.style.left = '0';
-      document.body.style.right = '0';
-      document.body.style.width = '100%';
+      // Simplified approach for Android - just prevent body scroll
+      if (isAndroidDevice) {
+        document.body.style.overflow = 'hidden';
+      } else {
+        const currentScrollY = window.scrollY;
+        document.body.style.overflow = 'hidden';
+        document.body.style.position = 'fixed';
+        document.body.style.top = `-${currentScrollY}px`;
+        document.body.style.left = '0';
+        document.body.style.right = '0';
+        document.body.style.width = '100%';
+      }
     } else {
-      const scrollY = document.body.style.top;
-      document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.left = '';
-      document.body.style.right = '';
-      document.body.style.width = '';
-      if (scrollY) {
-        window.scrollTo(0, parseInt(scrollY || '0') * -1);
+      if (isAndroidDevice) {
+        document.body.style.overflow = '';
+      } else {
+        const scrollY = document.body.style.top;
+        document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.left = '';
+        document.body.style.right = '';
+        document.body.style.width = '';
+        if (scrollY) {
+          window.scrollTo(0, parseInt(scrollY || '0') * -1);
+        }
       }
     }
     return () => {
       document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.left = '';
-      document.body.style.right = '';
-      document.body.style.width = '';
+      if (!isAndroidDevice) {
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.left = '';
+        document.body.style.right = '';
+        document.body.style.width = '';
+      }
     };
-  }, [mobileMenuOpen]);
+  }, [mobileMenuOpen, isAndroidDevice]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -141,13 +162,14 @@ export default function Header() {
         <div className={`flex justify-between items-center transition-all duration-300 ${isScrolled ? 'py-3 lg:py-6' : 'py-6'}`}>
           {/* Logo */}
           <Link href="/" className="flex items-center group animate-fade-in">
-            <div className={`relative flex items-center justify-center transform group-hover:scale-105 transition-all duration-300 ${isScrolled ? 'w-12 h-12 lg:w-20 lg:h-20' : 'w-20 h-20'}`}>
+            <div className={`relative flex items-center justify-center ${!isAndroidDevice ? 'transform group-hover:scale-105 transition-all duration-300' : ''} ${isScrolled ? 'w-12 h-12 lg:w-20 lg:h-20' : 'w-20 h-20'}`}>
               <Image
                 src="/images/logo.png"
                 alt="Palace Poker Logo"
                 width={isScrolled ? 48 : 80}
                 height={isScrolled ? 48 : 80}
                 className="object-contain lg:w-20 lg:h-20"
+                priority
               />
             </div>
           </Link>
@@ -211,18 +233,22 @@ export default function Header() {
           {/* Mobile menu button */}
           <button
             data-mobile-menu-button
-            className="lg:hidden p-3 text-white hover:text-poker-accent transition-all duration-300 rounded-xl hover:bg-white/10 backdrop-blur-sm relative overflow-hidden group"
+            className={`lg:hidden p-3 text-white hover:text-poker-accent rounded-xl hover:bg-white/10 backdrop-blur-sm relative overflow-hidden group ${!isAndroidDevice ? 'transition-all duration-300' : ''}`}
             onClick={() => {
               if (!isMenuTransitioning) {
-                setIsMenuTransitioning(true);
-                setMobileMenuOpen(!mobileMenuOpen);
-                setTimeout(() => setIsMenuTransitioning(false), 500);
+                if (!isAndroidDevice) {
+                  setIsMenuTransitioning(true);
+                  setMobileMenuOpen(!mobileMenuOpen);
+                  setTimeout(() => setIsMenuTransitioning(false), 300);
+                } else {
+                  setMobileMenuOpen(!mobileMenuOpen);
+                }
               }
             }}
-            disabled={isMenuTransitioning}
+            disabled={!isAndroidDevice && isMenuTransitioning}
           >
             <div className="relative z-10">
-              <svg className={`w-6 h-6 transform transition-all duration-300 ${mobileMenuOpen ? 'rotate-45' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className={`w-6 h-6 ${!isAndroidDevice ? 'transform transition-all duration-300' : ''} ${mobileMenuOpen ? 'rotate-45' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={mobileMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
               </svg>
             </div>
@@ -231,37 +257,40 @@ export default function Header() {
         </div>
 
         {/* Mobile Navigation */}
-        <nav data-mobile-menu className={`lg:hidden glass-effect mb-6 transition-all duration-500 ease-in-out transform origin-top ${mobileMenuOpen ? 'max-h-screen opacity-100 translate-y-0 scale-y-100 pointer-events-auto' : 'max-h-0 opacity-0 -translate-y-4 scale-y-0 pointer-events-none'} overflow-hidden`}>
-          <div className={`p-3 transition-all duration-500 delay-75 ${mobileMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'}`}>
+        <nav data-mobile-menu className={`lg:hidden glass-effect mb-6 ${isAndroidDevice ? 'transition-none' : 'transition-all duration-300 ease-in-out transform origin-top'} ${mobileMenuOpen ? 'max-h-screen opacity-100 translate-y-0 scale-y-100 pointer-events-auto' : 'max-h-0 opacity-0 -translate-y-4 scale-y-0 pointer-events-none'} ${isAndroidDevice ? 'overflow-y-auto' : 'overflow-hidden'}`} style={isAndroidDevice ? {
+          WebkitOverflowScrolling: 'touch',
+          touchAction: 'pan-y'
+        } : {}}>
+          <div className={`p-3 ${isAndroidDevice ? 'transition-none' : 'transition-all duration-300 delay-75'} ${mobileMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'}`}>
               {menuItems.map((item, index) => (
                 <div key={item.id} className="mb-2">
                   {item.children ? (
                     <div>
                       <button
-                        className="w-full flex items-center justify-between px-4 py-4 text-white hover:text-poker-accent hover:bg-white/10 transition-all duration-300 rounded-xl font-medium animate-fade-in"
+                        className={`w-full flex items-center justify-between px-4 py-4 text-white hover:text-poker-accent hover:bg-white/10 rounded-xl font-medium ${isAndroidDevice ? 'transition-none' : 'transition-all duration-300 animate-fade-in'}`}
                         onClick={() => setActiveDropdown(activeDropdown === item.id ? null : item.id)}
-                        style={{animationDelay: `${index * 0.1}s`}}
+                        style={!isAndroidDevice ? {animationDelay: `${index * 0.1}s`} : {}}
                       >
                         <div className="flex items-center">
                           <span className="w-2 h-2 bg-poker-primary rounded-full mr-3"></span>
                           {item.label}
                         </div>
-                        <svg className={`w-5 h-5 transform transition-transform duration-300 ${activeDropdown === item.id ? 'rotate-180' : ''}`} fill="currentColor" viewBox="0 0 20 20">
+                        <svg className={`w-5 h-5 ${isAndroidDevice ? '' : 'transform transition-transform duration-300'} ${activeDropdown === item.id ? 'rotate-180' : ''}`} fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
                         </svg>
                       </button>
                       {activeDropdown === item.id && (
-                        <div className="ml-6 mt-2 space-y-1 animate-slide-down">
+                        <div className={`ml-6 mt-2 space-y-1 ${isAndroidDevice ? '' : 'animate-slide-down'}`}>
                           {item.children.map((child, childIndex) => (
                             <Link
                               key={child.id}
                               href={child.href || '#'}
-                              className="flex items-center px-4 py-3 text-white/80 hover:text-poker-accent hover:bg-white/5 transition-all duration-200 rounded-lg animate-fade-in"
+                              className={`flex items-center px-4 py-3 text-white/80 hover:text-poker-accent hover:bg-white/5 rounded-lg ${isAndroidDevice ? 'transition-none' : 'transition-all duration-200 animate-fade-in'}`}
                               onClick={() => {
                                 setMobileMenuOpen(false);
                                 setActiveDropdown(null);
                               }}
-                              style={{animationDelay: `${childIndex * 0.1}s`}}
+                              style={!isAndroidDevice ? {animationDelay: `${childIndex * 0.1}s`} : {}}
                             >
                               <span className="w-1.5 h-1.5 bg-poker-accent rounded-full mr-3"></span>
                               {child.label}
@@ -273,12 +302,12 @@ export default function Header() {
                   ) : (
                     <Link
                       href={item.href || '#'}
-                      className="flex items-center px-4 py-4 text-white hover:text-poker-accent hover:bg-white/10 transition-all duration-300 rounded-xl font-medium animate-fade-in"
+                      className={`flex items-center px-4 py-4 text-white hover:text-poker-accent hover:bg-white/10 rounded-xl font-medium ${isAndroidDevice ? 'transition-none' : 'transition-all duration-300 animate-fade-in'}`}
                       onClick={() => {
                         setMobileMenuOpen(false);
                         setActiveDropdown(null);
                       }}
-                      style={{animationDelay: `${index * 0.1}s`}}
+                      style={!isAndroidDevice ? {animationDelay: `${index * 0.1}s`} : {}}
                     >
                       <span className="w-2 h-2 bg-poker-primary rounded-full mr-3"></span>
                       {item.label}
