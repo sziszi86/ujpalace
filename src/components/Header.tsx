@@ -67,13 +67,57 @@ export default function Header() {
 
   useEffect(() => {
     if (mobileMenuOpen) {
+      // Store current scroll position
+      const scrollY = window.scrollY;
+      
+      // Prevent body scroll
       document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.left = '0';
+      document.body.style.right = '0';
+      document.body.style.width = '100%';
+      
+      // Prevent touch events on body
+      const preventDefault = (e: TouchEvent) => {
+        const target = e.target as Element;
+        const isMenuContent = target.closest('[data-mobile-menu]');
+        if (!isMenuContent) {
+          e.preventDefault();
+        }
+      };
+      
+      document.addEventListener('touchmove', preventDefault, { passive: false });
+      
+      return () => {
+        document.removeEventListener('touchmove', preventDefault);
+        
+        // Restore scroll position
+        document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.left = '';
+        document.body.style.right = '';
+        document.body.style.width = '';
+        
+        window.scrollTo(0, scrollY);
+      };
     } else {
       document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      document.body.style.width = '';
     }
     
     return () => {
       document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      document.body.style.width = '';
     };
   }, [mobileMenuOpen]);
 
@@ -238,7 +282,10 @@ export default function Header() {
           data-mobile-menu 
           className={`lg:hidden fixed top-0 left-0 h-full w-80 max-w-[85vw] bg-gradient-to-b from-poker-dark to-poker-secondary z-50 transform transition-transform duration-300 ease-in-out ${
             mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-          } shadow-2xl`}
+          } shadow-2xl flex flex-col`}
+          style={{
+            height: '100dvh'
+          }}
         >
           {/* Menu Header */}
           <div className="flex items-center justify-between p-6 border-b border-white/10">
@@ -259,7 +306,16 @@ export default function Header() {
           </div>
 
           {/* Menu Content */}
-          <div className="flex-1 overflow-y-auto py-4" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <div 
+            className="flex-1 overflow-y-auto py-4" 
+            style={{ 
+              WebkitOverflowScrolling: 'touch',
+              overscrollBehavior: 'contain'
+            }}
+            onTouchMove={(e) => {
+              e.stopPropagation();
+            }}
+          >
             <div className="px-4 space-y-2">
               {menuItems.map((item, index) => (
                 <div key={item.id}>
