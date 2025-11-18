@@ -297,6 +297,7 @@ export default function Header() {
               ))}
             </div>
           </div>
+        </div>
         </nav>
       </div>
     </header>
