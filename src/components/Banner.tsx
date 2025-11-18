@@ -185,7 +185,7 @@ export default function Banner() {
 
   if (loading || !hasMounted) {
     return (
-      <section className="relative h-[400px] md:h-[500px] overflow-hidden bg-gradient-to-r from-poker-darkgreen to-poker-green mt-[160px] md:mt-[120px] lg:mt-0 -mb-[160px] md:-mb-[120px] lg:mb-0">
+      <section className="relative h-[400px] md:h-[500px] overflow-hidden bg-gradient-to-r from-poker-darkgreen to-poker-green mt-[80px] md:mt-[60px] lg:mt-0 -mb-[80px] md:-mb-[60px] lg:mb-0">
         <div className="flex items-center justify-center h-full">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
         </div>
@@ -195,7 +195,7 @@ export default function Banner() {
 
   if (activeBanners.length === 0) {
     return (
-      <section className="relative h-[400px] md:h-[500px] overflow-hidden bg-gradient-to-r from-poker-darkgreen to-poker-green mt-[160px] md:mt-[120px] lg:mt-0 -mb-[160px] md:-mb-[120px] lg:mb-0">
+      <section className="relative h-[400px] md:h-[500px] overflow-hidden bg-gradient-to-r from-poker-darkgreen to-poker-green mt-[80px] md:mt-[60px] lg:mt-0 -mb-[80px] md:-mb-[60px] lg:mb-0">
         <div className="absolute inset-0 bg-gradient-to-r from-poker-black/70 to-transparent z-10"></div>
         <div className="absolute inset-0 z-20 flex items-center">
           <div className="container mx-auto px-4">
@@ -217,7 +217,7 @@ export default function Banner() {
   }
 
   return (
-    <section className="relative h-[400px] md:h-[500px] overflow-hidden bg-gradient-to-r from-poker-darkgreen to-poker-green mt-[160px] md:mt-[120px] lg:mt-0 -mb-[160px] md:-mb-[120px] lg:mb-0">
+    <section className="relative h-[400px] md:h-[500px] overflow-hidden bg-gradient-to-r from-poker-darkgreen to-poker-green mt-[80px] md:mt-[60px] lg:mt-0 -mb-[80px] md:-mb-[60px] lg:mb-0">
       {/* Banner Images */}
       <div className="relative w-full h-full">
         {activeBanners.map((banner, index) => (

@@ -5,7 +5,12 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { MenuItem } from '@/types';
 
-// Detect if we're on Android
+// Detect mobile devices
+const isMobileDevice = () => {
+  if (typeof window === 'undefined') return false;
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+};
+
 const isAndroid = () => {
   if (typeof window === 'undefined') return false;
   return /Android/i.test(navigator.userAgent);
@@ -44,10 +49,12 @@ export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuTransitioning, setIsMenuTransitioning] = useState(false);
   const [isAndroidDevice, setIsAndroidDevice] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    // Check if we're on Android
+    // Check device types
     setIsAndroidDevice(isAndroid());
+    setIsMobile(isMobileDevice());
 
     const handleScroll = () => {
       const scrollY = window.scrollY;
@@ -60,45 +67,15 @@ export default function Header() {
 
   useEffect(() => {
     if (mobileMenuOpen) {
-      // Simplified approach for Android - just prevent body scroll
-      if (isAndroidDevice) {
-        document.body.style.overflow = 'hidden';
-      } else {
-        const currentScrollY = window.scrollY;
-        document.body.style.overflow = 'hidden';
-        document.body.style.position = 'fixed';
-        document.body.style.top = `-${currentScrollY}px`;
-        document.body.style.left = '0';
-        document.body.style.right = '0';
-        document.body.style.width = '100%';
-      }
+      // For all mobile devices - prevent body scroll but don't use fixed positioning
+      document.body.style.overflow = 'hidden';
     } else {
-      if (isAndroidDevice) {
-        document.body.style.overflow = '';
-      } else {
-        const scrollY = document.body.style.top;
-        document.body.style.overflow = '';
-        document.body.style.position = '';
-        document.body.style.top = '';
-        document.body.style.left = '';
-        document.body.style.right = '';
-        document.body.style.width = '';
-        if (scrollY) {
-          window.scrollTo(0, parseInt(scrollY || '0') * -1);
-        }
-      }
+      document.body.style.overflow = '';
     }
     return () => {
       document.body.style.overflow = '';
-      if (!isAndroidDevice) {
-        document.body.style.position = '';
-        document.body.style.top = '';
-        document.body.style.left = '';
-        document.body.style.right = '';
-        document.body.style.width = '';
-      }
     };
-  }, [mobileMenuOpen, isAndroidDevice]);
+  }, [mobileMenuOpen]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -236,7 +213,7 @@ export default function Header() {
             className={`lg:hidden p-3 text-white hover:text-poker-accent rounded-xl hover:bg-white/10 backdrop-blur-sm relative overflow-hidden group ${!isAndroidDevice ? 'transition-all duration-300' : ''}`}
             onClick={() => {
               if (!isMenuTransitioning) {
-                if (!isAndroidDevice) {
+                if (!isMobile) {
                   setIsMenuTransitioning(true);
                   setMobileMenuOpen(!mobileMenuOpen);
                   setTimeout(() => setIsMenuTransitioning(false), 300);
@@ -245,7 +222,7 @@ export default function Header() {
                 }
               }
             }}
-            disabled={!isAndroidDevice && isMenuTransitioning}
+            disabled={!isMobile && isMenuTransitioning}
           >
             <div className="relative z-10">
               <svg className={`w-6 h-6 ${!isAndroidDevice ? 'transform transition-all duration-300' : ''} ${mobileMenuOpen ? 'rotate-45' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -257,10 +234,12 @@ export default function Header() {
         </div>
 
         {/* Mobile Navigation */}
-        <nav data-mobile-menu className={`lg:hidden glass-effect mb-6 ${isAndroidDevice ? 'transition-none' : 'transition-all duration-300 ease-in-out transform origin-top'} ${mobileMenuOpen ? 'max-h-screen opacity-100 translate-y-0 scale-y-100 pointer-events-auto' : 'max-h-0 opacity-0 -translate-y-4 scale-y-0 pointer-events-none'} ${isAndroidDevice ? 'overflow-y-auto' : 'overflow-hidden'}`} style={isAndroidDevice ? {
+        <nav data-mobile-menu className={`lg:hidden glass-effect mb-6 ${isMobile ? 'transition-none' : 'transition-all duration-300 ease-in-out transform origin-top'} ${mobileMenuOpen ? 'max-h-screen opacity-100 translate-y-0 scale-y-100 pointer-events-auto' : 'max-h-0 opacity-0 -translate-y-4 scale-y-0 pointer-events-none'} overflow-y-auto`} style={{
           WebkitOverflowScrolling: 'touch',
-          touchAction: 'pan-y'
-        } : {}}>
+          touchAction: 'pan-y',
+          position: mobileMenuOpen ? 'relative' : 'static',
+          zIndex: 9999
+        }}>
           <div className={`p-3 ${isAndroidDevice ? 'transition-none' : 'transition-all duration-300 delay-75'} ${mobileMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'}`}>
               {menuItems.map((item, index) => (
                 <div key={item.id} className="mb-2">
