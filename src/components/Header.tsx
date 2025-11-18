@@ -75,7 +75,7 @@ export default function Header() {
       document.body.style.touchAction = 'none';
 
       // Add event listeners to prevent scroll
-      const preventDefault = (e: TouchEvent) => {
+      const preventTouchMove = (e: TouchEvent) => {
         // Allow scrolling only within the menu container
         const target = e.target as Element;
         const menuContainer = target.closest('[data-mobile-menu]');
@@ -86,12 +86,23 @@ export default function Header() {
         }
       };
 
-      document.addEventListener('touchmove', preventDefault, { passive: false });
-      document.addEventListener('wheel', preventDefault, { passive: false });
+      const preventWheel = (e: WheelEvent) => {
+        // Allow scrolling only within the menu container
+        const target = e.target as Element;
+        const menuContainer = target.closest('[data-mobile-menu]');
+        const menuInner = target.closest('.glass-effect');
+        
+        if (!menuContainer || !menuInner) {
+          e.preventDefault();
+        }
+      };
+
+      document.addEventListener('touchmove', preventTouchMove, { passive: false });
+      document.addEventListener('wheel', preventWheel, { passive: false });
 
       return () => {
-        document.removeEventListener('touchmove', preventDefault);
-        document.removeEventListener('wheel', preventDefault);
+        document.removeEventListener('touchmove', preventTouchMove);
+        document.removeEventListener('wheel', preventWheel);
       };
     } else {
       document.body.style.overflow = '';
