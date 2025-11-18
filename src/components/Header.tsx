@@ -67,13 +67,46 @@ export default function Header() {
 
   useEffect(() => {
     if (mobileMenuOpen) {
-      // For all mobile devices - prevent body scroll but don't use fixed positioning
+      // For all mobile devices - prevent body scroll and touch actions
       document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+      document.body.style.height = '100%';
+      document.body.style.touchAction = 'none';
+
+      // Add event listeners to prevent scroll
+      const preventDefault = (e: TouchEvent) => {
+        // Allow scrolling only within the menu container
+        const target = e.target as Element;
+        const menuContainer = target.closest('[data-mobile-menu]');
+        const menuInner = target.closest('.glass-effect');
+        
+        if (!menuContainer || !menuInner) {
+          e.preventDefault();
+        }
+      };
+
+      document.addEventListener('touchmove', preventDefault, { passive: false });
+      document.addEventListener('wheel', preventDefault, { passive: false });
+
+      return () => {
+        document.removeEventListener('touchmove', preventDefault);
+        document.removeEventListener('wheel', preventDefault);
+      };
     } else {
       document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.height = '';
+      document.body.style.touchAction = '';
     }
+    
     return () => {
       document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.height = '';
+      document.body.style.touchAction = '';
     };
   }, [mobileMenuOpen]);
 
@@ -234,13 +267,41 @@ export default function Header() {
         </div>
 
         {/* Mobile Navigation */}
-        <nav data-mobile-menu className={`lg:hidden glass-effect mb-6 ${isMobile ? 'transition-none' : 'transition-all duration-300 ease-in-out transform origin-top'} ${mobileMenuOpen ? 'max-h-screen opacity-100 translate-y-0 scale-y-100 pointer-events-auto' : 'max-h-0 opacity-0 -translate-y-4 scale-y-0 pointer-events-none'} overflow-y-auto`} style={{
-          WebkitOverflowScrolling: 'touch',
-          touchAction: 'pan-y',
-          position: mobileMenuOpen ? 'relative' : 'static',
-          zIndex: 9999
-        }}>
-          <div className={`p-3 ${isAndroidDevice ? 'transition-none' : 'transition-all duration-300 delay-75'} ${mobileMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'}`}>
+        <nav 
+          data-mobile-menu 
+          className={`lg:hidden glass-effect mb-6 ${isMobile ? 'transition-none' : 'transition-all duration-300 ease-in-out transform origin-top'} ${mobileMenuOpen ? 'max-h-screen opacity-100 translate-y-0 scale-y-100 pointer-events-auto' : 'max-h-0 opacity-0 -translate-y-4 scale-y-0 pointer-events-none'}`} 
+          style={{
+            position: mobileMenuOpen ? 'fixed' : 'static',
+            top: mobileMenuOpen ? '0' : 'auto',
+            left: mobileMenuOpen ? '0' : 'auto',
+            right: mobileMenuOpen ? '0' : 'auto',
+            bottom: mobileMenuOpen ? '0' : 'auto',
+            zIndex: mobileMenuOpen ? 9999 : 'auto',
+            overflowY: mobileMenuOpen ? 'auto' : 'hidden',
+            WebkitOverflowScrolling: 'touch',
+            touchAction: 'pan-y',
+            background: mobileMenuOpen ? 'rgba(0,0,0,0.95)' : 'transparent',
+            paddingTop: mobileMenuOpen ? '120px' : '0'
+          }}
+          onTouchMove={(e) => {
+            if (mobileMenuOpen) {
+              e.stopPropagation();
+            }
+          }}
+        >
+          <div 
+            className={`glass-effect mx-4 my-4 rounded-2xl ${isAndroidDevice ? 'transition-none' : 'transition-all duration-300 delay-75'} ${mobileMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'}`}
+            style={{
+              maxHeight: mobileMenuOpen ? '70vh' : '0',
+              overflowY: mobileMenuOpen ? 'auto' : 'hidden',
+              WebkitOverflowScrolling: 'touch',
+              touchAction: 'pan-y'
+            }}
+            onTouchMove={(e) => {
+              e.stopPropagation();
+            }}
+          >
+            <div className="p-3">
               {menuItems.map((item, index) => (
                 <div key={item.id} className="mb-2">
                   {item.children ? (
@@ -295,6 +356,7 @@ export default function Header() {
                 </div>
               ))}
             </div>
+          </div>
         </nav>
       </div>
     </header>
