@@ -67,7 +67,6 @@ export default function Header() {
 
   useEffect(() => {
     if (mobileMenuOpen) {
-      // Simple body scroll prevention
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
@@ -226,54 +225,67 @@ export default function Header() {
           </button>
         </div>
 
-        {/* Mobile Navigation */}
+        {/* Mobile Navigation Overlay */}
+        {mobileMenuOpen && (
+          <div 
+            className="lg:hidden fixed inset-0 bg-black/50 z-40"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+        )}
+
+        {/* Mobile Navigation Sidebar */}
         <nav 
           data-mobile-menu 
-          className={`lg:hidden ${mobileMenuOpen ? 'block' : 'hidden'}`} 
-          style={{
-            position: 'fixed',
-            top: '0',
-            left: '0',
-            right: '0',
-            bottom: '0',
-            zIndex: 50,
-            background: 'rgba(0,0,0,0.95)',
-            overflowY: 'auto',
-            WebkitOverflowScrolling: 'touch'
-          }}
+          className={`lg:hidden fixed top-0 left-0 h-full w-80 max-w-[85vw] bg-gradient-to-b from-poker-dark to-poker-secondary z-50 transform transition-transform duration-300 ease-in-out ${
+            mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+          } shadow-2xl`}
         >
-          <div className="pt-20 pb-8">
-            <div className="glass-effect mx-4 rounded-2xl">
-              <div className="p-4">
-                {menuItems.map((item, index) => (
-                <div key={item.id} className="mb-2">
+          {/* Menu Header */}
+          <div className="flex items-center justify-between p-6 border-b border-white/10">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-poker-gold/20 rounded-lg flex items-center justify-center">
+                <span className="text-poker-gold text-xl">♠</span>
+              </div>
+              <span className="text-white font-bold text-lg">Palace Poker</span>
+            </div>
+            <button
+              onClick={() => setMobileMenuOpen(false)}
+              className="p-2 text-white hover:text-poker-accent rounded-lg hover:bg-white/10 transition-colors"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Menu Content */}
+          <div className="flex-1 overflow-y-auto py-4" style={{ WebkitOverflowScrolling: 'touch' }}>
+            <div className="px-4 space-y-2">
+              {menuItems.map((item, index) => (
+                <div key={item.id}>
                   {item.children ? (
                     <div>
                       <button
-                        className="w-full flex items-center justify-between px-4 py-4 text-white hover:text-poker-accent hover:bg-white/10 rounded-xl font-medium"
+                        className="w-full flex items-center justify-between px-4 py-3 text-white hover:text-poker-accent hover:bg-white/5 rounded-lg font-medium transition-colors"
                         onClick={() => setActiveDropdown(activeDropdown === item.id ? null : item.id)}
                       >
-                        <div className="flex items-center">
-                          <span className="w-2 h-2 bg-poker-primary rounded-full mr-3"></span>
-                          {item.label}
-                        </div>
-                        <svg className={`w-5 h-5 transform transition-transform duration-300 ${activeDropdown === item.id ? 'rotate-180' : ''}`} fill="currentColor" viewBox="0 0 20 20">
+                        <span>{item.label}</span>
+                        <svg className={`w-4 h-4 transform transition-transform duration-200 ${activeDropdown === item.id ? 'rotate-180' : ''}`} fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
                         </svg>
                       </button>
                       {activeDropdown === item.id && (
-                        <div className="ml-6 mt-2 space-y-1">
-                          {item.children.map((child, childIndex) => (
+                        <div className="pl-4 py-2 space-y-1">
+                          {item.children.map((child) => (
                             <Link
                               key={child.id}
                               href={child.href || '#'}
-                              className="flex items-center px-4 py-3 text-white/80 hover:text-poker-accent hover:bg-white/5 rounded-lg transition-all duration-200"
+                              className="block px-4 py-2 text-white/80 hover:text-white hover:bg-white/5 rounded text-sm transition-colors"
                               onClick={() => {
                                 setMobileMenuOpen(false);
                                 setActiveDropdown(null);
                               }}
                             >
-                              <span className="w-1.5 h-1.5 bg-poker-accent rounded-full mr-3"></span>
                               {child.label}
                             </Link>
                           ))}
@@ -283,13 +295,12 @@ export default function Header() {
                   ) : (
                     <Link
                       href={item.href || '#'}
-                      className="flex items-center px-4 py-4 text-white hover:text-poker-accent hover:bg-white/10 rounded-xl font-medium transition-all duration-300"
+                      className="block px-4 py-3 text-white hover:text-poker-accent hover:bg-white/5 rounded-lg font-medium transition-colors"
                       onClick={() => {
                         setMobileMenuOpen(false);
                         setActiveDropdown(null);
                       }}
                     >
-                      <span className="w-2 h-2 bg-poker-primary rounded-full mr-3"></span>
                       {item.label}
                     </Link>
                   )}
@@ -297,7 +308,6 @@ export default function Header() {
               ))}
             </div>
           </div>
-        </div>
         </nav>
       </div>
     </header>
