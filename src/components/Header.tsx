@@ -67,57 +67,14 @@ export default function Header() {
 
   useEffect(() => {
     if (mobileMenuOpen) {
-      // For all mobile devices - prevent body scroll and touch actions
+      // Simple body scroll prevention
       document.body.style.overflow = 'hidden';
-      document.body.style.position = 'fixed';
-      document.body.style.width = '100%';
-      document.body.style.height = '100%';
-      document.body.style.touchAction = 'none';
-
-      // Add event listeners to prevent scroll
-      const preventTouchMove = (e: TouchEvent) => {
-        // Allow scrolling only within the menu container
-        const target = e.target as Element;
-        const menuContainer = target.closest('[data-mobile-menu]');
-        const menuInner = target.closest('.glass-effect');
-        
-        if (!menuContainer || !menuInner) {
-          e.preventDefault();
-        }
-      };
-
-      const preventWheel = (e: WheelEvent) => {
-        // Allow scrolling only within the menu container
-        const target = e.target as Element;
-        const menuContainer = target.closest('[data-mobile-menu]');
-        const menuInner = target.closest('.glass-effect');
-        
-        if (!menuContainer || !menuInner) {
-          e.preventDefault();
-        }
-      };
-
-      document.addEventListener('touchmove', preventTouchMove, { passive: false });
-      document.addEventListener('wheel', preventWheel, { passive: false });
-
-      return () => {
-        document.removeEventListener('touchmove', preventTouchMove);
-        document.removeEventListener('wheel', preventWheel);
-      };
     } else {
       document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.width = '';
-      document.body.style.height = '';
-      document.body.style.touchAction = '';
     }
     
     return () => {
       document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.width = '';
-      document.body.style.height = '';
-      document.body.style.touchAction = '';
     };
   }, [mobileMenuOpen]);
 
@@ -254,22 +211,14 @@ export default function Header() {
           {/* Mobile menu button */}
           <button
             data-mobile-menu-button
-            className={`lg:hidden p-3 text-white hover:text-poker-accent rounded-xl hover:bg-white/10 backdrop-blur-sm relative overflow-hidden group ${!isAndroidDevice ? 'transition-all duration-300' : ''}`}
+            className="lg:hidden p-3 text-white hover:text-poker-accent rounded-xl hover:bg-white/10 backdrop-blur-sm relative overflow-hidden group transition-all duration-300"
             onClick={() => {
-              if (!isMenuTransitioning) {
-                if (!isMobile) {
-                  setIsMenuTransitioning(true);
-                  setMobileMenuOpen(!mobileMenuOpen);
-                  setTimeout(() => setIsMenuTransitioning(false), 300);
-                } else {
-                  setMobileMenuOpen(!mobileMenuOpen);
-                }
-              }
+              setMobileMenuOpen(!mobileMenuOpen);
+              setActiveDropdown(null);
             }}
-            disabled={!isMobile && isMenuTransitioning}
           >
             <div className="relative z-10">
-              <svg className={`w-6 h-6 ${!isAndroidDevice ? 'transform transition-all duration-300' : ''} ${mobileMenuOpen ? 'rotate-45' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className={`w-6 h-6 transform transition-all duration-300 ${mobileMenuOpen ? 'rotate-45' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={mobileMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
               </svg>
             </div>
@@ -280,68 +229,49 @@ export default function Header() {
         {/* Mobile Navigation */}
         <nav 
           data-mobile-menu 
-          className={`lg:hidden glass-effect mb-6 ${isMobile ? 'transition-none' : 'transition-all duration-300 ease-in-out transform origin-top'} ${mobileMenuOpen ? 'max-h-screen opacity-100 translate-y-0 scale-y-100 pointer-events-auto' : 'max-h-0 opacity-0 -translate-y-4 scale-y-0 pointer-events-none'}`} 
+          className={`lg:hidden ${mobileMenuOpen ? 'block' : 'hidden'}`} 
           style={{
-            position: mobileMenuOpen ? 'fixed' : 'static',
-            top: mobileMenuOpen ? '0' : 'auto',
-            left: mobileMenuOpen ? '0' : 'auto',
-            right: mobileMenuOpen ? '0' : 'auto',
-            bottom: mobileMenuOpen ? '0' : 'auto',
-            zIndex: mobileMenuOpen ? 9999 : 'auto',
-            overflowY: mobileMenuOpen ? 'auto' : 'hidden',
-            WebkitOverflowScrolling: 'touch',
-            touchAction: 'pan-y',
-            background: mobileMenuOpen ? 'rgba(0,0,0,0.95)' : 'transparent',
-            paddingTop: mobileMenuOpen ? '120px' : '0'
-          }}
-          onTouchMove={(e) => {
-            if (mobileMenuOpen) {
-              e.stopPropagation();
-            }
+            position: 'fixed',
+            top: '0',
+            left: '0',
+            right: '0',
+            bottom: '0',
+            zIndex: 50,
+            background: 'rgba(0,0,0,0.95)',
+            overflowY: 'auto',
+            WebkitOverflowScrolling: 'touch'
           }}
         >
-          <div 
-            className={`glass-effect mx-4 my-4 rounded-2xl ${isAndroidDevice ? 'transition-none' : 'transition-all duration-300 delay-75'} ${mobileMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'}`}
-            style={{
-              maxHeight: mobileMenuOpen ? '70vh' : '0',
-              overflowY: mobileMenuOpen ? 'auto' : 'hidden',
-              WebkitOverflowScrolling: 'touch',
-              touchAction: 'pan-y'
-            }}
-            onTouchMove={(e) => {
-              e.stopPropagation();
-            }}
-          >
-            <div className="p-3">
-              {menuItems.map((item, index) => (
+          <div className="pt-20 pb-8">
+            <div className="glass-effect mx-4 rounded-2xl">
+              <div className="p-4">
+                {menuItems.map((item, index) => (
                 <div key={item.id} className="mb-2">
                   {item.children ? (
                     <div>
                       <button
-                        className={`w-full flex items-center justify-between px-4 py-4 text-white hover:text-poker-accent hover:bg-white/10 rounded-xl font-medium ${isAndroidDevice ? 'transition-none' : 'transition-all duration-300 animate-fade-in'}`}
+                        className="w-full flex items-center justify-between px-4 py-4 text-white hover:text-poker-accent hover:bg-white/10 rounded-xl font-medium"
                         onClick={() => setActiveDropdown(activeDropdown === item.id ? null : item.id)}
-                        style={!isAndroidDevice ? {animationDelay: `${index * 0.1}s`} : {}}
                       >
                         <div className="flex items-center">
                           <span className="w-2 h-2 bg-poker-primary rounded-full mr-3"></span>
                           {item.label}
                         </div>
-                        <svg className={`w-5 h-5 ${isAndroidDevice ? '' : 'transform transition-transform duration-300'} ${activeDropdown === item.id ? 'rotate-180' : ''}`} fill="currentColor" viewBox="0 0 20 20">
+                        <svg className={`w-5 h-5 transform transition-transform duration-300 ${activeDropdown === item.id ? 'rotate-180' : ''}`} fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
                         </svg>
                       </button>
                       {activeDropdown === item.id && (
-                        <div className={`ml-6 mt-2 space-y-1 ${isAndroidDevice ? '' : 'animate-slide-down'}`}>
+                        <div className="ml-6 mt-2 space-y-1">
                           {item.children.map((child, childIndex) => (
                             <Link
                               key={child.id}
                               href={child.href || '#'}
-                              className={`flex items-center px-4 py-3 text-white/80 hover:text-poker-accent hover:bg-white/5 rounded-lg ${isAndroidDevice ? 'transition-none' : 'transition-all duration-200 animate-fade-in'}`}
+                              className="flex items-center px-4 py-3 text-white/80 hover:text-poker-accent hover:bg-white/5 rounded-lg transition-all duration-200"
                               onClick={() => {
                                 setMobileMenuOpen(false);
                                 setActiveDropdown(null);
                               }}
-                              style={!isAndroidDevice ? {animationDelay: `${childIndex * 0.1}s`} : {}}
                             >
                               <span className="w-1.5 h-1.5 bg-poker-accent rounded-full mr-3"></span>
                               {child.label}
@@ -353,12 +283,11 @@ export default function Header() {
                   ) : (
                     <Link
                       href={item.href || '#'}
-                      className={`flex items-center px-4 py-4 text-white hover:text-poker-accent hover:bg-white/10 rounded-xl font-medium ${isAndroidDevice ? 'transition-none' : 'transition-all duration-300 animate-fade-in'}`}
+                      className="flex items-center px-4 py-4 text-white hover:text-poker-accent hover:bg-white/10 rounded-xl font-medium transition-all duration-300"
                       onClick={() => {
                         setMobileMenuOpen(false);
                         setActiveDropdown(null);
                       }}
-                      style={!isAndroidDevice ? {animationDelay: `${index * 0.1}s`} : {}}
                     >
                       <span className="w-2 h-2 bg-poker-primary rounded-full mr-3"></span>
                       {item.label}
