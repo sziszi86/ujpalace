@@ -50,6 +50,7 @@ export default function Header() {
   const [isMenuTransitioning, setIsMenuTransitioning] = useState(false);
   const [isAndroidDevice, setIsAndroidDevice] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [hasScrolledOnAndroid, setHasScrolledOnAndroid] = useState(false);
 
   useEffect(() => {
     // Check device types
@@ -59,11 +60,16 @@ export default function Header() {
     const handleScroll = () => {
       const scrollY = window.scrollY;
       setIsScrolled(scrollY > 100);
+      
+      // On Android, permanently hide after first scroll
+      if (isAndroid() && scrollY > 100 && !hasScrolledOnAndroid) {
+        setHasScrolledOnAndroid(true);
+      }
     };
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [hasScrolledOnAndroid]);
 
   useEffect(() => {
     if (mobileMenuOpen) {
@@ -151,7 +157,7 @@ export default function Header() {
       <div 
         className={`bg-gradient-to-r from-poker-primary to-poker-secondary text-white px-4 lg:block overflow-hidden ${
           isAndroidDevice 
-            ? `transition-none ${isScrolled ? 'hidden' : 'block py-3'}` 
+            ? `transition-none ${hasScrolledOnAndroid ? 'hidden' : 'block py-3'}` 
             : `transition-all duration-500 ease-in-out transform origin-top ${isScrolled ? 'h-0 py-0 opacity-0 -translate-y-full scale-y-0' : 'h-auto py-3 opacity-100 translate-y-0 scale-y-100'}`
         }`}
         style={isAndroidDevice ? { willChange: 'auto' } : { willChange: 'transform, opacity, height' }}
