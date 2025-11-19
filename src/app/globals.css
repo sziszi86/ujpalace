@@ -114,7 +114,7 @@ div[data-color-mode="light"] * {
 @media only screen and (max-width: 1024px) {
   /* Android device detection */
   @supports (-webkit-touch-callout: none) {
-    *, *::before, *::after {
+    *:not([data-mobile-menu]):not([data-mobile-menu] *), *:not([data-mobile-menu]):not([data-mobile-menu] *)::before, *:not([data-mobile-menu]):not([data-mobile-menu] *)::after {
       animation-duration: 0s !important;
       animation-delay: 0s !important;
       animation-iteration-count: 1 !important;
@@ -156,6 +156,12 @@ div[data-color-mode="light"] * {
       transform: none !important;
       transition: none !important;
     }
+    
+    /* Allow menu transforms to work */
+    [data-mobile-menu] {
+      transition: none !important;
+      animation: none !important;
+    }
   }
 }
 
@@ -172,7 +178,7 @@ div[data-color-mode="light"] * {
     animation: none !important;
   }
   
-  *, *::before, *::after {
+  *:not([data-mobile-menu]):not([data-mobile-menu] *), *:not([data-mobile-menu]):not([data-mobile-menu] *)::before, *:not([data-mobile-menu]):not([data-mobile-menu] *)::after {
     animation-duration: 0s !important;
     transition-duration: 0s !important;
     transform: none !important;
@@ -180,28 +186,17 @@ div[data-color-mode="light"] * {
     transition: none !important;
     will-change: auto !important;
   }
+  
+  /* Allow menu functionality */
+  [data-mobile-menu] {
+    transition: none !important;
+    animation: none !important;
+  }
 }
 
 /* Firefox mobile fixes */
 @-moz-document url-prefix() {
   @media only screen and (max-width: 768px) {
-    /* Force mobile menu to show */
-    [data-mobile-menu] {
-      display: flex !important;
-      z-index: 9999 !important;
-    }
-    
-    /* Fix mobile menu positioning in Firefox */
-    [data-mobile-menu].translate-x-0 {
-      transform: translateX(0px) !important;
-      -moz-transform: translateX(0px) !important;
-    }
-    
-    [data-mobile-menu].-translate-x-full {
-      transform: translateX(-100%) !important;
-      -moz-transform: translateX(-100%) !important;
-    }
-    
     /* Disable problematic backdrop blur on Firefox mobile */
     .backdrop-blur-sm,
     .backdrop-blur-md {
@@ -221,11 +216,16 @@ div[data-color-mode="light"] * {
       min-height: 100vh !important;
     }
     
-    /* Remove all animations on Firefox mobile */
-    *, *::before, *::after {
+    /* Remove animations but allow transforms for menu positioning */
+    *, *:not([data-mobile-menu]):not([data-mobile-menu] *), *::before, *::after {
       animation: none !important;
       transition: none !important;
-      transform: none !important;
+    }
+    
+    /* Allow specific transforms for menu functionality */
+    [data-mobile-menu] {
+      z-index: 9999 !important;
+      transition: none !important;
     }
   }
 }
