@@ -164,10 +164,16 @@ export default function Header() {
       <div 
         className={`bg-gradient-to-r from-poker-primary to-poker-secondary text-white px-4 lg:block overflow-hidden ${
           isAndroidDevice 
-            ? `transition-none ${hasScrolledOnAndroid ? 'hidden' : 'block py-3'}` 
+            ? `${hasScrolledOnAndroid ? 'hidden' : 'block py-3'}` 
             : `transition-all duration-500 ease-in-out transform origin-top ${isScrolled ? 'h-0 py-0 opacity-0 -translate-y-full scale-y-0' : 'h-auto py-3 opacity-100 translate-y-0 scale-y-100'}`
         }`}
-        style={isAndroidDevice ? { willChange: 'auto' } : { willChange: 'transform, opacity, height' }}
+        style={isAndroidDevice ? { 
+          willChange: 'auto',
+          transition: 'none',
+          transform: 'none'
+        } : { 
+          willChange: 'transform, opacity, height' 
+        }}
       >
         <div className="container mx-auto flex flex-col lg:flex-row justify-between items-center text-sm space-y-2 lg:space-y-0">
           <div className="flex flex-col lg:flex-row items-center space-y-2 lg:space-y-0 lg:space-x-6">
@@ -188,7 +194,14 @@ export default function Header() {
           </div>
           <div className="flex flex-col lg:flex-row items-center space-y-2 lg:space-y-0 lg:space-x-6">
             <div className={`flex space-x-3 ${isAndroidDevice ? '' : 'animate-fade-in'}`} style={!isAndroidDevice ? {animationDelay: '0.6s'} : undefined}>
-              <Link href="https://www.facebook.com/PalacePokerClubSzombathely" className={`p-2 rounded-full bg-white/10 hover:bg-white/20 hover:text-poker-accent transition-all duration-300 ${isAndroidDevice ? '' : 'transform hover:scale-110 hover:rotate-12'}`}>
+              <Link 
+                href="https://www.facebook.com/PalacePokerClubSzombathely" 
+                className={`p-2 rounded-full bg-white/10 hover:bg-white/20 hover:text-poker-accent ${!isAndroidDevice ? 'transition-all duration-300 transform hover:scale-110 hover:rotate-12' : ''}`}
+                style={isAndroidDevice ? { 
+                  transition: 'none',
+                  transform: 'none'
+                } : {}}
+              >
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M20 10C20 4.477 15.523 0 10 0S0 4.477 0 10c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V10h2.54V7.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V10h2.773l-.443 2.89h-2.33v6.988C16.343 19.128 20 14.991 20 10z" clipRule="evenodd" />
                 </svg>
@@ -201,8 +214,16 @@ export default function Header() {
       {/* Main Header */}
       <div className="container mx-auto px-4">
         <div 
-          className={`flex justify-between items-center ${!isAndroidDevice ? 'transition-all duration-300' : ''} ${isScrolled ? 'py-3 lg:py-6' : 'py-6'}`}
-          style={isAndroidDevice ? { willChange: 'auto' } : { willChange: 'height, padding' }}
+          className={`flex justify-between items-center ${isScrolled ? 'py-3 lg:py-6' : 'py-6'}`}
+          style={isAndroidDevice ? { 
+            willChange: 'auto',
+            transition: 'none',
+            height: 'auto',
+            padding: isScrolled ? '0.75rem 0' : '1.5rem 0'
+          } : { 
+            willChange: 'height, padding',
+            transition: 'all 300ms'
+          }}
         >
           {/* Logo */}
           <Link href="/" className={`flex items-center group ${!isAndroidDevice ? 'animate-fade-in' : ''}`}>

@@ -162,6 +162,12 @@ div[data-color-mode="light"] * {
       transition: none !important;
       animation: none !important;
     }
+    
+    /* Fix header height flickering on Android */
+    header, header * {
+      transition: none !important;
+      animation: none !important;
+    }
   }
 }
 
@@ -189,6 +195,12 @@ div[data-color-mode="light"] * {
   
   /* Allow menu functionality */
   [data-mobile-menu] {
+    transition: none !important;
+    animation: none !important;
+  }
+  
+  /* Fix header height flickering on mobile devices */
+  header, header * {
     transition: none !important;
     animation: none !important;
   }
