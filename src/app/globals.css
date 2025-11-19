@@ -110,6 +110,126 @@ div[data-color-mode="light"] * {
   color: #000000 !important;
 }
 
+/* Android mobilon animációk letiltása */
+@media only screen and (max-width: 1024px) {
+  /* Android device detection */
+  @supports (-webkit-touch-callout: none) {
+    *, *::before, *::after {
+      animation-duration: 0s !important;
+      animation-delay: 0s !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0s !important;
+      transition-delay: 0s !important;
+      transform: none !important;
+      animation: none !important;
+      transition: none !important;
+      will-change: auto !important;
+    }
+    
+    .animate-fade-in,
+    .animate-slide-up,
+    .animate-scale-in,
+    .animate-bounce-subtle,
+    .animate-float,
+    .animate-glow,
+    .animate-fade-in-up,
+    .animate-pulse {
+      animation: none !important;
+    }
+    
+    .hover\:scale-105:hover,
+    .group:hover .group-hover\:scale-110,
+    .transform,
+    .transition-all,
+    .transition-transform,
+    .transition-colors,
+    .transition-opacity {
+      transform: none !important;
+      transition: none !important;
+    }
+    
+    /* Disable card animations specifically */
+    .poker-card,
+    .poker-card:hover,
+    .poker-card-back::before {
+      animation: none !important;
+      transform: none !important;
+      transition: none !important;
+    }
+  }
+}
+
+/* Fallback for all Android devices */
+@media only screen and (max-device-width: 1024px) {
+  .animate-fade-in,
+  .animate-slide-up,
+  .animate-scale-in,
+  .animate-bounce-subtle,
+  .animate-float,
+  .animate-glow,
+  .animate-fade-in-up,
+  .animate-pulse {
+    animation: none !important;
+  }
+  
+  *, *::before, *::after {
+    animation-duration: 0s !important;
+    transition-duration: 0s !important;
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+    will-change: auto !important;
+  }
+}
+
+/* Firefox mobile fixes */
+@-moz-document url-prefix() {
+  @media only screen and (max-width: 768px) {
+    /* Force mobile menu to show */
+    [data-mobile-menu] {
+      display: flex !important;
+      z-index: 9999 !important;
+    }
+    
+    /* Fix mobile menu positioning in Firefox */
+    [data-mobile-menu].translate-x-0 {
+      transform: translateX(0px) !important;
+      -moz-transform: translateX(0px) !important;
+    }
+    
+    [data-mobile-menu].-translate-x-full {
+      transform: translateX(-100%) !important;
+      -moz-transform: translateX(-100%) !important;
+    }
+    
+    /* Disable problematic backdrop blur on Firefox mobile */
+    .backdrop-blur-sm,
+    .backdrop-blur-md {
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+    
+    /* Ensure menu button is visible */
+    [data-mobile-menu-button] {
+      display: block !important;
+      z-index: 10000 !important;
+    }
+    
+    /* Fix viewport units on Firefox mobile */
+    nav[data-mobile-menu] {
+      height: 100vh !important;
+      min-height: 100vh !important;
+    }
+    
+    /* Remove all animations on Firefox mobile */
+    *, *::before, *::after {
+      animation: none !important;
+      transition: none !important;
+      transform: none !important;
+    }
+  }
+}
+
 /* Radikális megoldás minden elemre */
 * {
   color: inherit;

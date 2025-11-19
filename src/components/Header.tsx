@@ -16,6 +16,11 @@ const isAndroid = () => {
   return /Android/i.test(navigator.userAgent);
 };
 
+const isFirefox = () => {
+  if (typeof window === 'undefined') return false;
+  return /Firefox/i.test(navigator.userAgent);
+};
+
 const menuItems: MenuItem[] = [
   { id: 'home', label: 'Főoldal', href: '/' },
   {
@@ -51,11 +56,13 @@ export default function Header() {
   const [isAndroidDevice, setIsAndroidDevice] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [hasScrolledOnAndroid, setHasScrolledOnAndroid] = useState(false);
+  const [isFirefoxBrowser, setIsFirefoxBrowser] = useState(false);
 
   useEffect(() => {
     // Check device types
     setIsAndroidDevice(isAndroid());
     setIsMobile(isMobileDevice());
+    setIsFirefoxBrowser(isFirefox());
 
     const handleScroll = () => {
       const scrollY = window.scrollY;
@@ -152,7 +159,7 @@ export default function Header() {
   }, [mobileMenuOpen, isMenuTransitioning]);
 
   return (
-    <header className="bg-gradient-to-r from-poker-dark via-poker-secondary to-poker-dark shadow-2xl sticky top-0 z-50 backdrop-blur-md border-b border-poker-primary/20">
+    <header className={`bg-gradient-to-r from-poker-dark via-poker-secondary to-poker-dark shadow-2xl sticky top-0 z-50 border-b border-poker-primary/20 ${isFirefoxBrowser && isMobile ? '' : 'backdrop-blur-md'}`}>
       {/* Info Bar */}
       <div 
         className={`bg-gradient-to-r from-poker-primary to-poker-secondary text-white px-4 lg:block overflow-hidden ${
@@ -193,17 +200,35 @@ export default function Header() {
 
       {/* Main Header */}
       <div className="container mx-auto px-4">
-        <div className={`flex justify-between items-center transition-all duration-300 ${isScrolled ? 'py-3 lg:py-6' : 'py-6'}`}>
+        <div 
+          className={`flex justify-between items-center ${!isAndroidDevice ? 'transition-all duration-300' : ''} ${isScrolled ? 'py-3 lg:py-6' : 'py-6'}`}
+          style={isAndroidDevice ? { willChange: 'auto' } : { willChange: 'height, padding' }}
+        >
           {/* Logo */}
-          <Link href="/" className="flex items-center group animate-fade-in">
-            <div className={`relative flex items-center justify-center ${!isAndroidDevice ? 'transform group-hover:scale-105 transition-all duration-300' : ''} ${isScrolled ? 'w-12 h-12 lg:w-20 lg:h-20' : 'w-20 h-20'}`}>
+          <Link href="/" className={`flex items-center group ${!isAndroidDevice ? 'animate-fade-in' : ''}`}>
+            <div 
+              className={`relative flex items-center justify-center ${isScrolled ? 'w-12 h-12 lg:w-20 lg:h-20' : 'w-20 h-20'}`}
+              style={isAndroidDevice ? { 
+                transform: 'none', 
+                willChange: 'auto',
+                backfaceVisibility: 'hidden',
+                WebkitBackfaceVisibility: 'hidden'
+              } : { 
+                willChange: 'transform'
+              }}
+            >
               <Image
                 src="/images/logo.png"
                 alt="Palace Poker Logo"
                 width={isScrolled ? 48 : 80}
                 height={isScrolled ? 48 : 80}
-                className="object-contain lg:w-20 lg:h-20"
+                className={`object-contain lg:w-20 lg:h-20 ${!isAndroidDevice ? 'transform group-hover:scale-105 transition-all duration-300' : ''}`}
                 priority
+                style={isAndroidDevice ? { 
+                  transform: 'translateZ(0)',
+                  backfaceVisibility: 'hidden',
+                  WebkitBackfaceVisibility: 'hidden'
+                } : {}}
               />
             </div>
           </Link>
@@ -267,18 +292,31 @@ export default function Header() {
           {/* Mobile menu button */}
           <button
             data-mobile-menu-button
-            className="lg:hidden p-3 text-white hover:text-poker-accent rounded-xl hover:bg-white/10 backdrop-blur-sm relative overflow-hidden group transition-all duration-300"
+            className={`lg:hidden p-3 text-white hover:text-poker-accent rounded-xl hover:bg-white/10 backdrop-blur-sm relative overflow-hidden group ${!isAndroidDevice ? 'transition-all duration-300' : ''}`}
             onClick={() => {
               setMobileMenuOpen(!mobileMenuOpen);
               setActiveDropdown(null);
             }}
+            style={isAndroidDevice ? { 
+              willChange: 'auto',
+              transform: 'translateZ(0)',
+              backfaceVisibility: 'hidden'
+            } : {}}
           >
             <div className="relative z-10">
-              <svg className={`w-6 h-6 transform transition-all duration-300 ${mobileMenuOpen ? 'rotate-45' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg 
+                className={`w-6 h-6 ${!isAndroidDevice ? `transform transition-all duration-300 ${mobileMenuOpen ? 'rotate-45' : ''}` : ''}`} 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+                style={isAndroidDevice ? { transform: 'none' } : {}}
+              >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={mobileMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
               </svg>
             </div>
-            <div className="absolute inset-0 bg-gradient-to-r from-poker-primary/20 to-poker-secondary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
+            {!isAndroidDevice && (
+              <div className="absolute inset-0 bg-gradient-to-r from-poker-primary/20 to-poker-secondary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
+            )}
           </button>
         </div>
 
@@ -293,10 +331,14 @@ export default function Header() {
         {/* Mobile Navigation Sidebar */}
         <nav 
           data-mobile-menu 
-          className={`lg:hidden fixed top-0 left-0 h-full w-80 max-w-[85vw] bg-gradient-to-b from-poker-dark to-poker-secondary z-50 transform transition-transform duration-300 ease-in-out ${
+          className={`lg:hidden fixed top-0 left-0 h-full w-80 max-w-[85vw] bg-gradient-to-b from-poker-dark to-poker-secondary z-50 ${!isAndroidDevice ? 'transform transition-transform duration-300 ease-in-out' : ''} ${
             mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
           } shadow-2xl flex flex-col`}
-          style={{
+          style={isAndroidDevice ? {
+            height: '100dvh',
+            transform: mobileMenuOpen ? 'translateX(0)' : 'translateX(-100%)',
+            willChange: 'auto'
+          } : {
             height: '100dvh'
           }}
         >
