@@ -151,10 +151,10 @@ export default function Header() {
       <div 
         className={`bg-gradient-to-r from-poker-primary to-poker-secondary text-white px-4 lg:block overflow-hidden ${
           isAndroidDevice 
-            ? `transition-opacity duration-300 ease-out ${isScrolled ? 'h-0 py-0 opacity-0' : 'h-auto py-3 opacity-100'}` 
+            ? `transition-none ${isScrolled ? 'hidden' : 'block py-3'}` 
             : `transition-all duration-500 ease-in-out transform origin-top ${isScrolled ? 'h-0 py-0 opacity-0 -translate-y-full scale-y-0' : 'h-auto py-3 opacity-100 translate-y-0 scale-y-100'}`
         }`}
-        style={isAndroidDevice ? { willChange: 'opacity, height' } : { willChange: 'transform, opacity, height' }}
+        style={isAndroidDevice ? { willChange: 'auto' } : { willChange: 'transform, opacity, height' }}
       >
         <div className="container mx-auto flex flex-col lg:flex-row justify-between items-center text-sm space-y-2 lg:space-y-0">
           <div className="flex flex-col lg:flex-row items-center space-y-2 lg:space-y-0 lg:space-x-6">
