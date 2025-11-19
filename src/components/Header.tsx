@@ -148,27 +148,34 @@ export default function Header() {
   return (
     <header className="bg-gradient-to-r from-poker-dark via-poker-secondary to-poker-dark shadow-2xl sticky top-0 z-50 backdrop-blur-md border-b border-poker-primary/20">
       {/* Info Bar */}
-      <div className={`bg-gradient-to-r from-poker-primary to-poker-secondary text-white px-4 transition-all duration-500 ease-in-out transform origin-top lg:block ${isScrolled ? 'h-0 py-0 opacity-0 -translate-y-full scale-y-0' : 'h-auto py-3 opacity-100 translate-y-0 scale-y-100'} overflow-hidden`}>
+      <div 
+        className={`bg-gradient-to-r from-poker-primary to-poker-secondary text-white px-4 lg:block overflow-hidden ${
+          isAndroidDevice 
+            ? `transition-opacity duration-300 ease-out ${isScrolled ? 'h-0 py-0 opacity-0' : 'h-auto py-3 opacity-100'}` 
+            : `transition-all duration-500 ease-in-out transform origin-top ${isScrolled ? 'h-0 py-0 opacity-0 -translate-y-full scale-y-0' : 'h-auto py-3 opacity-100 translate-y-0 scale-y-100'}`
+        }`}
+        style={isAndroidDevice ? { willChange: 'opacity, height' } : { willChange: 'transform, opacity, height' }}
+      >
         <div className="container mx-auto flex flex-col lg:flex-row justify-between items-center text-sm space-y-2 lg:space-y-0">
           <div className="flex flex-col lg:flex-row items-center space-y-2 lg:space-y-0 lg:space-x-6">
-            <div className="flex items-center space-x-2 animate-fade-in">
-              <span className="w-2 h-2 bg-white rounded-full animate-pulse opacity-80"></span>
+            <div className={`flex items-center space-x-2 ${isAndroidDevice ? '' : 'animate-fade-in'}`}>
+              <span className={`w-2 h-2 bg-white rounded-full opacity-80 ${isAndroidDevice ? '' : 'animate-pulse'}`}></span>
               <span className="font-medium text-white/95">📍 9700 Szombathely, Semmelweis u. 2.</span>
             </div>
-            <div className="flex items-center space-x-2 animate-fade-in" style={{animationDelay: '0.1s'}}>
-              <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+            <div className={`flex items-center space-x-2 ${isAndroidDevice ? '' : 'animate-fade-in'}`} style={!isAndroidDevice ? {animationDelay: '0.1s'} : undefined}>
+              <span className={`w-2 h-2 bg-green-400 rounded-full ${isAndroidDevice ? '' : 'animate-pulse'}`}></span>
               <span className="font-bold text-white text-lg bg-gradient-to-r from-green-200 to-white bg-clip-text text-transparent">
                 📞 +36 30 971 5832
               </span>
             </div>
-            <div className="flex items-center space-x-2 animate-fade-in flex-1 max-w-none" style={{animationDelay: '0.2s'}}>
-              <span className="w-2 h-2 bg-orange-300 rounded-full animate-pulse"></span>
+            <div className={`flex items-center space-x-2 flex-1 max-w-none ${isAndroidDevice ? '' : 'animate-fade-in'}`} style={!isAndroidDevice ? {animationDelay: '0.2s'} : undefined}>
+              <span className={`w-2 h-2 bg-orange-300 rounded-full ${isAndroidDevice ? '' : 'animate-pulse'}`}></span>
               <span className="font-medium text-white/95 text-xs lg:text-sm leading-tight">⚠️ Szerencsejátékban csak 18 éven felüliek vehetnek részt! A túlzásba vitt szerencsejáték ártalmas, függőséget okozhat! Kérje bejegyzését a játékosvédelmi nyilvántartásba! | Játékosvédelem:<Link href="/jatekosvedelm" className="ml-1 text-poker-accent hover:text-white underline transition-colors">36 80 205 352</Link></span>
             </div>
           </div>
           <div className="flex flex-col lg:flex-row items-center space-y-2 lg:space-y-0 lg:space-x-6">
-            <div className="flex space-x-3 animate-fade-in" style={{animationDelay: '0.6s'}}>
-              <Link href="https://www.facebook.com/PalacePokerClubSzombathely" className="p-2 rounded-full bg-white/10 hover:bg-white/20 hover:text-poker-accent transition-all duration-300 transform hover:scale-110 hover:rotate-12">
+            <div className={`flex space-x-3 ${isAndroidDevice ? '' : 'animate-fade-in'}`} style={!isAndroidDevice ? {animationDelay: '0.6s'} : undefined}>
+              <Link href="https://www.facebook.com/PalacePokerClubSzombathely" className={`p-2 rounded-full bg-white/10 hover:bg-white/20 hover:text-poker-accent transition-all duration-300 ${isAndroidDevice ? '' : 'transform hover:scale-110 hover:rotate-12'}`}>
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M20 10C20 4.477 15.523 0 10 0S0 4.477 0 10c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V10h2.54V7.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V10h2.773l-.443 2.89h-2.33v6.988C16.343 19.128 20 14.991 20 10z" clipRule="evenodd" />
                 </svg>
