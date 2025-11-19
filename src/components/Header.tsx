@@ -66,9 +66,13 @@ export default function Header() {
 
     const handleScroll = () => {
       const scrollY = window.scrollY;
-      setIsScrolled(scrollY > 100);
       
-      // On Android, permanently hide after first scroll
+      // On Android, don't change header height/size
+      if (!isAndroid()) {
+        setIsScrolled(scrollY > 100);
+      }
+      
+      // On Android, permanently hide info bar after first scroll
       if (isAndroid() && scrollY > 100 && !hasScrolledOnAndroid) {
         setHasScrolledOnAndroid(true);
       }
@@ -214,12 +218,12 @@ export default function Header() {
       {/* Main Header */}
       <div className="container mx-auto px-4">
         <div 
-          className={`flex justify-between items-center ${isScrolled ? 'py-3 lg:py-6' : 'py-6'}`}
+          className={`flex justify-between items-center ${isAndroidDevice ? 'py-6' : (isScrolled ? 'py-3 lg:py-6' : 'py-6')}`}
           style={isAndroidDevice ? { 
             willChange: 'auto',
             transition: 'none',
             height: 'auto',
-            padding: isScrolled ? '0.75rem 0' : '1.5rem 0'
+            padding: '1.5rem 0'
           } : { 
             willChange: 'height, padding',
             transition: 'all 300ms'
@@ -228,7 +232,7 @@ export default function Header() {
           {/* Logo */}
           <Link href="/" className={`flex items-center group ${!isAndroidDevice ? 'animate-fade-in' : ''}`}>
             <div 
-              className={`relative flex items-center justify-center ${isScrolled ? 'w-12 h-12 lg:w-20 lg:h-20' : 'w-20 h-20'}`}
+              className={`relative flex items-center justify-center ${isAndroidDevice ? 'w-20 h-20' : (isScrolled ? 'w-12 h-12 lg:w-20 lg:h-20' : 'w-20 h-20')}`}
               style={isAndroidDevice ? { 
                 transform: 'none', 
                 willChange: 'auto',
@@ -241,8 +245,8 @@ export default function Header() {
               <Image
                 src="/images/logo.png"
                 alt="Palace Poker Logo"
-                width={isScrolled ? 48 : 80}
-                height={isScrolled ? 48 : 80}
+                width={isAndroidDevice ? 80 : (isScrolled ? 48 : 80)}
+                height={isAndroidDevice ? 80 : (isScrolled ? 48 : 80)}
                 className={`object-contain lg:w-20 lg:h-20 ${!isAndroidDevice ? 'transform group-hover:scale-105 transition-all duration-300' : ''}`}
                 priority
                 style={isAndroidDevice ? { 
