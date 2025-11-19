@@ -92,6 +92,13 @@ export default function AdminStructuresPage() {
 
       const structure = structures.find(s => s.id === id);
       if (!structure) return;
+
+      // Fetch the full structure with levels before updating
+      const structureResponse = await fetch(`/api/structures/${id}`);
+      if (!structureResponse.ok) {
+        throw new Error('Failed to fetch structure details');
+      }
+      const fullStructure = await structureResponse.json();
       
       const response = await fetch(`/api/structures/${id}`, {
         method: 'PUT',
@@ -103,7 +110,10 @@ export default function AdminStructuresPage() {
           name: structure.name,
           description: structure.description,
           starting_chips: structure.starting_chips,
+          level_duration: fullStructure.level_duration,
+          late_registration_levels: fullStructure.late_registration_levels,
           is_active: !structure.is_active,
+          levels: fullStructure.levels || [],
         }),
       });
       

@@ -108,11 +108,11 @@ export default function StructureEditPage({ params }: { params: Promise<{ id: st
 
     // Validate that all levels have valid blind values
     const invalidLevels = structure.levels.filter(level => 
-      level.smallBlind <= 0 || level.bigBlind <= 0 || level.bigBlind <= level.smallBlind
+      level.smallBlind <= 0 || level.bigBlind <= 0 || level.bigBlind < level.smallBlind
     );
     
     if (invalidLevels.length > 0) {
-      setError('Minden szintnek érvényes vak értékekkel kell rendelkeznie (nagy vak > kis vak > 0)!');
+      setError('Minden szintnek érvényes vak értékekkel kell rendelkeznie (nagy vak >= kis vak > 0)!');
       setSaving(false);
       return;
     }
