@@ -118,6 +118,14 @@ export default function StructureEditPage({ params }: { params: Promise<{ id: st
     }
 
     try {
+      // Get authentication token
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        setError('Nincs érvényes bejelentkezés. Kérlek jelentkezz be újra.');
+        setSaving(false);
+        return;
+      }
+
       const url = isNew ? '/api/structures' : `/api/structures/${id}`;
       const method = isNew ? 'POST' : 'PUT';
 
@@ -150,6 +158,7 @@ export default function StructureEditPage({ params }: { params: Promise<{ id: st
         method,
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify(structureData),
       });
@@ -162,7 +171,12 @@ export default function StructureEditPage({ params }: { params: Promise<{ id: st
       } else {
         const errorData = await response.json();
         console.error('Save failed:', errorData);
-        setError(errorData.error || 'Hiba történt a mentés során');
+        if (response.status === 401) {
+          setError('Nincs érvényes bejelentkezés. Kérlek jelentkezz be újra.');
+          setTimeout(() => router.push('/admin/login'), 2000);
+        } else {
+          setError(errorData.error || 'Hiba történt a mentés során');
+        }
       }
     } catch (error) {
       console.error('Error saving structure:', error);

@@ -55,8 +55,18 @@ export default function AdminStructuresPage() {
   const handleDelete = async (id: number) => {
     if (window.confirm('Biztosan törölni szeretnéd ezt a struktúrát?')) {
       try {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+          alert('Nincs érvényes bejelentkezés. Kérlek jelentkezz be újra.');
+          router.push('/admin/login');
+          return;
+        }
+
         const response = await fetch(`/api/structures/${id}`, {
           method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
         });
         
         if (!response.ok) {
@@ -73,6 +83,13 @@ export default function AdminStructuresPage() {
 
   const toggleActive = async (id: number) => {
     try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        alert('Nincs érvényes bejelentkezés. Kérlek jelentkezz be újra.');
+        router.push('/admin/login');
+        return;
+      }
+
       const structure = structures.find(s => s.id === id);
       if (!structure) return;
       
@@ -80,6 +97,7 @@ export default function AdminStructuresPage() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
           name: structure.name,

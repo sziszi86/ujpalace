@@ -120,8 +120,14 @@ export default function CreateNewsPage() {
         router.push('/admin/news');
       } else {
         const result = await response.json();
-        setError(result.error || 'Hiba a hír létrehozásakor');
-        showAlert(result.error || 'Hiba a hír létrehozásakor', 'error');
+        if (response.status === 401) {
+          setError('Nincs érvényes bejelentkezés. Kérlek jelentkezz be újra.');
+          showAlert('Nincs érvényes bejelentkezés. Kérlek jelentkezz be újra.', 'error');
+          setTimeout(() => router.push('/admin/login'), 2000);
+        } else {
+          setError(result.error || 'Hiba a hír létrehozásakor');
+          showAlert(result.error || 'Hiba a hír létrehozásakor', 'error');
+        }
       }
     } catch (error) {
       setError('Hiba a hír létrehozásakor');

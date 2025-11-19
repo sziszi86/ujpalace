@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { executeQuery, executeQuerySingle } from '@/lib/database-postgresql';
+import { verifyAuth } from '@/lib/auth';
 
 export async function GET(
   request: Request,
@@ -47,6 +48,14 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const authResult = await verifyAuth(request);
+    if (!authResult.success) {
+      return NextResponse.json(
+        { error: authResult.error },
+        { status: 401 }
+      );
+    }
+
     const resolvedParams = await params;
     const structureId = resolvedParams.id;
     const body = await request.json();
@@ -114,6 +123,14 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const authResult = await verifyAuth(request);
+    if (!authResult.success) {
+      return NextResponse.json(
+        { error: authResult.error },
+        { status: 401 }
+      );
+    }
+
     const resolvedParams = await params;
     const structureId = resolvedParams.id;
 

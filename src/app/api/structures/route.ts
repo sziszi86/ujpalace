@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { executeQuery, executeInsert } from '@/lib/database-postgresql';
+import { verifyAuth } from '@/lib/auth';
 
 export async function GET() {
   try {
@@ -46,6 +47,14 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const authResult = await verifyAuth(request);
+    if (!authResult.success) {
+      return NextResponse.json(
+        { error: authResult.error },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
     const { name, description, starting_chips, level_duration = 20, late_registration_levels = 6, is_active = true, levels = [] } = body;
 
