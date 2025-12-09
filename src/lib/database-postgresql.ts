@@ -151,10 +151,12 @@ export async function getAllTournaments(limit?: number, status?: string, feature
   } else {
     conditions.push(`t.status != 'inactive'`);
   }
-  
+
   if (featured) {
     conditions.push(`t.featured = $${paramIndex++}`);
     params.push(true);
+    // For featured tournaments, only show upcoming ones (date >= today)
+    conditions.push(`t.date >= CURRENT_DATE`);
   }
     
     if (conditions.length > 0) {
