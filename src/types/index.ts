@@ -41,6 +41,8 @@ export interface Tournament {
   blind_structure?: string; // API field compatibility
   startingChips?: number;
   starting_chips?: number; // API field compatibility
+  startingChipsNote?: string;
+  starting_chips_note?: string; // API field compatibility - pl. "18:00-ig 4000 extrazseton"
   prize1st?: number;
   totalPlayers?: number;
   registrationDeadline?: string;

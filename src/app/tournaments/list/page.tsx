@@ -5,13 +5,34 @@ import Link from 'next/link';
 import { Tournament } from '@/types';
 import { formatChips, formatCurrency } from '@/utils/formatters';
 
+interface AboutData {
+  opening_hours?: string;
+}
+
 export default function TournamentListPage() {
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('date');
+  const [aboutData, setAboutData] = useState<AboutData | null>(null);
 
   useEffect(() => {
+    // Fetch opening hours
+    const fetchAboutData = async () => {
+      try {
+        const response = await fetch('/api/about');
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data.length > 0) {
+            setAboutData(data[0]);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching about data:', error);
+      }
+    };
+    fetchAboutData();
+
     const fetchTournaments = async () => {
       try {
         setLoading(true);
@@ -102,8 +123,8 @@ export default function TournamentListPage() {
             Versenyek Lista
           </h1>
           <p className="text-xl text-poker-muted max-w-3xl mx-auto">
-            Minden versenyünk részletes információkkal egy helyen. 
-            Jelentkezz a következő élő poker versenyekre!
+            Minden versenyünk részletes információkkal egy helyen.
+            Vegyél részt a következő élő poker versenyeken!
           </p>
         </div>
 
@@ -289,7 +310,7 @@ export default function TournamentListPage() {
             </div>
             <div className="flex items-center">
               <span className="mr-2">🕐</span>
-              <span>Hétfő-Vasárnap 18:00-06:00</span>
+              <span>{aboutData?.opening_hours?.split('\n')[0] || 'Szerda: 19:00-04:00'}</span>
             </div>
           </div>
         </div>

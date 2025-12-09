@@ -486,7 +486,7 @@ export default function FeaturedOffers() {
                 </div>
                 Közelgő Versenyek
               </h3>
-              <p className="text-poker-muted text-lg">Jelentkezz be és vegyél részt a következő nagy eseményeken</p>
+              <p className="text-poker-muted text-lg">Vegyél részt a következő nagy eseményeken</p>
             </div>
             <a 
               href="/tournaments" 

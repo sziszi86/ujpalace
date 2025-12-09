@@ -9,8 +9,8 @@ export default function TournamentPage() {
             Versenynaptár
           </h1>
           <p className="text-xl text-poker-muted max-w-3xl mx-auto">
-            Minden versenyünk egy helyen. 
-            Jelentkezz a következő élő poker versenyekre!
+            Minden versenyünk egy helyen.
+            Vegyél részt a következő élő poker versenyeken!
           </p>
         </div>
         

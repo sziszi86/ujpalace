@@ -1,13 +1,35 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Banner from "@/components/Banner";
 import FeaturedOffers from "@/components/FeaturedOffers";
 import FeaturedEvents from "@/components/FeaturedEvents";
 import BlogSection from "@/components/BlogSection";
 
+interface AboutData {
+  opening_hours?: string;
+}
+
 export default function Home() {
+  const [aboutData, setAboutData] = useState<AboutData | null>(null);
+
   useEffect(() => {
+    // Fetch opening hours
+    const fetchAboutData = async () => {
+      try {
+        const response = await fetch('/api/about');
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data.length > 0) {
+            setAboutData(data[0]);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching about data:', error);
+      }
+    };
+    fetchAboutData();
+
     // Counter animation function
     const animateCounters = () => {
       const counters = document.querySelectorAll('.counter');
@@ -327,9 +349,19 @@ export default function Home() {
                     <div>
                       <p className="font-semibold text-poker-dark">Nyitvatartás</p>
                       <div className="text-poker-muted font-medium text-sm space-y-1">
-                        <div>Szerda: 19:00 - 04:00</div>
-                        <div>Péntek-Szombat: 19:30 - 04:00</div>
-                        <div className="text-xs">Vas-Hét-Kedd-Csüt: zárva</div>
+                        {aboutData?.opening_hours ? (
+                          aboutData.opening_hours.split('\n').map((line, index) => (
+                            <div key={index} className={line.toLowerCase().includes('zárva') ? 'text-xs' : ''}>
+                              {line}
+                            </div>
+                          ))
+                        ) : (
+                          <>
+                            <div>Szerda: 19:00 - 04:00</div>
+                            <div>Péntek-Szombat: 19:30 - 04:00</div>
+                            <div className="text-xs">Vas-Hét-Kedd-Csüt: zárva</div>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>

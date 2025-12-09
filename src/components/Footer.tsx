@@ -135,8 +135,7 @@ export default function Footer() {
               <div>
                 <p className="font-semibold mb-1">Felelős szerencsejáték</p>
                 <p className="text-sm">
-                  A szerencsejáték függőséget okozhat. A játék csak 18 éven felülieknek engedélyezett. 
-                  Kérjük, játsszon felelősségteljesen!
+                  Szerencsejátékban csak 18 éven felüliek vehetnek részt!
                 </p>
               </div>
             </div>
@@ -152,7 +151,7 @@ export default function Footer() {
               ÜZEMELTETŐ GAZDASÁGI TÁRSASÁG: PANNON PÓKER KFT, 9700 SZOMBATHELY SEMMELWEIS U. 2.
             </p>
             <p className="text-poker-gold font-medium text-sm">
-              Kártyaterem hivatalos neve: All-In Póker Club
+              Kártyaterem hivatalos neve: Palace Poker Club
             </p>
           </div>
         </div>

@@ -8,6 +8,7 @@ interface AboutPage {
   content: string;
   features?: string[] | null;
   image?: string;
+  opening_hours?: string;
   active: boolean;
   created_at: string;
   updated_at: string;
@@ -229,7 +230,7 @@ export default function AboutPage() {
                 <div className="space-y-3 text-poker-muted">
                   <p><strong>Cím:</strong> 9700 Szombathely, Semmelweis u. 2.</p>
                   <p><strong>Telefon:</strong> +36 30 971 5832</p>
-                  <p><strong>Nyitva:</strong> Sze, P-Szo: 19:00-04:00</p>
+                  <p><strong>Nyitva:</strong> {aboutData?.opening_hours?.split('\n')[0] || 'Sze, P-Szo: 19:00-04:00'}</p>
                 </div>
               </div>
               

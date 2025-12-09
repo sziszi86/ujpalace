@@ -33,6 +33,7 @@ interface TournamentFormData {
   category: string;
   venue: string;
   startingChips: string;
+  startingChipsNote: string;
   imageUrl: string;
   specialNotes: string;
   visibleFrom: string;
@@ -76,6 +77,7 @@ export default function EditTournamentPage() {
     category: '',
     venue: 'Palace Poker Szombathely',
     startingChips: '',
+    startingChipsNote: '',
     imageUrl: '',
     specialNotes: '',
     visibleFrom: new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0],
@@ -155,6 +157,7 @@ export default function EditTournamentPage() {
             category: tournament.category || '',
             venue: tournament.venue || 'Palace Poker Szombathely',
             startingChips: (tournament.starting_chips || tournament.startingChips || '').toString(),
+            startingChipsNote: tournament.starting_chips_note || tournament.startingChipsNote || '',
             imageUrl: tournament.image_url || tournament.image || tournament.imageUrl || '',
             specialNotes: tournament.special_notes || tournament.specialNotes || '',
             visibleFrom: tournament.visible_from || tournament.visibleFrom || 
@@ -265,6 +268,8 @@ export default function EditTournamentPage() {
         venue: formData.venue,
         starting_chips: parseInt(formData.startingChips) || 0,
         startingChips: parseInt(formData.startingChips) || 0,
+        starting_chips_note: formData.startingChipsNote || '',
+        startingChipsNote: formData.startingChipsNote || '',
         image_url: formData.imageUrl,
         image: formData.imageUrl,
         special_notes: formData.specialNotes,
@@ -707,6 +712,21 @@ export default function EditTournamentPage() {
                 value={formData.startingChips}
                 onChange={handleInputChange}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-poker-primary admin-input"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Kezdőzseton megjegyzés
+                <small className="block text-gray-500">pl. "18:00-ig 4000 extrazseton"</small>
+              </label>
+              <input
+                type="text"
+                name="startingChipsNote"
+                value={formData.startingChipsNote}
+                onChange={handleInputChange}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-poker-primary admin-input"
+                placeholder="pl. 18:00-ig 4000 extrazseton"
               />
             </div>
 

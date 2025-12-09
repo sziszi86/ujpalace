@@ -257,7 +257,12 @@ export default function TournamentDetailPage() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-poker-muted">Kezdő chipek:</span>
-                      <span className="font-medium">{tournament.starting_chips ? formatChips(tournament.starting_chips) : 'N/A'}</span>
+                      <div className="text-right">
+                        <span className="font-medium">{tournament.starting_chips ? formatChips(tournament.starting_chips) : 'N/A'}</span>
+                        {(tournament.starting_chips_note || tournament.startingChipsNote) && (
+                          <div className="text-xs text-poker-accent">{tournament.starting_chips_note || tournament.startingChipsNote}</div>
+                        )}
+                      </div>
                     </div>
                     {(tournament.rebuyPrice) && Number(tournament.rebuyPrice) > 0 && (
                       <div className="flex justify-between">
@@ -271,10 +276,6 @@ export default function TournamentDetailPage() {
                         <span className="font-medium">{formatChips(Number(tournament.rebuyChips))}</span>
                       </div>
                     )}
-                    <div className="flex justify-between">
-                      <span className="text-poker-muted">Blind struktúra:</span>
-                      <span className="font-medium">{tournament.blind_structure || 'Standard'}</span>
-                    </div>
                   </div>
                 </div>
 
@@ -338,7 +339,7 @@ export default function TournamentDetailPage() {
                           <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Szint</th>
                           <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Kisvak</th>
                           <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Nagyvak</th>
-                          <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Ante</th>
+                          <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">BBante</th>
                           <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Időtartam</th>
                           <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Szünet</th>
                         </tr>
@@ -375,6 +376,9 @@ export default function TournamentDetailPage() {
                       </tbody>
                     </table>
                   </div>
+                  <p className="text-sm text-poker-muted mt-3">
+                    A BBante a nagyvakra vonatkozik, az aktuális nagyvaknak kell a potban elhelyezni.
+                  </p>
                 </div>
               )}
             </div>

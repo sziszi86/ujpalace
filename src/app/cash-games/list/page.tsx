@@ -5,13 +5,34 @@ import Link from 'next/link';
 import { CashGame } from '@/types';
 import { formatCurrency } from '@/utils/formatters';
 
+interface AboutData {
+  opening_hours?: string;
+}
+
 export default function CashGameListPage() {
   const [cashGames, setCashGames] = useState<CashGame[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterActive, setFilterActive] = useState<string>('active');
   const [sortBy, setSortBy] = useState<string>('stakes');
+  const [aboutData, setAboutData] = useState<AboutData | null>(null);
 
   useEffect(() => {
+    // Fetch opening hours
+    const fetchAboutData = async () => {
+      try {
+        const response = await fetch('/api/about');
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data.length > 0) {
+            setAboutData(data[0]);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching about data:', error);
+      }
+    };
+    fetchAboutData();
+
     const loadCashGames = async () => {
       try {
         const response = await fetch('/api/cash-games');
@@ -332,7 +353,7 @@ export default function CashGameListPage() {
             </div>
             <div className="flex items-center">
               <span className="mr-2">🕐</span>
-              <span>Hétfő-Vasárnap 18:00-06:00</span>
+              <span>{aboutData?.opening_hours?.split('\n')[0] || 'Szerda: 19:00-04:00'}</span>
             </div>
           </div>
         </div>

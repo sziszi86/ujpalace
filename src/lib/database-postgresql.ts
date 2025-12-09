@@ -185,7 +185,8 @@ export async function getTournamentById(id: number) {
     console.log('getTournamentById called with id:', id);
     
     const query = `
-      SELECT t.id, t.title, t.description, t.long_description, t.date, t.buyin_amount, t.starting_chips, 
+      SELECT t.id, t.title, t.description, t.long_description, t.date, t.buyin_amount, t.starting_chips,
+             t.starting_chips_note,
              t.max_players, t.status, t.featured, t.image_url, t.structure_id,
              t.rebuy_count, t.rebuy_price, t.rebuy_chips, t.rebuy_amounts,
              t.addon_price, t.addon_chips, t.category, t.venue, t.special_notes,
@@ -193,7 +194,7 @@ export async function getTournamentById(id: number) {
              t.date as tournament_date,
              EXTRACT(HOUR FROM t.date) || ':' || LPAD(EXTRACT(MINUTE FROM t.date)::text, 2, '0') as tournament_time,
              t.buyin_amount as buy_in,
-             'Tournament' as category_name, 
+             'Tournament' as category_name,
              null as category_color,
              s.name as structure
       FROM tournaments t
@@ -294,14 +295,14 @@ export async function updateTournament(id: number, data: any) {
 
   // Update all tournament fields including rebuy and addon fields
   const query = `
-    UPDATE tournaments 
-    SET title = $1, description = $2, long_description = $3, date = $4, buyin_amount = $5, 
-        starting_chips = $6, max_players = $7, status = $8, featured = $9, 
-        structure_id = $10, image_url = $11, rebuy_price = $12, rebuy_chips = $13,
-        rebuy_count = $14, rebuy_amounts = $15, addon_price = $16, addon_chips = $17,
-        category = $18, venue = $19, special_notes = $20, visible_from = $21,
-        visible_until = $22, guarantee_amount = $23
-    WHERE id = $24
+    UPDATE tournaments
+    SET title = $1, description = $2, long_description = $3, date = $4, buyin_amount = $5,
+        starting_chips = $6, starting_chips_note = $7, max_players = $8, status = $9, featured = $10,
+        structure_id = $11, image_url = $12, rebuy_price = $13, rebuy_chips = $14,
+        rebuy_count = $15, rebuy_amounts = $16, addon_price = $17, addon_chips = $18,
+        category = $19, venue = $20, special_notes = $21, visible_from = $22,
+        visible_until = $23, guarantee_amount = $24
+    WHERE id = $25
   `;
   const params = [
     data.title,
@@ -310,6 +311,7 @@ export async function updateTournament(id: number, data: any) {
     tournamentDateTime,
     data.buyin_amount || data.buy_in || data.buyIn || 0,
     data.starting_chips || data.startingChips || 15000,
+    data.starting_chips_note || data.startingChipsNote || null,
     data.max_players || data.maxPlayers || null,
     data.status || 'upcoming',
     data.featured || false,
