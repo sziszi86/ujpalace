@@ -1,5 +1,38 @@
 import { NextResponse } from 'next/server';
 import { getCashGameById } from '@/lib/database-postgresql';
+import { CashGame } from '@/types';
+
+// Fallback cash games (must match the ones in /api/cash-games/route.ts)
+const fallbackCashGames: CashGame[] = [
+  {
+    id: 1,
+    name: 'No Limit Hold\'em',
+    stakes: '100/200',
+    game: 'NLH',
+    minBuyIn: 20000,
+    maxBuyIn: 40000,
+    schedule: 'Hétfő-Vasárnap 18:00-06:00',
+    active: true,
+    description: 'Klasszikus No Limit Texas Hold\'em cash game',
+    venue: 'Palace Poker Szombathely',
+    visibleFrom: '2025-01-01',
+    visibleUntil: '2025-12-31'
+  },
+  {
+    id: 2,
+    name: 'Pot Limit Omaha',
+    stakes: '200/400',
+    game: 'PLO',
+    minBuyIn: 40000,
+    maxBuyIn: 80000,
+    schedule: 'Péntek-Vasárnap 20:00-04:00',
+    active: true,
+    description: 'Izgalmas PLO cash game tapasztalt játékosoknak',
+    venue: 'Palace Poker Szombathely',
+    visibleFrom: '2025-01-01',
+    visibleUntil: '2025-12-31'
+  }
+];
 
 export async function GET(
   request: Request,
@@ -8,7 +41,7 @@ export async function GET(
   try {
     const resolvedParams = await params;
     const id = parseInt(resolvedParams.id);
-    
+
     if (isNaN(id)) {
       return NextResponse.json(
         { error: 'Invalid cash game ID' },
@@ -16,9 +49,28 @@ export async function GET(
       );
     }
 
-    const cashGame = await getCashGameById(id);
-    
+    let cashGame;
+    try {
+      cashGame = await getCashGameById(id);
+    } catch (dbError) {
+      console.error('Database error, using fallback:', dbError);
+      // Try fallback
+      const fallbackGame = fallbackCashGames.find(g => g.id === id);
+      if (fallbackGame) {
+        return NextResponse.json(fallbackGame);
+      }
+      return NextResponse.json(
+        { error: 'Cash game not found' },
+        { status: 404 }
+      );
+    }
+
     if (!cashGame) {
+      // Try fallback if database returned null
+      const fallbackGame = fallbackCashGames.find(g => g.id === id);
+      if (fallbackGame) {
+        return NextResponse.json(fallbackGame);
+      }
       return NextResponse.json(
         { error: 'Cash game not found' },
         { status: 404 }
