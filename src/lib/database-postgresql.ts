@@ -30,10 +30,12 @@ function parseDatabaseUrl(databaseUrl: string): DatabaseConfig {
 }
 
 // Check if DATABASE_URL is valid and not a Railway template
-const databaseUrl = process.env.DATABASE_URL;
-const isValidDatabaseUrl = databaseUrl && 
-  !databaseUrl.includes('{{') && 
-  !databaseUrl.includes('}}') && 
+// Prefer DATABASE_PUBLIC_URL for external access (e.g., from Vercel to Railway)
+// Fall back to DATABASE_URL for internal access (e.g., within Railway)
+const databaseUrl = process.env.DATABASE_PUBLIC_URL || process.env.DATABASE_URL;
+const isValidDatabaseUrl = databaseUrl &&
+  !databaseUrl.includes('{{') &&
+  !databaseUrl.includes('}}') &&
   databaseUrl.startsWith('postgresql://');
 
 const dbConfig: DatabaseConfig = isValidDatabaseUrl
