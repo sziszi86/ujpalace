@@ -500,7 +500,7 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
           </div>
 
           {/* Calendar Grid */}
-          <div className={`grid ${selectedView === 'mobile' ? 'grid-cols-3' : 'grid-cols-7'} ${selectedView === 'week' ? 'gap-1 md:gap-2' : selectedView === 'mobile' ? 'gap-3' : 'gap-2 md:gap-3'}`}>
+          <div className={`grid ${selectedView === 'mobile' ? 'grid-cols-3' : 'grid-cols-7 auto-cols-auto'} ${selectedView === 'week' ? 'gap-1 md:gap-2' : selectedView === 'mobile' ? 'gap-3' : 'gap-2 md:gap-3'}`}>
             {/* Day Headers */}
             {selectedView === 'mobile' ? (
               generateMobileCalendarDays().map(day => (
@@ -527,16 +527,16 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
                   className={`${
                     selectedView === 'mobile'
                       ? hasEvents
-                        ? 'min-h-40 col-span-1'
-                        : 'min-h-12 col-span-1'
+                        ? 'min-h-40 col-span-1 p-2'
+                        : 'min-h-12 col-span-1 p-1'
                       : selectedView === 'week'
                         ? hasEvents
-                          ? 'min-h-36 md:min-h-32'
-                          : 'min-h-10 md:min-h-10'
+                          ? 'min-h-36 md:min-h-32 p-2'
+                          : 'min-h-10 md:min-h-10 p-0.5 md:p-1'
                         : hasEvents
-                          ? 'min-h-28 md:min-h-24'
-                          : 'min-h-10 md:min-h-10'
-                  } p-2 border border-gray-100 rounded-lg transition-all duration-200 ${
+                          ? 'min-h-28 md:min-h-24 p-2'
+                          : 'min-h-10 md:min-h-10 p-0.5 md:p-1'
+                  } border border-gray-100 rounded-lg transition-all duration-200 ${
                     selectedView === 'week' || selectedView === 'mobile' || isCurrentMonth(day)
                       ? hasEvents
                         ? 'bg-poker-light/30 hover:bg-poker-light/50'
@@ -548,10 +548,14 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
                       : ''
                   }`}
                 >
-                  <div className={`${selectedView === 'mobile' ? 'text-sm' : 'text-xs md:text-sm'} font-semibold mb-1 text-center ${
+                  <div className={`${
+                    hasEvents
+                      ? selectedView === 'mobile' ? 'text-sm' : 'text-xs md:text-sm'
+                      : 'text-xs'
+                  } font-semibold ${hasEvents ? 'mb-1' : 'mb-0'} text-center ${
                     isToday(day) ? 'text-poker-primary' : 'text-poker-dark'
                   }`}>
-                    {selectedView === 'week' || selectedView === 'mobile' ? 
+                    {selectedView === 'week' || selectedView === 'mobile' ?
                       `${day.getMonth() + 1}/${day.getDate()}` :
                       day.getDate()
                     }
