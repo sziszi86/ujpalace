@@ -7,7 +7,16 @@ export async function GET(request: NextRequest) {
     const limit = searchParams.get('limit');
     const featured = searchParams.get('featured');
     const status = searchParams.get('status');
-    
+
+    // Automatically set expired tournaments to inactive (same as admin API)
+    const { executeQuery } = await import('@/lib/database-postgresql');
+    const updateExpiredQuery = `
+      UPDATE tournaments
+      SET status = 'inactive'
+      WHERE status = 'upcoming' AND date < NOW()
+    `;
+    await executeQuery(updateExpiredQuery);
+
     const tournaments = await getAllTournaments(
       limit ? parseInt(limit) : undefined,
       status || undefined,

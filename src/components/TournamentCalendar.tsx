@@ -102,9 +102,18 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
             // Check if we have specific selected dates first
             if (cashGame.selected_dates) {
               try {
-                scheduledDates = typeof cashGame.selected_dates === 'string' 
-                  ? JSON.parse(cashGame.selected_dates) 
+                const allDates = typeof cashGame.selected_dates === 'string'
+                  ? JSON.parse(cashGame.selected_dates)
                   : cashGame.selected_dates;
+
+                // Filter out past dates (only keep today and future dates)
+                const today = new Date();
+                today.setHours(0, 0, 0, 0); // Reset to start of day
+                scheduledDates = allDates.filter((dateStr: string) => {
+                  const date = new Date(dateStr);
+                  date.setHours(0, 0, 0, 0);
+                  return date >= today;
+                });
               } catch (e) {
                 console.error('Error parsing selected_dates:', e);
                 scheduledDates = [];
@@ -519,14 +528,14 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
                     selectedView === 'mobile'
                       ? hasEvents
                         ? 'min-h-40 col-span-1'
-                        : 'min-h-20 col-span-1'
+                        : 'min-h-12 col-span-1'
                       : selectedView === 'week'
                         ? hasEvents
                           ? 'min-h-36 md:min-h-32'
-                          : 'min-h-16 md:min-h-14'
+                          : 'min-h-10 md:min-h-10'
                         : hasEvents
                           ? 'min-h-28 md:min-h-24'
-                          : 'min-h-16 md:min-h-14'
+                          : 'min-h-10 md:min-h-10'
                   } p-2 border border-gray-100 rounded-lg transition-all duration-200 ${
                     selectedView === 'week' || selectedView === 'mobile' || isCurrentMonth(day)
                       ? hasEvents
