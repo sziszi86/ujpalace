@@ -92,7 +92,9 @@ export async function GET(
       image: cashGame.image_url || '',
       venue: 'Palace Poker Szombathely',
       visibleFrom: cashGame.visible_from || '2025-01-01',
-      visibleUntil: cashGame.visible_until || '2025-12-31'
+      visibleUntil: cashGame.visible_until || '2025-12-31',
+      selectedDates: cashGame.selected_dates || [],
+      weekDays: cashGame.week_days || []
     };
 
     return NextResponse.json(formattedCashGame);

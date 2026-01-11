@@ -254,7 +254,7 @@ CREATE TABLE tournaments (
   rebuy_allowed BOOLEAN DEFAULT FALSE,
   rebuy_price INTEGER,
   rebuy_chips INTEGER,
-  rebuy_count INTEGER DEFAULT 1,
+  rebuy_count INTEGER DEFAULT 0,
   rebuy_amounts TEXT,
   rebuy_period_end TIMESTAMP,
   addon_allowed BOOLEAN DEFAULT FALSE,

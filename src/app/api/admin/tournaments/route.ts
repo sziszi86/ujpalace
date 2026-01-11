@@ -16,15 +16,24 @@ export async function GET(request: Request) {
     }
 
     console.log('Auth successful, fetching tournaments...');
-    
+
     try {
+      // Automatically set expired tournaments to inactive
+      const updateExpiredQuery = `
+        UPDATE tournaments
+        SET status = 'inactive'
+        WHERE status = 'upcoming' AND date < NOW()
+      `;
+      const updateResult = await executeQuery(updateExpiredQuery);
+      console.log('Expired tournaments updated:', updateResult);
+
       // Simple test query first
       const testResult = await executeQuery('SELECT COUNT(*) as count FROM tournaments');
       console.log('Tournament count test:', testResult);
-      
+
       // Get all tournaments (including inactive ones for admin)
-      const tournaments = await getAllTournaments(undefined, undefined, undefined);
-      
+      const tournaments = await getAllTournaments(undefined, 'all', undefined);
+
       console.log('Tournaments fetched:', tournaments.length);
       return NextResponse.json(tournaments);
     } catch (dbError) {

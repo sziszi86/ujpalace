@@ -516,13 +516,17 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
                 <div
                   key={index}
                   className={`${
-                    selectedView === 'mobile' 
-                      ? hasEvents 
-                        ? 'min-h-40 col-span-1' 
+                    selectedView === 'mobile'
+                      ? hasEvents
+                        ? 'min-h-40 col-span-1'
                         : 'min-h-20 col-span-1'
-                      : selectedView === 'week' 
-                        ? 'min-h-36 md:min-h-32' 
-                        : 'min-h-28 md:min-h-24'
+                      : selectedView === 'week'
+                        ? hasEvents
+                          ? 'min-h-36 md:min-h-32'
+                          : 'min-h-16 md:min-h-14'
+                        : hasEvents
+                          ? 'min-h-28 md:min-h-24'
+                          : 'min-h-16 md:min-h-14'
                   } p-2 border border-gray-100 rounded-lg transition-all duration-200 ${
                     selectedView === 'week' || selectedView === 'mobile' || isCurrentMonth(day)
                       ? hasEvents

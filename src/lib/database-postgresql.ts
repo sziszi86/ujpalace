@@ -145,18 +145,19 @@ export async function getAllTournaments(limit?: number, status?: string, feature
   let paramIndex = 1;
   
   // Always exclude inactive tournaments unless specifically requested
-  if (status) {
+  if (status && status !== 'all') {
     conditions.push(`t.status = $${paramIndex++}`);
     params.push(status);
-  } else {
+  } else if (status !== 'all') {
     conditions.push(`t.status != 'inactive'`);
   }
+  // If status === 'all', don't filter by status (show all including inactive)
 
   if (featured) {
     conditions.push(`t.featured = $${paramIndex++}`);
     params.push(true);
-    // For featured tournaments, only show upcoming ones (date >= today)
-    conditions.push(`t.date >= CURRENT_DATE`);
+    // For featured tournaments, only show upcoming ones (date >= now)
+    conditions.push(`t.date >= NOW()`);
   }
     
     if (conditions.length > 0) {
@@ -323,7 +324,7 @@ export async function updateTournament(id: number, data: any) {
     data.image_url || data.image || data.imageUrl || null,
     data.rebuy_price || data.rebuyPrice ? parseInt(data.rebuy_price || data.rebuyPrice) || null : null,
     data.rebuy_chips || data.rebuyChips ? parseInt(data.rebuy_chips || data.rebuyChips) || null : null,
-    data.rebuy_count || data.rebuyCount ? parseInt(data.rebuy_count || data.rebuyCount) || 1 : 1,
+    parseInt(data.rebuy_count ?? data.rebuyCount ?? 0),
     data.rebuy_amounts || data.rebuyAmounts || null,
     data.addon_price || data.addonPrice ? parseInt(data.addon_price || data.addonPrice) || null : null,
     data.addon_chips || data.addonChips ? parseInt(data.addon_chips || data.addonChips) || null : null,
@@ -398,42 +399,7 @@ export async function createCashGame(data: any) {
   // Parse stakes to extract small_blind and big_blind
   let small_blind = 0;
   let big_blind = 0;
-  
-  if (data.stakes) {
-    // Handle multiple stakes (e.g., "100/200, 200/400") by taking the first one
-    const firstStake = data.stakes.split(',')[0].trim();
-    const stakesMatch = firstStake.match(/(\d+)\/(\d+)/);
-    if (stakesMatch) {
-      small_blind = parseInt(stakesMatch[1]);
-      big_blind = parseInt(stakesMatch[2]);
-    }
-  }
-  
-  const query = `
-    INSERT INTO cash_games 
-    (name, game_type_id, stakes, small_blind, big_blind, min_buyin, max_buyin, description, schedule, active) 
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-  `;
-  const params = [
-    data.name,
-    data.game_type_id || null,
-    data.stakes,
-    small_blind,
-    big_blind,
-    data.min_buy_in || data.min_buyin,
-    data.max_buy_in || data.max_buyin || null,
-    data.description || null,
-    data.schedule || null,
-    data.active !== undefined ? data.active : true
-  ];
-  return executeInsert(query, params);
-}
 
-export async function updateCashGame(id: number, data: any) {
-  // Parse stakes to extract small_blind and big_blind
-  let small_blind = 0;
-  let big_blind = 0;
-  
   if (data.stakes) {
     // Handle multiple stakes (e.g., "100/200, 200/400") by taking the first one
     const firstStake = data.stakes.split(',')[0].trim();
@@ -443,13 +409,15 @@ export async function updateCashGame(id: number, data: any) {
       big_blind = parseInt(stakesMatch[2]);
     }
   }
-  
+
+  // Prepare selected_dates and week_days as JSON
+  const selectedDates = data.selected_dates || [];
+  const weekDays = data.week_days || [];
+
   const query = `
-    UPDATE cash_games 
-    SET name = $1, game_type_id = $2, stakes = $3, small_blind = $4, big_blind = $5,
-        min_buyin = $6, max_buyin = $7, description = $8, schedule = $9, active = $10, 
-        updated_at = CURRENT_TIMESTAMP
-    WHERE id = $11
+    INSERT INTO cash_games
+    (name, game_type_id, stakes, small_blind, big_blind, min_buyin, max_buyin, description, schedule, active, image_url, selected_dates, week_days)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
   `;
   const params = [
     data.name,
@@ -462,6 +430,54 @@ export async function updateCashGame(id: number, data: any) {
     data.description || null,
     data.schedule || null,
     data.active !== undefined ? data.active : true,
+    data.image_url || null,
+    JSON.stringify(selectedDates),
+    JSON.stringify(weekDays)
+  ];
+  return executeInsert(query, params);
+}
+
+export async function updateCashGame(id: number, data: any) {
+  // Parse stakes to extract small_blind and big_blind
+  let small_blind = 0;
+  let big_blind = 0;
+
+  if (data.stakes) {
+    // Handle multiple stakes (e.g., "100/200, 200/400") by taking the first one
+    const firstStake = data.stakes.split(',')[0].trim();
+    const stakesMatch = firstStake.match(/(\d+)\/(\d+)/);
+    if (stakesMatch) {
+      small_blind = parseInt(stakesMatch[1]);
+      big_blind = parseInt(stakesMatch[2]);
+    }
+  }
+
+  // Prepare selected_dates and week_days as JSON
+  const selectedDates = data.selected_dates || [];
+  const weekDays = data.week_days || [];
+
+  const query = `
+    UPDATE cash_games
+    SET name = $1, game_type_id = $2, stakes = $3, small_blind = $4, big_blind = $5,
+        min_buyin = $6, max_buyin = $7, description = $8, schedule = $9, active = $10,
+        image_url = $11, selected_dates = $12, week_days = $13,
+        updated_at = CURRENT_TIMESTAMP
+    WHERE id = $14
+  `;
+  const params = [
+    data.name,
+    data.game_type_id || null,
+    data.stakes,
+    small_blind,
+    big_blind,
+    data.min_buy_in || data.min_buyin,
+    data.max_buy_in || data.max_buyin || null,
+    data.description || null,
+    data.schedule || null,
+    data.active !== undefined ? data.active : true,
+    data.image_url || null,
+    JSON.stringify(selectedDates),
+    JSON.stringify(weekDays),
     id
   ];
   return executeUpdate(query, params);

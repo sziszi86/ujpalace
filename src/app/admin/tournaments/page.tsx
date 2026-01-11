@@ -38,7 +38,7 @@ export default function AdminTournamentsPage() {
         });
         
         let tournaments: Tournament[] = [];
-        
+
         if (response.ok) {
           tournaments = await response.json();
         } else {
@@ -53,50 +53,9 @@ export default function AdminTournamentsPage() {
           console.error('API Error Response:', errorText);
           tournaments = [];
         }
-        
-        // Automatikus státusz frissítés lejárt dátum alapján
-        const today = new Date().toISOString().split('T')[0];
-        const now = new Date();
-        
-        const updatedTournaments = tournaments.map(tournament => {
-          const tournamentDateTime = new Date(`${tournament.date}T${tournament.time}`);
-          
-          let newStatus = tournament.status;
-          
-          // Ha a verseny dátuma elmúlt, akkor inactive
-          if (tournamentDateTime < now && tournament.status === 'upcoming') {
-            newStatus = 'inactive';
-          }
-          
-          return {
-            ...tournament,
-            status: newStatus
-          };
-        });
-        
-        // Ha volt változás, mentjük
-        const hasChanges = updatedTournaments.some((tournament, index) => 
-          tournament.status !== tournaments[index].status
-        );
-        
-        if (hasChanges) {
-          // API-val frissítjük az adatbázist
-          for (const tournament of updatedTournaments) {
-            if (tournaments.some((t, index) => t.status !== tournament.status && tournaments[index].id === tournament.id)) {
-              await fetch('/api/admin/tournaments', {
-                method: 'PUT',
-                headers: { 
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${token}`,
-                },
-                body: JSON.stringify(tournament)
-              });
-            }
-          }
-          console.log('Versenyek automatikusan frissítve lejárt dátum miatt');
-        }
-        
-        setTournaments(updatedTournaments);
+
+        // A szerver automatikusan inaktívvá teszi a lejárt versenyeket
+        setTournaments(tournaments);
       } catch (error) {
         console.error('Hiba a versenyek betöltésekor:', error);
       } finally {
