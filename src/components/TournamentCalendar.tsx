@@ -83,20 +83,16 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
 
         if (tournamentsResponse.ok && !onlyShowCashGames) {
           const tournamentData = await tournamentsResponse.json();
-          // Only show active tournaments (status !== 'inactive')
-          const activeTournaments = tournamentData.filter((tournament: Tournament) => 
-            tournament.status !== 'inactive'
-          );
-          setTournaments(activeTournaments);
+          // Show all tournaments including inactive ones (inactive will be displayed with faded style)
+          setTournaments(tournamentData);
         }
 
         if (cashGamesResponse.ok) {
           const cashGameData = await cashGamesResponse.json();
-          // Only show active cash games
-          const activeCashGames = cashGameData.filter((cashGame: CashGame) => Boolean(cashGame.active));
-          
-          // Generate scheduled dates for active cash games
-          const enhancedCashGames = activeCashGames.map((cashGame: any) => {
+          // Show all cash games including inactive ones (inactive will be displayed with faded style)
+
+          // Generate scheduled dates for all cash games
+          const enhancedCashGames = cashGameData.map((cashGame: any) => {
             let scheduledDates = [];
             
             // Check if we have specific selected dates first
@@ -284,10 +280,11 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
           title: cashGame.name,
           time: cashGame.schedule,
           type: 'cash-game',
-          stakes: cashGame.stakes
+          stakes: cashGame.stakes,
+          isInactive: !cashGame.active
         }));
     }
-    
+
     return tournaments.filter(tournament => {
       // Convert tournament date to YYYY-MM-DD format for comparison
       // Use tournament_date field and avoid timezone issues by parsing as local date
@@ -308,8 +305,15 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
           tournamentDateStr = tournament.tournament_date;
         }
       }
-      return tournamentDateStr === dateStr && tournament.status !== 'inactive';
-    });
+      // Show all tournaments including inactive ones
+      return tournamentDateStr === dateStr;
+    }).map(tournament => ({
+      id: tournament.id,
+      title: tournament.title,
+      time: tournament.time || tournament.tournament_time,
+      type: 'tournament',
+      isInactive: tournament.status === 'inactive'
+    }));
   };
 
   const getDayOfWeek = (date: Date) => {
@@ -563,27 +567,32 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
                   
                   {/* Events */}
                   <div className="space-y-1">
-                    {events.slice(0, selectedView === 'mobile' ? 3 : selectedView === 'week' ? 4 : 2).map(event => (
-                      <Link
-                        key={event.id}
-                        href={(event as any).type === 'cash-game' ? `/cash-games/${event.id}` : `/tournaments/${event.id}`}
-                        className={`block p-2 bg-poker-primary/10 hover:bg-poker-primary/20 rounded text-poker-dark hover:text-poker-primary transition-colors ${
-                          selectedView === 'mobile' ? 'text-sm min-h-10' : 'text-xs md:text-sm min-h-8 md:min-h-auto'
-                        }`}
-                      >
-                        <div className={`font-medium truncate ${selectedView === 'mobile' ? 'text-sm' : 'text-xs md:text-sm'}`}>
-                          {event.time}
-                        </div>
-                        <div className={`truncate ${selectedView === 'mobile' ? 'text-sm' : 'text-xs md:text-sm'}`}>
-                          {event.title}
-                        </div>
-                        {(event as any).type === 'cash-game' && (
-                          <div className={`text-poker-muted ${selectedView === 'mobile' ? 'text-xs' : 'text-xs'}`}>
-                            {(event as any).stakes}
+                    {events.slice(0, selectedView === 'mobile' ? 3 : selectedView === 'week' ? 4 : 2).map(event => {
+                      const isInactive = (event as any).isInactive;
+                      return (
+                        <Link
+                          key={event.id}
+                          href={(event as any).type === 'cash-game' ? `/cash-games/${event.id}` : `/tournaments/${event.id}`}
+                          className={`block p-2 rounded transition-colors ${
+                            isInactive
+                              ? 'bg-gray-100/50 hover:bg-gray-200/50 text-gray-400 hover:text-gray-500 opacity-50'
+                              : 'bg-poker-primary/10 hover:bg-poker-primary/20 text-poker-dark hover:text-poker-primary'
+                          } ${selectedView === 'mobile' ? 'text-sm min-h-10' : 'text-xs md:text-sm min-h-8 md:min-h-auto'}`}
+                        >
+                          <div className={`font-medium truncate ${selectedView === 'mobile' ? 'text-sm' : 'text-xs md:text-sm'} ${isInactive ? 'line-through' : ''}`}>
+                            {event.time}
                           </div>
-                        )}
-                      </Link>
-                    ))}
+                          <div className={`truncate ${selectedView === 'mobile' ? 'text-sm' : 'text-xs md:text-sm'}`}>
+                            {event.title}
+                          </div>
+                          {(event as any).type === 'cash-game' && (
+                            <div className={`${isInactive ? 'text-gray-300' : 'text-poker-muted'} ${selectedView === 'mobile' ? 'text-xs' : 'text-xs'}`}>
+                              {(event as any).stakes}
+                            </div>
+                          )}
+                        </Link>
+                      );
+                    })}
                     {events.length > (selectedView === 'mobile' ? 3 : selectedView === 'week' ? 4 : 2) && (
                       <div className="text-xs text-poker-muted text-center">
                         +{events.length - (selectedView === 'mobile' ? 3 : selectedView === 'week' ? 4 : 2)} több

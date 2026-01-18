@@ -143,15 +143,23 @@ export async function getAllTournaments(limit?: number, status?: string, feature
   const params: any[] = [];
   const conditions: string[] = [];
   let paramIndex = 1;
-  
-  // Always exclude inactive tournaments unless specifically requested
+
+  // Status filtering:
+  // - If status is undefined/null: show all tournaments (public view with inactive ones faded)
+  // - If status === 'all': show all tournaments (admin view, no visibility check)
+  // - Otherwise: show only tournaments with the specified status
   if (status && status !== 'all') {
     conditions.push(`t.status = $${paramIndex++}`);
     params.push(status);
-  } else if (status !== 'all') {
-    conditions.push(`t.status != 'inactive'`);
   }
-  // If status === 'all', don't filter by status (show all including inactive)
+  // Note: If status is undefined/null or 'all', we don't filter by status
+
+  // Add visibility check (only for non-admin calls, i.e., when status !== 'all')
+  // This ensures visibility dates are respected on public pages
+  if (status !== 'all') {
+    conditions.push(`(t.visible_from IS NULL OR t.visible_from <= CURRENT_DATE)`);
+    conditions.push(`(t.visible_until IS NULL OR t.visible_until >= CURRENT_DATE)`);
+  }
 
   if (featured) {
     conditions.push(`t.featured = $${paramIndex++}`);
@@ -356,10 +364,10 @@ export async function deleteTournament(id: number) {
 }
 
 // Cash game functions (PostgreSQL compatible)
-export async function getAllCashGames(activeOnly: boolean = true) {
+export async function getAllCashGames(includeInactive: boolean = true) {
   let query = `
-    SELECT cg.*, 
-           COALESCE(cgt.name, 'Texas Hold''em') as game_type_name, 
+    SELECT cg.*,
+           COALESCE(cgt.name, 'Texas Hold''em') as game_type_name,
            null as game_type_icon,
            cg.small_blind || '/' || cg.big_blind as stakes,
            cg.min_buyin,
@@ -367,16 +375,22 @@ export async function getAllCashGames(activeOnly: boolean = true) {
            COALESCE(cg.name, 'Cash Game') as name,
            cg.description,
            cg.schedule
-    FROM cash_games cg 
+    FROM cash_games cg
     LEFT JOIN cash_game_types cgt ON cg.game_type_id = cgt.id
   `;
-  
-  if (activeOnly) {
-    query += ' WHERE cg.active = true';
+
+  const conditions: string[] = [];
+
+  // Always add visibility check (inactive cash games will be shown faded in the calendar)
+  conditions.push('(cg.visible_from IS NULL OR cg.visible_from <= CURRENT_DATE)');
+  conditions.push('(cg.visible_until IS NULL OR cg.visible_until >= CURRENT_DATE)');
+
+  if (conditions.length > 0) {
+    query += ' WHERE ' + conditions.join(' AND ');
   }
-  
+
   query += ' ORDER BY cg.created_at DESC';
-  
+
   return executeQuery(query);
 }
 
@@ -416,8 +430,8 @@ export async function createCashGame(data: any) {
 
   const query = `
     INSERT INTO cash_games
-    (name, game_type_id, stakes, small_blind, big_blind, min_buyin, max_buyin, description, schedule, active, image_url, selected_dates, week_days)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+    (name, game_type_id, stakes, small_blind, big_blind, min_buyin, max_buyin, description, schedule, active, image_url, selected_dates, week_days, visible_from, visible_until)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
   `;
   const params = [
     data.name,
@@ -432,7 +446,9 @@ export async function createCashGame(data: any) {
     data.active !== undefined ? data.active : true,
     data.image_url || null,
     JSON.stringify(selectedDates),
-    JSON.stringify(weekDays)
+    JSON.stringify(weekDays),
+    data.visible_from || data.visibleFrom ? (data.visible_from || data.visibleFrom).split('T')[0] : null,
+    data.visible_until || data.visibleUntil ? (data.visible_until || data.visibleUntil).split('T')[0] : null
   ];
   return executeInsert(query, params);
 }
@@ -461,8 +477,9 @@ export async function updateCashGame(id: number, data: any) {
     SET name = $1, game_type_id = $2, stakes = $3, small_blind = $4, big_blind = $5,
         min_buyin = $6, max_buyin = $7, description = $8, schedule = $9, active = $10,
         image_url = $11, selected_dates = $12, week_days = $13,
+        visible_from = $14, visible_until = $15,
         updated_at = CURRENT_TIMESTAMP
-    WHERE id = $14
+    WHERE id = $16
   `;
   const params = [
     data.name,
@@ -478,6 +495,8 @@ export async function updateCashGame(id: number, data: any) {
     data.image_url || null,
     JSON.stringify(selectedDates),
     JSON.stringify(weekDays),
+    data.visible_from || data.visibleFrom ? (data.visible_from || data.visibleFrom).split('T')[0] : null,
+    data.visible_until || data.visibleUntil ? (data.visible_until || data.visibleUntil).split('T')[0] : null,
     id
   ];
   return executeUpdate(query, params);

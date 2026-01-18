@@ -9,11 +9,12 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status');
 
     // Automatically set expired tournaments to inactive (same as admin API)
+    // Tournaments become inactive 12 hours after their start time
     const { executeQuery } = await import('@/lib/database-postgresql');
     const updateExpiredQuery = `
       UPDATE tournaments
       SET status = 'inactive'
-      WHERE status = 'upcoming' AND date < NOW()
+      WHERE status = 'upcoming' AND date < NOW() - INTERVAL '12 hours'
     `;
     await executeQuery(updateExpiredQuery);
 

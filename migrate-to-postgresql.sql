@@ -83,6 +83,8 @@ CREATE TABLE cash_games (
   ante INTEGER DEFAULT 0,
   active BOOLEAN DEFAULT TRUE,
   featured BOOLEAN DEFAULT FALSE,
+  visible_from DATE,
+  visible_until DATE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

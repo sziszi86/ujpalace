@@ -19,10 +19,11 @@ export async function GET(request: Request) {
 
     try {
       // Automatically set expired tournaments to inactive
+      // Tournaments become inactive 12 hours after their start time
       const updateExpiredQuery = `
         UPDATE tournaments
         SET status = 'inactive'
-        WHERE status = 'upcoming' AND date < NOW()
+        WHERE status = 'upcoming' AND date < NOW() - INTERVAL '12 hours'
       `;
       const updateResult = await executeQuery(updateExpiredQuery);
       console.log('Expired tournaments updated:', updateResult);
