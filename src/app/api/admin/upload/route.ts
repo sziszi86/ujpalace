@@ -78,21 +78,24 @@ export async function POST(request: NextRequest) {
       // Optimize image with Sharp
       let optimizedBuffer: Buffer = new Uint8Array(buffer) as Buffer;
       let optimizedSize = buffer.length;
+      let finalMimeType = file.type;
 
       // Only optimize if the image is larger than 1MB
       if (buffer.length > 1024 * 1024) {
         optimizedBuffer = await sharp(optimizedBuffer)
-          .resize(1920, 1080, { 
-            fit: 'inside', 
-            withoutEnlargement: true 
+          .resize(1920, 1080, {
+            fit: 'inside',
+            withoutEnlargement: true
           })
-          .jpeg({ 
-            quality: 85, 
-            progressive: true 
+          .jpeg({
+            quality: 85,
+            progressive: true
           })
           .toBuffer();
-        
+
         optimizedSize = optimizedBuffer.length;
+        // Sharp always outputs JPEG when .jpeg() is called
+        finalMimeType = 'image/jpeg';
       }
 
       // Write optimized file
@@ -100,13 +103,13 @@ export async function POST(request: NextRequest) {
 
       // Save to database - store image data in images table
       const result = await executeInsert(`
-        INSERT INTO images 
+        INSERT INTO images
         (filename, original_name, mime_type, size_bytes, data, category)
         VALUES ($1, $2, $3, $4, $5, $6)
       `, [
         filename,
         file.name,
-        file.type,
+        finalMimeType,
         optimizedSize,
         optimizedBuffer,
         category

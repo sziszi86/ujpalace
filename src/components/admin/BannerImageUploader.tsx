@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface BannerImageUploaderProps {
   onImageChange?: (file: File | null, preview: string | null) => void;
@@ -14,6 +14,13 @@ export default function BannerImageUploader({
   currentImage
 }: BannerImageUploaderProps) {
   const [preview, setPreview] = useState<string | null>(currentImage || null);
+
+  // Ha a currentImage aszinkron töltődik be (pl. admin edit), frissítjük a preview-t
+  useEffect(() => {
+    if (currentImage && !preview) {
+      setPreview(currentImage);
+    }
+  }, [currentImage]);
   const [dragOver, setDragOver] = useState(false);
   const [uploading, setUploading] = useState(false);
 
