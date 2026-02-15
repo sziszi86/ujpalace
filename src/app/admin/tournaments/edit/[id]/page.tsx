@@ -139,33 +139,50 @@ export default function EditTournamentPage() {
             }
           }
           
+          // Helper: PostgreSQL DATE/TIMESTAMP mezőket YYYY-MM-DD formátumra hozza
+          const toDateString = (val: any): string => {
+            if (!val) return '';
+            return val.toString().split('T')[0];
+          };
+          // Helper: numerikus mezőknél a 0 értéket is megtartja (|| helyett != null)
+          const numToStr = (val: any, fallback: string = ''): string => {
+            if (val != null && val !== '') return val.toString();
+            return fallback;
+          };
+
+          const rawVisibleFrom = tournament.visible_from || tournament.visibleFrom;
+          const rawVisibleUntil = tournament.visible_until || tournament.visibleUntil;
+
           setFormData({
             title: tournament.title || '',
             description: tournament.description || '',
             longDescription: tournament.long_description || tournament.longDescription || '',
             date: dateValue,
             time: timeValue,
-            buyIn: (tournament.buyin_amount || tournament.buyIn || tournament.buy_in || '').toString(),
-            entryFee: (tournament.entry_fee || tournament.entryFee || '').toString(),
-            rebuyPrice: (tournament.rebuy_price || tournament.rebuyPrice || '').toString(),
-            rebuyChips: (tournament.rebuy_chips || tournament.rebuyChips || '').toString(),
-            addonPrice: (tournament.addon_price || tournament.addonPrice || '').toString(),
-            addonChips: (tournament.addon_chips || tournament.addonChips || '').toString(),
-            rebuyCount: (tournament.rebuy_count || tournament.rebuyCount || '1').toString(),
+            buyIn: numToStr(tournament.buyin_amount ?? tournament.buyIn ?? tournament.buy_in),
+            entryFee: numToStr(tournament.entry_fee ?? tournament.entryFee),
+            rebuyPrice: numToStr(tournament.rebuy_price ?? tournament.rebuyPrice),
+            rebuyChips: numToStr(tournament.rebuy_chips ?? tournament.rebuyChips),
+            addonPrice: numToStr(tournament.addon_price ?? tournament.addonPrice),
+            addonChips: numToStr(tournament.addon_chips ?? tournament.addonChips),
+            rebuyCount: numToStr(tournament.rebuy_count ?? tournament.rebuyCount, '0'),
             rebuyAmounts: tournament.rebuy_amounts || tournament.rebuyAmounts || '',
             structure: tournament.structure || 'Freeze-out',
             category: tournament.category || '',
             venue: tournament.venue || 'Palace Poker Szombathely',
-            startingChips: (tournament.starting_chips || tournament.startingChips || '').toString(),
+            startingChips: numToStr(tournament.starting_chips ?? tournament.startingChips),
             startingChipsNote: tournament.starting_chips_note || tournament.startingChipsNote || '',
             imageUrl: tournament.image_url || tournament.image || tournament.imageUrl || '',
             specialNotes: tournament.special_notes || tournament.specialNotes || '',
-            visibleFrom: tournament.visible_from || tournament.visibleFrom || 
-              new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0],
-            visibleUntil: tournament.visible_until || tournament.visibleUntil || dateValue || '',
+            visibleFrom: rawVisibleFrom
+              ? toDateString(rawVisibleFrom)
+              : new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0],
+            visibleUntil: rawVisibleUntil
+              ? toDateString(rawVisibleUntil)
+              : dateValue || '',
             featured: tournament.featured || false,
             status: tournament.status || 'upcoming',
-            guarantee: (tournament.guarantee || '').toString(),
+            guarantee: numToStr(tournament.guarantee),
           });
         } else {
           showAlert('Verseny nem található!', 'error');
@@ -259,7 +276,7 @@ export default function EditTournamentPage() {
         entry_fee: parseInt(formData.entryFee) || 0,
         rebuy_price: parseInt(formData.rebuyPrice) || 0,
         rebuy_chips: parseInt(formData.rebuyChips) || 0,
-        rebuy_count: parseInt(formData.rebuyCount) || 1,
+        rebuy_count: isNaN(parseInt(formData.rebuyCount)) ? 0 : parseInt(formData.rebuyCount),
         rebuy_amounts: formData.rebuyAmounts || '',
         addon_price: parseInt(formData.addonPrice) || 0,
         addon_chips: parseInt(formData.addonChips) || 0,
@@ -696,7 +713,7 @@ export default function EditTournamentPage() {
                 name="rebuyCount"
                 value={formData.rebuyCount}
                 onChange={handleInputChange}
-                min="1"
+                min="0"
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-poker-primary admin-input"
                 required
               />

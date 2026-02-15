@@ -1,679 +1,344 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Tournament, CashGame } from '@/types';
-import TournamentCard from './TournamentCard';
-import { formatCurrency } from '@/utils/formatters';
+import Link from 'next/link';
+import { formatCurrency, formatDate, formatTime } from '@/utils/formatters';
 
-const mockTournaments: Tournament[] = [
-  {
-    id: 1,
-    title: 'Weekend Series Main Event',
-    description: 'A hétvége fénypontja! Mély stackek, lassú struktúra.',
-    longDescription: 'A hét legkiemelkedőbb versenye! Csatlakozz hozzánk a Weekend Series Main Event-jére, ahol mély stack struktúra vár. Ez egy freeze-out verseny, amely a legjobb élő poker élményt nyújtja Szombathelyen.',
-    date: '2025-12-18',
-    time: '19:00',
-    buyIn: 30000,
-    rebuyPrice: 10000,
-    rebuyChips: 15000,
-    addonPrice: 10000,
-    addonChips: 20000,
-    guarantee: 500000,
-    structure: 'Freeze-out Deep Stack',
-    status: 'upcoming',
-    maxPlayers: 80,
-    currentPlayers: 45,
-    category: 'Main Event',
-    featured: true,
-    venue: 'Palace Poker Szombathely',
-    lateRegistration: true,
-    lateRegistrationUntil: '21:00',
-    blindStructure: '20 perc szintek',
-    startingChips: 50000,
-    contactPhone: '+36 30 971 5832',
-    contactEmail: 'palacepoker kukac hotmail.hu',
-    image: 'https://images.unsplash.com/photo-1511193311914-0346f16efe90?w=800',
-    images: [
-      'https://images.unsplash.com/photo-1511193311914-0346f16efe90?w=800',
-      'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800',
-      'https://images.unsplash.com/photo-1596838132731-3301c3fd4317?w=800'
-    ],
-    specialNotes: 'Személyes jelentkezés a helyszínen vagy telefonon keresztül.',
-  },
-  {
-    id: 2,
-    title: 'Friday Night Bounty',
-    description: 'Fejvadász verseny! Minden kiejtésért bounty jutalom.',
-    longDescription: 'Izgalmas bounty tournament minden pénteken! Minden egyes kiejtett ellenfélért extra pénzt kapsz. Tökéletes a kezdők és a tapasztalt játékosok számára egyaránt.',
-    date: '2025-12-17',
-    time: '20:00',
-    buyIn: 25000,
-    rebuyPrice: 8000,
-    rebuyChips: 12000,
-    addonPrice: 8000,
-    addonChips: 15000,
-    guarantee: 300000,
-    structure: 'Progressive Bounty',
-    status: 'upcoming',
-    maxPlayers: 60,
-    currentPlayers: 38,
-    category: 'Bounty',
-    featured: true,
-    venue: 'Palace Poker Szombathely',
-    lateRegistration: true,
-    lateRegistrationUntil: '22:30',
-    blindStructure: '15 perc szintek',
-    startingChips: 30000,
-    contactPhone: '+36 30 971 5832',
-    contactEmail: 'palacepoker kukac hotmail.hu',
-    image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800',
-    images: [
-      'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800',
-      'https://images.unsplash.com/photo-1596838132731-3301c3fd4317?w=800',
-      'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800'
-    ],
-    specialNotes: 'Minden kiejtett játékosért 5000 Ft bounty járt!',
-  },
-  {
-    id: 3,
-    title: 'Sunday High Roller',
-    description: 'Magas tétes verseny tapasztalt játékosoknak. Exkluzív élmény.',
-    longDescription: 'Exkluzív high roller esemény csak a legkomolyan vevőknek! Magas buy-in, lassú struktúra és prémium kiszolgálás. Limitált részvételi lehetőség, ezért érdemes időben jelentkezni.',
-    date: '2025-12-19',
-    time: '18:00',
-    buyIn: 50000,
-    guarantee: 750000,
-    structure: 'High Roller Freeze-out',
-    status: 'upcoming',
-    maxPlayers: 30,
-    currentPlayers: 12,
-    category: 'High Roller',
-    featured: true,
-    venue: 'Palace Poker Szombathely',
-    lateRegistration: false,
-    blindStructure: '30 perc szintek',
-    startingChips: 100000,
-    contactPhone: '+36 30 971 5832',
-    contactEmail: 'palacepoker kukac hotmail.hu',
-    image: 'https://images.unsplash.com/photo-1596838132731-3301c3fd4317?w=800',
-    images: [
-      'https://images.unsplash.com/photo-1596838132731-3301c3fd4317?w=800',
-      'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800',
-      'https://images.unsplash.com/photo-1511193311914-0346f16efe90?w=800'
-    ],
-    specialNotes: 'Exkluzív high roller élmény prémium kiszolgálással.',
-  },
-];
-
-const mockCashGames: CashGame[] = [
-  {
-    id: 1,
-    name: 'NL Hold\'em 100/200',
-    stakes: '100/200 Ft',
-    game: 'No Limit Texas Hold\'em',
-    minBuyIn: 10000,
-    maxBuyIn: 40000,
-    description: 'Népszerű cash game asztal minden szinten. Barátságos légkör.',
-    schedule: 'Szerda: 19:00-04:00',
-    active: true,
-  },
-  {
-    id: 2,
-    name: 'NL Hold\'em 200/400',
-    stakes: '200/400 Ft',
-    game: 'No Limit Texas Hold\'em',
-    minBuyIn: 20000,
-    maxBuyIn: 80000,
-    description: 'Magasabb tétes akció tapasztalt játékosoknak. Izgalmas pot-ok.',
-    schedule: 'Péntek-Szombat: 19:30-04:00',
-    active: true,
-  },
-  {
-    id: 3,
-    name: 'PLO 200/400',
-    stakes: '200/400 Ft',
-    game: 'Pot Limit Omaha',
-    minBuyIn: 20000,
-    maxBuyIn: 100000,
-    description: 'Omaha akció! Több lehetőség, nagyobb variance, izgalmas játék.',
-    schedule: 'Péntek-Szombat: 19:30-04:00',
-    active: true,
-  },
-];
-
-interface FeaturedOffersProps {
-  tournaments?: Tournament[];
-  cashGames?: CashGame[];
+interface Tournament {
+  id: number;
+  title: string;
+  date?: string;
+  time?: string;
+  tournament_date?: string;
+  tournament_time?: string;
+  buyIn?: number;
+  buy_in?: string | number;
+  guarantee?: number;
+  guarantee_amount?: string | number;
+  rebuy_count?: number;
+  rebuy_price?: string | number;
+  addon_price?: string | number;
+  category?: string;
+  status?: string;
+  image?: string;
+  image_url?: string;
+  featured?: boolean;
 }
-
-// Helper function to calculate the next cash game date based on schedule
-const getNextCashGameDate = (schedule: string): string | null => {
-  if (!schedule) return null;
-  
-  const today = new Date();
-  const currentDay = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
-  
-  // Map Hungarian day names to day numbers
-  const dayMap: { [key: string]: number } = {
-    'vasárnap': 0, 'vas': 0,
-    'hétfő': 1, 'hét': 1,
-    'kedd': 2,
-    'szerda': 3, 'sze': 3,
-    'csütörtök': 4, 'csüt': 4,
-    'péntek': 5, 'pén': 5,
-    'szombat': 6, 'szo': 6
-  };
-  
-  // Extract days from schedule (e.g., "Szerda: 19:00-04:00, Péntek-Szombat: 19:30-04:00")
-  const scheduleDays: number[] = [];
-  
-  for (const [dayName, dayNum] of Object.entries(dayMap)) {
-    if (schedule.toLowerCase().includes(dayName.toLowerCase())) {
-      scheduleDays.push(dayNum);
-    }
-  }
-  
-  // If no days found, default to Wed, Fri, Sat (common poker schedule)
-  if (scheduleDays.length === 0) {
-    scheduleDays.push(3, 5, 6); // Wednesday, Friday, Saturday
-  }
-  
-  // Find the next occurrence
-  let nextDate = new Date(today);
-  let daysToAdd = 1;
-  
-  // Look for the next 14 days
-  for (let i = 0; i < 14; i++) {
-    const checkDate = new Date(today);
-    checkDate.setDate(today.getDate() + i);
-    const checkDay = checkDate.getDay();
-    
-    if (scheduleDays.includes(checkDay)) {
-      // If it's today, make sure we haven't passed the start time
-      if (i === 0) {
-        const now = new Date();
-        const startTime = extractStartTime(schedule);
-        if (startTime) {
-          const startToday = new Date(today);
-          const [hours, minutes] = startTime.split(':').map(Number);
-          startToday.setHours(hours, minutes, 0, 0);
-          
-          if (now > startToday) {
-            continue; // Too late today, find next occurrence
-          }
-        }
-      }
-      return checkDate.toISOString().split('T')[0];
-    }
-  }
-  
-  return null;
-};
-
-// Helper function to extract start time from schedule
-const extractStartTime = (schedule: string): string | null => {
-  const timeMatch = schedule.match(/(\d{2}):(\d{2})/);
-  return timeMatch ? `${timeMatch[1]}:${timeMatch[2]}` : null;
-};
-
-// Helper function to format upcoming date in Hungarian
-const formatUpcomingDate = (dateString: string): string => {
-  const date = new Date(dateString);
-  const today = new Date();
-  const diffTime = date.getTime() - today.getTime();
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  
-  const dayNames = ['Vas', 'Hét', 'Kedd', 'Sze', 'Csüt', 'Pén', 'Szo'];
-  const dayName = dayNames[date.getDay()];
-  const month = date.getMonth() + 1;
-  const day = date.getDate();
-  
-  if (diffDays === 0) return 'Ma';
-  if (diffDays === 1) return 'Holnap';
-  if (diffDays <= 7) return `${dayName} (${diffDays} nap)`;
-  
-  return `${dayName}, ${month}.${day}.`;
-};
-
-// Helper function to format schedule nicely
-const formatSchedule = (schedule: string): React.ReactElement => {
-  if (!schedule) {
-    return <span className="text-xs">Sze-Pén-Szo 19:00+</span>;
-  }
-  
-  // Split by comma to handle multiple schedules
-  const schedules = schedule.split(',').map(s => s.trim());
-  
-  return (
-    <div className="text-xs space-y-1">
-      {schedules.map((sched, index) => {
-        // Extract day and time parts
-        const parts = sched.split(':');
-        if (parts.length >= 2) {
-          const dayPart = parts[0].trim();
-          const timePart = parts.slice(1).join(':').trim();
-          return (
-            <div key={index} className="flex flex-col">
-              <span className="font-medium text-poker-primary">{dayPart}</span>
-              <span className="text-poker-muted">{timePart}</span>
-            </div>
-          );
-        }
-        return <span key={index}>{sched}</span>;
-      })}
-    </div>
-  );
-};
-
-// Helper function to format stakes nicely
-const formatStakes = (name: string, stakes: string): React.ReactElement => {
-  // Try to extract multiple stakes from the name if available
-  const nameStakesMatch = name.match(/(\d+\/\d+)/g);
-  
-  if (nameStakesMatch && nameStakesMatch.length > 1) {
-    // Multiple stakes found in name
-    return (
-      <div className="text-right">
-        {nameStakesMatch.map((stake, index) => (
-          <div key={index} className="font-bold text-poker-primary">
-            {stake} Ft
-          </div>
-        ))}
-      </div>
-    );
-  }
-  
-  // Single stake or fallback
-  return <span className="font-bold text-poker-primary text-lg">{stakes} Ft</span>;
-};
 
 export default function FeaturedOffers() {
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
-  const [cashGames, setCashGames] = useState<CashGame[]>([]);
-  const [currentTournamentPage, setCurrentTournamentPage] = useState(0);
-  const [touchStart, setTouchStart] = useState<{x: number; y: number} | null>(null);
-  const [touchEnd, setTouchEnd] = useState<{x: number; y: number} | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
+  const [touchEnd, setTouchEnd] = useState<{ x: number; y: number } | null>(null);
+
+  const CARDS_PER_PAGE = 3;
 
   useEffect(() => {
-    // Load tournaments from API
-    console.log('Fetching tournaments from /api/tournaments...');
     fetch('/api/tournaments')
       .then(res => {
-        console.log('API response status:', res.status, res.statusText);
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json();
       })
-      .then(data => {
-        console.log('API tournaments loaded:', data);
-        console.log('Number of tournaments:', data.length);
-        console.log('First tournament:', data[0]);
-        
-        if (!Array.isArray(data)) {
-          console.error('API did not return an array:', typeof data, data);
-          setTournaments(mockTournaments);
-          return;
-        }
-        
-        // Transform API data to match Tournament interface
-        const transformedTournaments = data.map((tournament: any) => ({
-          ...tournament,
-          date: tournament.tournament_date || tournament.date,
-          time: tournament.tournament_time || tournament.time,
-          buyIn: Number(tournament.buy_in || tournament.buyIn || 0),
-          image: tournament.image_url || tournament.image,
-          // Transform rebuy/addon fields
-          rebuyPrice: tournament.rebuy_price || tournament.rebuyPrice,
-          rebuyChips: tournament.rebuy_chips || tournament.rebuyChips,
-          addonPrice: tournament.addon_price || tournament.addonPrice,
-          addonChips: tournament.addon_chips || tournament.addonChips,
-          startingChips: tournament.starting_chips || tournament.startingChips,
-          // Keep both field names for backward compatibility
-          tournament_date: tournament.tournament_date,
-          tournament_time: tournament.tournament_time,
-          buy_in: tournament.buy_in
-        }));
-        console.log('Transformed tournaments:', transformedTournaments);
-        console.log('First transformed tournament:', transformedTournaments[0]);
-        setTournaments(transformedTournaments);
+      .then((data: any[]) => {
+        if (!Array.isArray(data)) return;
+        const transformed = data
+          .filter((t: any) => t.status === 'upcoming')
+          .map((t: any) => ({
+            ...t,
+            date: t.tournament_date || t.date,
+            time: t.tournament_time || t.time,
+            buyIn: Number(t.buy_in || t.buyIn || 0),
+            guarantee: Number(t.guarantee_amount || t.guarantee || 0),
+            image: t.image_url || t.image || '',
+          }));
+        setTournaments(transformed);
       })
-      .catch(err => {
-        console.error('Failed to load tournaments:', err);
-        setTournaments(mockTournaments);
-      });
-
-      // Load cash games from API
-    fetch('/api/cash-games')
-      .then(res => res.json())
-      .then(data => {
-        // Convert database format to frontend format and filter for upcoming scheduled games
-        const today = new Date().toISOString().split('T')[0];
-        const formattedCashGames = data.map((game: any) => ({
-          id: game.id,
-          name: game.name,
-          stakes: game.stakes,
-          game: game.game_type || game.game || 'NLH',
-          minBuyIn: game.min_buyin || game.minBuyIn,
-          maxBuyIn: game.max_buyin || game.maxBuyIn,
-          schedule: game.schedule || 'Szerda: 19:00-04:00, Péntek-Szombat: 19:30-04:00',
-          startDate: game.start_date || game.startDate,
-          nextDate: getNextCashGameDate(game.schedule),
-          active: game.active === 1 || game.active === true || game.active !== 0,
-          description: game.description || '',
-          image: game.image_url || game.image || ''
-        }));
-        
-        // Show all active cash games, limit to 3
-        const upcomingCashGames = formattedCashGames
-          .filter((game: any) => game.active)
-          .slice(0, 3);
-        
-        setCashGames(upcomingCashGames);
-      })
-      .catch(err => {
-        console.error('Failed to load cash games:', err);
-        setCashGames(mockCashGames);
-      });
+      .catch(err => console.error('Failed to load tournaments:', err))
+      .finally(() => setLoading(false));
   }, []);
 
-  // Show all upcoming tournaments for now to test - limit to 10
-  const upcomingTournaments = tournaments.filter(tournament => {
-    console.log('Tournament:', tournament.id, tournament.title, 'Status:', tournament.status);
-    // Just show all upcoming tournaments regardless of date for debugging
-    return tournament.status === 'upcoming';
-  }).slice(0, 10);
-  
-  console.log('Total tournaments loaded:', tournaments.length);
-  console.log('Filtered upcoming tournaments:', upcomingTournaments.length);
-
-  // Pagination logic - 3 tournaments per page  
-  const tournamentsPerPage = 3;
-  const totalPages = Math.ceil(upcomingTournaments.length / tournamentsPerPage);
-  const currentTournaments = upcomingTournaments.slice(
-    currentTournamentPage * tournamentsPerPage,
-    (currentTournamentPage + 1) * tournamentsPerPage
+  const totalPages = Math.ceil(tournaments.length / CARDS_PER_PAGE);
+  const currentTournaments = tournaments.slice(
+    currentPage * CARDS_PER_PAGE,
+    (currentPage + 1) * CARDS_PER_PAGE
   );
 
-  const nextTournamentPage = () => {
-    if (currentTournamentPage < totalPages - 1) {
-      setCurrentTournamentPage(currentTournamentPage + 1);
-    }
-  };
-
-  const prevTournamentPage = () => {
-    if (currentTournamentPage > 0) {
-      setCurrentTournamentPage(currentTournamentPage - 1);
-    }
-  };
-
-  // Show only the first 3 upcoming cash games (already limited in API call)
-  const currentCashGames = cashGames;
-
-
-  // Touch handlers
   const handleTouchStart = (e: React.TouchEvent) => {
     setTouchEnd(null);
-    setTouchStart({
-      x: e.targetTouches[0].clientX,
-      y: e.targetTouches[0].clientY
-    });
+    setTouchStart({ x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY });
   };
-
   const handleTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd({
-      x: e.targetTouches[0].clientX,
-      y: e.targetTouches[0].clientY
-    });
+    setTouchEnd({ x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY });
   };
-
-  const handleTouchEnd = (type: 'tournament' | 'cashgame') => {
+  const handleTouchEnd = () => {
     if (!touchStart || !touchEnd) return;
-
-    const distanceX = touchStart.x - touchEnd.x;
-    const distanceY = touchStart.y - touchEnd.y;
-    const isLeftSwipe = distanceX > 50;
-    const isRightSwipe = distanceX < -50;
-    const isVerticalSwipe = Math.abs(distanceY) > Math.abs(distanceX);
-
-    // Only handle horizontal swipes
-    if (!isVerticalSwipe) {
-      if (type === 'tournament') {
-        if (isLeftSwipe && currentTournamentPage < Math.ceil(upcomingTournaments.length / tournamentsPerPage) - 1) {
-          setCurrentTournamentPage(currentTournamentPage + 1);
-        }
-        if (isRightSwipe && currentTournamentPage > 0) {
-          setCurrentTournamentPage(currentTournamentPage - 1);
-        }
-      } else if (type === 'cashgame') {
-        // No pagination for cash games - show static 3 games
-      }
+    const dx = touchStart.x - touchEnd.x;
+    const dy = touchStart.y - touchEnd.y;
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
+      if (dx > 0 && currentPage < totalPages - 1) setCurrentPage(p => p + 1);
+      if (dx < 0 && currentPage > 0) setCurrentPage(p => p - 1);
     }
   };
 
+  if (loading) {
+    return (
+      <section className="py-20 bg-[#080d0b]">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <div className="h-8 bg-gray-800 rounded w-64 mx-auto mb-4 animate-pulse" />
+            <div className="h-4 bg-gray-800 rounded w-48 mx-auto animate-pulse" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="bg-gray-900 rounded-2xl h-80 animate-pulse" />
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
-    <section className="py-20 bg-gradient-to-b from-poker-light to-white relative overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute top-20 left-10 text-8xl">♠</div>
-        <div className="absolute top-40 right-20 text-6xl">♥</div>
-        <div className="absolute bottom-32 left-1/4 text-7xl">♣</div>
-        <div className="absolute bottom-20 right-1/3 text-5xl">♦</div>
+    <section className="py-20 bg-[#080d0b] relative overflow-hidden">
+      {/* Subtle background poker suit decorations */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden select-none">
+        <span className="absolute top-8 left-8 text-[120px] text-white/[0.025] font-serif leading-none">♠</span>
+        <span className="absolute bottom-8 right-8 text-[120px] text-white/[0.025] font-serif leading-none">♦</span>
+        <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[200px] text-white/[0.015] font-serif leading-none">♣</span>
       </div>
-      
+
       <div className="container mx-auto px-4 relative">
-        {/* Section Header */}
-        <div className="text-center mb-16 animate-fade-in">
-          <h2 className="text-5xl font-bold gradient-text mb-6">
-            Élő Poker Események
-          </h2>
-          <p className="text-xl text-poker-muted max-w-4xl mx-auto leading-relaxed">
-            Csatlakozz Szombathely legizgalmasabb élő poker eseményeihez! 
-            Versenyek, cash game asztalok és exkluzív események várnak rád.
-          </p>
-          <div className="flex justify-center mt-8">
-            <div className="w-24 h-1 bg-gradient-to-r from-poker-primary to-poker-gold rounded-full"></div>
+        {/* Header */}
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-14">
+          <div>
+            <p className="text-poker-gold text-sm font-semibold uppercase tracking-[0.2em] mb-3">
+              Palace Poker Szombathely
+            </p>
+            <h2 className="text-4xl md:text-5xl font-bold text-white leading-tight">
+              Közelgő <span className="text-poker-gold">Versenyek</span>
+            </h2>
+            <div className="mt-4 w-16 h-0.5 bg-poker-gold rounded-full" />
           </div>
-        </div>
-
-        {/* Tournaments Section */}
-        <div className="mb-20 animate-slide-up">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-12">
-            <div>
-              <h3 className="text-4xl font-bold text-poker-dark flex items-center mb-2">
-                <div className="w-16 h-16 bg-gradient-to-r from-poker-primary to-poker-gold rounded-2xl flex items-center justify-center mr-4 shadow-xl animate-bounce-subtle">
-                  <span className="text-2xl">🏆</span>
-                </div>
-                Közelgő Versenyek
-              </h3>
-              <p className="text-poker-muted text-lg">Vegyél részt a következő nagy eseményeken</p>
-            </div>
-            <a 
-              href="/tournaments" 
-              className="btn-outline mt-4 lg:mt-0 group"
-            >
-              <span>Összes verseny</span>
-              <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-            </a>
-          </div>
-          
-          <div 
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 touch-pan-y"
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={() => handleTouchEnd('tournament')}
+          <Link
+            href="/tournaments"
+            className="mt-6 lg:mt-0 inline-flex items-center gap-2 text-poker-gold border border-poker-gold/40 hover:border-poker-gold hover:bg-poker-gold/10 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200"
           >
-            {currentTournaments.map((tournament, index) => (
-              <div key={tournament.id} className="animate-scale-in" style={{animationDelay: `${index * 0.15}s`}}>
-                <TournamentCard tournament={tournament} />
-              </div>
-            ))}
-          </div>
-          
-          {/* Mobile Swipe Indicator */}
-          <div className="md:hidden text-center mt-6 text-sm text-poker-muted">
-            <span className="flex items-center justify-center">
-              <span className="mr-2">👈</span>
-              Húzd ujjal jobbra vagy balra
-              <span className="ml-2">👉</span>
-            </span>
-          </div>
-
-          {/* Tournament Pagination */}
-          {totalPages > 1 && (
-            <div className="flex justify-center items-center mt-8 space-x-4">
-              <button
-                onClick={prevTournamentPage}
-                disabled={currentTournamentPage === 0}
-                className={`p-3 rounded-full transition-all duration-300 ${
-                  currentTournamentPage === 0
-                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                    : 'bg-poker-primary text-white hover:bg-poker-secondary shadow-lg hover:shadow-xl transform hover:scale-105'
-                }`}
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-              
-              <div className="flex space-x-2">
-                {Array.from({ length: totalPages }, (_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setCurrentTournamentPage(i)}
-                    className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                      i === currentTournamentPage
-                        ? 'bg-poker-primary scale-125'
-                        : 'bg-gray-300 hover:bg-poker-primary/50'
-                    }`}
-                  />
-                ))}
-              </div>
-              
-              <button
-                onClick={nextTournamentPage}
-                disabled={currentTournamentPage === totalPages - 1}
-                className={`p-3 rounded-full transition-all duration-300 ${
-                  currentTournamentPage === totalPages - 1
-                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                    : 'bg-poker-primary text-white hover:bg-poker-secondary shadow-lg hover:shadow-xl transform hover:scale-105'
-                }`}
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            </div>
-          )}
-          
-          {upcomingTournaments.length === 0 && (
-            <div className="text-center py-12 bg-white/50 rounded-xl">
-              <div className="text-6xl mb-4">🏆</div>
-              <h3 className="text-xl font-semibold text-poker-dark mb-2">Jelenleg nincsenek közelgő versenyek</h3>
-              <p className="text-poker-muted">Hamarosan új versenyeket hirdetünk meg!</p>
-            </div>
-          )}
+            Összes verseny
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          </Link>
         </div>
 
-        {/* Cash Games Section */}
-        <div className="animate-slide-up" style={{animationDelay: '0.4s'}}>
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-12">
-            <div>
-              <h3 className="text-4xl font-bold text-poker-dark flex items-center mb-2">
-                <div className="w-16 h-16 bg-gradient-to-r from-poker-green to-poker-darkgreen rounded-2xl flex items-center justify-center mr-4 shadow-xl animate-float">
-                  <span className="text-2xl text-white">♠</span>
-                </div>
-                Közelgő Cash Game-ek
-              </h3>
-              <p className="text-poker-muted text-lg">Jövő hetente induló cash game asztalok</p>
-            </div>
-            <a 
-              href="/cash-games" 
-              className="btn-outline mt-4 lg:mt-0 group"
+        {/* Cards grid */}
+        {tournaments.length === 0 ? (
+          <div className="text-center py-16 border border-gray-800 rounded-2xl">
+            <span className="text-5xl block mb-4 opacity-30">🏆</span>
+            <p className="text-gray-400 text-lg">Jelenleg nincsenek közelgő versenyek.</p>
+            <p className="text-gray-600 text-sm mt-1">Hamarosan új versenyeket hirdetünk!</p>
+          </div>
+        ) : (
+          <>
+            <div
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
             >
-              <span>Összes asztal</span>
-              <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-            </a>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {currentCashGames.map((cashGame, index) => (
-              <div key={cashGame.id} className="animate-scale-in" style={{animationDelay: `${(index + 3) * 0.2}s`}}>
-                <a href={`/cash-games/${cashGame.id}`} className="block group">
-                  <div className="card-modern p-8 h-full transition-all duration-300 hover:scale-105 group-hover:shadow-2xl">
-                    {/* Upcoming Status Indicator */}
-                    <div className="flex justify-between items-start mb-6">
-                      <div className="flex items-center">
-                        <div className="w-3 h-3 bg-blue-400 rounded-full mr-2 animate-pulse"></div>
-                        <span className="text-sm font-medium text-blue-600">Közelgő asztal</span>
-                      </div>
-                      <div className="text-2xl transform group-hover:scale-110 transition-transform">♠</div>
-                    </div>
-
-                    {/* Cash Game Info */}
-                    <div className="mb-6">
-                      <h3 className="text-2xl font-bold text-poker-dark mb-2 group-hover:text-poker-primary transition-colors">
-                        {cashGame.name}
-                      </h3>
-                      <p className="text-poker-muted mb-4">
-                        {cashGame.description}
-                      </p>
-                      
-                      <div className="space-y-2">
-                        <div className="flex justify-between items-start">
-                          <span className="text-poker-muted">Tétek:</span>
-                          {formatStakes(cashGame.name, cashGame.stakes)}
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-poker-muted">Buy-in / nevezési díj:</span>
-                          <span className="font-semibold text-poker-dark">
-                            {formatCurrency(cashGame.minBuyIn)} - {formatCurrency(cashGame.maxBuyIn)}
-                          </span>
-                        </div>
-                        <div className="flex justify-between items-start">
-                          <span className="text-poker-muted">Menetrend:</span>
-                          <div className="text-right">
-                            {formatSchedule(cashGame.schedule)}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Action Hint */}
-                    <div className="flex items-center justify-center mt-6 pt-6 border-t border-poker-light/30">
-                      <span className="text-poker-accent font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                        Részletek megtekintése →
-                      </span>
-                    </div>
-                  </div>
-                </a>
-              </div>
-            ))}
-          </div>
-          
-          {/* Mobile Swipe Indicator */}
-          <div className="md:hidden text-center mt-6 text-sm text-poker-muted">
-            <span className="flex items-center justify-center">
-              <span className="mr-2">👈</span>
-              Húzd ujjal jobbra vagy balra
-              <span className="ml-2">👉</span>
-            </span>
-          </div>
-
-          
-          {cashGames.length === 0 && (
-            <div className="text-center py-12 bg-white/50 rounded-xl">
-              <div className="text-6xl mb-4">♠</div>
-              <h3 className="text-xl font-semibold text-poker-dark mb-2">Jelenleg nincsenek közelgő cash game asztalok</h3>
-              <p className="text-poker-muted">Hamarosan új időpontok kerülnek kiírásra!</p>
+              {currentTournaments.map((tournament, index) => (
+                <TournamentEventCard key={tournament.id} tournament={tournament} index={index} />
+              ))}
             </div>
-          )}
-        </div>
+
+            {/* Swipe hint on mobile */}
+            {totalPages > 1 && (
+              <p className="md:hidden text-center text-gray-600 text-xs mt-5">
+                ← Húzd az ujjad a lapozáshoz →
+              </p>
+            )}
+
+            {/* Pagination dots + arrows */}
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center gap-4 mt-10">
+                <button
+                  onClick={() => setCurrentPage(p => Math.max(0, p - 1))}
+                  disabled={currentPage === 0}
+                  className="w-9 h-9 rounded-full border border-gray-700 hover:border-poker-gold disabled:opacity-25 disabled:cursor-not-allowed flex items-center justify-center text-gray-400 hover:text-poker-gold transition-all"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+
+                <div className="flex gap-2">
+                  {Array.from({ length: totalPages }, (_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setCurrentPage(i)}
+                      className={`rounded-full transition-all duration-300 ${
+                        i === currentPage
+                          ? 'w-6 h-2.5 bg-poker-gold'
+                          : 'w-2.5 h-2.5 bg-gray-700 hover:bg-gray-500'
+                      }`}
+                    />
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))}
+                  disabled={currentPage === totalPages - 1}
+                  className="w-9 h-9 rounded-full border border-gray-700 hover:border-poker-gold disabled:opacity-25 disabled:cursor-not-allowed flex items-center justify-center text-gray-400 hover:text-poker-gold transition-all"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </section>
+  );
+}
+
+function TournamentEventCard({ tournament, index }: { tournament: Tournament; index: number }) {
+  const dateStr = tournament.date || tournament.tournament_date || '';
+  const timeStr = tournament.time || tournament.tournament_time || '';
+  const buyIn = tournament.buyIn ?? Number(tournament.buy_in ?? 0);
+  const guarantee = tournament.guarantee ?? Number(tournament.guarantee_amount ?? 0);
+  const rebuyPrice = Number(tournament.rebuy_price ?? 0);
+  const rebuyCount = tournament.rebuy_count ?? 0;
+  const addonPrice = Number(tournament.addon_price ?? 0);
+  const hasImage = !!(tournament.image || tournament.image_url);
+  const imageUrl = tournament.image || tournament.image_url || '';
+
+  // Format date nicely
+  let formattedDate = '';
+  if (dateStr) {
+    try {
+      formattedDate = formatDate(dateStr);
+    } catch {
+      formattedDate = dateStr;
+    }
+  }
+  const formattedTime = timeStr ? formatTime(timeStr) : '';
+
+  return (
+    <Link
+      href={`/tournaments/${tournament.id}`}
+      className="group block"
+      style={{ animationDelay: `${index * 0.1}s` }}
+    >
+      <div className="relative flex flex-col bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden transition-all duration-300 hover:border-poker-gold/50 hover:shadow-[0_0_30px_rgba(212,175,55,0.08)] hover:-translate-y-1 h-full">
+
+        {/* Image / Header */}
+        <div className="relative h-44 overflow-hidden flex-shrink-0">
+          {hasImage ? (
+            <img
+              src={imageUrl}
+              alt={tournament.title}
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
+              <span className="text-7xl text-white/10 font-serif select-none">♠</span>
+            </div>
+          )}
+          {/* Gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/30 to-transparent" />
+
+          {/* Category badge */}
+          {tournament.category && (
+            <div className="absolute top-3 left-3">
+              <span className="px-2.5 py-1 bg-poker-gold text-gray-900 text-[11px] font-bold rounded-md uppercase tracking-widest">
+                {tournament.category}
+              </span>
+            </div>
+          )}
+
+          {/* Guarantee badge */}
+          {guarantee > 0 && (
+            <div className="absolute top-3 right-3">
+              <span className="px-2.5 py-1 bg-green-500/20 border border-green-500/40 text-green-400 text-[11px] font-semibold rounded-md">
+                {formatCurrency(guarantee)} garancia
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Content */}
+        <div className="flex flex-col flex-1 p-5">
+          {/* Title */}
+          <h3 className="text-white font-bold text-[17px] leading-snug mb-4 line-clamp-2 group-hover:text-poker-gold transition-colors duration-200">
+            {tournament.title}
+          </h3>
+
+          {/* Info rows */}
+          <div className="space-y-2.5 mb-5 flex-1">
+            {/* Date + Time */}
+            {(formattedDate || formattedTime) && (
+              <div className="flex items-center gap-3">
+                <div className="w-7 h-7 rounded-lg bg-poker-gold/10 flex items-center justify-center flex-shrink-0">
+                  <svg className="w-3.5 h-3.5 text-poker-gold" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <span className="text-gray-300 text-sm font-medium">
+                  {formattedDate}{formattedTime ? ` · ${formattedTime}` : ''}
+                </span>
+              </div>
+            )}
+
+            {/* Buy-in */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-7 h-7 rounded-lg bg-poker-gold/10 flex items-center justify-center flex-shrink-0">
+                  <svg className="w-3.5 h-3.5 text-poker-gold" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <span className="text-gray-500 text-sm">Buy-in</span>
+              </div>
+              <span className="text-poker-gold font-bold text-base">
+                {formatCurrency(buyIn)}
+              </span>
+            </div>
+
+            {/* Rebuy */}
+            {rebuyPrice > 0 && (
+              <div className="flex items-center justify-between pl-10">
+                <span className="text-gray-600 text-xs">
+                  Rebuy{rebuyCount > 1 ? ` (${rebuyCount}×)` : ''}
+                </span>
+                <span className="text-gray-400 text-xs font-medium">{formatCurrency(rebuyPrice)}</span>
+              </div>
+            )}
+
+            {/* Addon */}
+            {addonPrice > 0 && (
+              <div className="flex items-center justify-between pl-10">
+                <span className="text-gray-600 text-xs">Add-on</span>
+                <span className="text-gray-400 text-xs font-medium">{formatCurrency(addonPrice)}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Divider */}
+          <div className="h-px bg-gray-800 mb-4" />
+
+          {/* CTA */}
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-gray-600 uppercase tracking-widest">Részletek</span>
+            <div className="w-8 h-8 rounded-full border border-poker-gold/30 group-hover:border-poker-gold group-hover:bg-poker-gold flex items-center justify-center transition-all duration-200">
+              <svg className="w-3.5 h-3.5 text-poker-gold group-hover:text-gray-900 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Link>
   );
 }

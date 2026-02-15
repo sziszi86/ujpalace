@@ -40,10 +40,10 @@ export function formatStakes(stakes: string): string {
 
 export function formatChips(amount: number): string {
   if (amount >= 1000000) {
-    return `${(amount / 1000000).toFixed(1)}M`;
+    return `${parseFloat((amount / 1000000).toFixed(1))}M`;
   }
   if (amount >= 1000) {
-    return `${(amount / 1000).toFixed(1)}K`;
+    return `${parseFloat((amount / 1000).toFixed(1))}K`;
   }
   return amount.toString();
 }

@@ -26,7 +26,8 @@
       "WebFetch(domain:vercel.com)",
       "Bash(npm show:*)",
       "Bash(source:*)",
-      "Bash(echo:*)"
+      "Bash(echo:*)",
+      "Bash(npx tsc:*)"
     ],
     "deny": [],
     "ask": []

@@ -3,8 +3,6 @@
 import { useEffect, useState } from 'react';
 import Banner from "@/components/Banner";
 import FeaturedOffers from "@/components/FeaturedOffers";
-import FeaturedEvents from "@/components/FeaturedEvents";
-import BlogSection from "@/components/BlogSection";
 
 interface AboutData {
   opening_hours?: string;
@@ -75,9 +73,6 @@ export default function Home() {
     <div>
       {/* Hero Banner */}
       <Banner />
-
-      {/* Featured Events Section */}
-      <FeaturedEvents />
 
       {/* Featured Offers Section */}
       <FeaturedOffers />
@@ -284,9 +279,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* Blog & News Section */}
-      <BlogSection />
 
       {/* Location Section - Enhanced */}
       <section className="py-20 bg-gradient-to-br from-white to-poker-light/30">
