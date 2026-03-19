@@ -44,5 +44,8 @@
     "@types/nodemailer": "^7.0.1",
     "basic-ftp": "^5.0.5",
     "dotenv": "^16.6.1"
+  },
+  "overrides": {
+    "flatted": "^3.4.0"
   }
 }
