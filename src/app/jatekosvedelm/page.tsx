@@ -18,7 +18,7 @@ export default function PlayerProtectionPage() {
         <div className="bg-gradient-to-r from-green-600 to-green-700 text-white rounded-2xl p-6 mb-8 shadow-lg">
           <div className="text-center">
             <h2 className="text-2xl font-bold mb-2">📞 Játékosvédelmi Zöld Szám</h2>
-            <div className="text-4xl font-bold mb-2">36 80 205 352</div>
+            <div className="text-4xl font-bold mb-2">+36 80 205 352</div>
             <p className="text-lg">Ingyenes, 0-24 órás segélyvonal</p>
             <p className="text-sm opacity-90 mt-2">
               Szerencsejátékban csak 18 éven felüliek vehetnek részt!<br/>
@@ -44,7 +44,7 @@ export default function PlayerProtectionPage() {
           </h3>
           <div className="space-y-4 text-gray-700">
             <div className="text-center bg-green-50 p-6 rounded-lg">
-              <h4 className="text-3xl font-bold text-green-600 mb-2">36 80 205 352</h4>
+              <h4 className="text-3xl font-bold text-green-600 mb-2">+36 80 205 352</h4>
               <p className="text-lg font-semibold text-green-800">Zöld Szám - Ingyenes Országos Segélyvonal</p>
               <p className="text-green-700 mt-2">0-24 órában elérhető • Anonim bejelentés lehetséges</p>
             </div>
@@ -410,7 +410,7 @@ export default function PlayerProtectionPage() {
               <div className="space-y-4">
                 <div className="p-4 bg-green-50 rounded-lg">
                   <h4 className="font-semibold text-green-800 mb-2">Játékosvédelmi Zöld Szám</h4>
-                  <p className="text-2xl font-bold text-green-600">36 80 205 352</p>
+                  <p className="text-2xl font-bold text-green-600">+36 80 205 352</p>
                   <p className="text-sm text-green-700">Ingyenes, 24 órás segélyvonal</p>
                 </div>
                 

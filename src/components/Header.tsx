@@ -64,14 +64,17 @@ export default function Header() {
     setIsMobile(isMobileDevice());
     setIsFirefoxBrowser(isFirefox());
 
+    // Ensure mobile menu is closed on initial load
+    setMobileMenuOpen(false);
+
     const handleScroll = () => {
       const scrollY = window.scrollY;
-      
+
       // On Android, don't change header height/size
       if (!isAndroid()) {
         setIsScrolled(scrollY > 100);
       }
-      
+
       // On Android, permanently hide info bar after first scroll
       if (isAndroid() && scrollY > 100 && !hasScrolledOnAndroid) {
         setHasScrolledOnAndroid(true);
@@ -180,9 +183,9 @@ export default function Header() {
               Szerencsejátékban csak 18 éven felüliek vehetnek részt! A túlzásba vitt szerencsejáték ártalmas, függőséget okozhat! Kérje bejegyzését a játékosvédelmi nyilvántartásba!
               <span className="mx-1 hidden sm:inline text-emerald-800/70">|</span>
               <span className="block sm:inline">
-                Játékosvédelem:
+                Játékosvédelmi zöld szám:
                 <Link href="/jatekosvedelm" className="ml-1 font-extrabold text-emerald-900 underline decoration-emerald-800/70 underline-offset-2 transition-colors hover:text-emerald-700">
-                  36 80 205 352
+                  +36 80 205 352
                 </Link>
               </span>
             </p>
@@ -322,18 +325,27 @@ export default function Header() {
 
         {/* Mobile Navigation Overlay */}
         {mobileMenuOpen && (
-          <div 
+          <div
             className="lg:hidden fixed inset-0 bg-black/50 z-40"
-            onClick={() => setMobileMenuOpen(false)}
+            onClick={(e) => {
+              e.preventDefault();
+              setMobileMenuOpen(false);
+              setActiveDropdown(null);
+            }}
+            onTouchEnd={(e) => {
+              e.preventDefault();
+              setMobileMenuOpen(false);
+              setActiveDropdown(null);
+            }}
           />
         )}
 
         {/* Mobile Navigation Sidebar */}
-        <nav 
-          data-mobile-menu 
+        <nav
+          data-mobile-menu
           className={`lg:hidden fixed top-0 left-0 h-full w-80 max-w-[85vw] bg-gradient-to-b from-poker-dark to-poker-secondary z-50 ${!isAndroidDevice ? 'transform transition-transform duration-300 ease-in-out' : ''} ${
             mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-          } shadow-2xl flex flex-col`}
+          } ${!mobileMenuOpen ? 'pointer-events-none' : 'pointer-events-auto'} shadow-2xl flex flex-col`}
           style={isAndroidDevice ? {
             height: '100dvh',
             transform: mobileMenuOpen ? 'translateX(0)' : 'translateX(-100%)',
@@ -351,7 +363,18 @@ export default function Header() {
               <span className="text-white font-bold text-lg">Palace Poker</span>
             </div>
             <button
-              onClick={() => setMobileMenuOpen(false)}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setMobileMenuOpen(false);
+                setActiveDropdown(null);
+              }}
+              onTouchEnd={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setMobileMenuOpen(false);
+                setActiveDropdown(null);
+              }}
               className="p-2 text-white hover:text-poker-accent rounded-lg hover:bg-white/10 transition-colors"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -392,9 +415,16 @@ export default function Header() {
                               key={child.id}
                               href={child.href || '#'}
                               className="block px-4 py-2 text-white/80 hover:text-white hover:bg-white/5 rounded text-sm transition-colors"
-                              onClick={() => {
+                              onClick={(e) => {
                                 setMobileMenuOpen(false);
                                 setActiveDropdown(null);
+                              }}
+                              onTouchEnd={(e) => {
+                                e.stopPropagation();
+                                setTimeout(() => {
+                                  setMobileMenuOpen(false);
+                                  setActiveDropdown(null);
+                                }, 100);
                               }}
                             >
                               {child.label}
@@ -407,9 +437,16 @@ export default function Header() {
                     <Link
                       href={item.href || '#'}
                       className="block px-4 py-3 text-white hover:text-poker-accent hover:bg-white/5 rounded-lg font-medium transition-colors"
-                      onClick={() => {
+                      onClick={(e) => {
                         setMobileMenuOpen(false);
                         setActiveDropdown(null);
+                      }}
+                      onTouchEnd={(e) => {
+                        e.stopPropagation();
+                        setTimeout(() => {
+                          setMobileMenuOpen(false);
+                          setActiveDropdown(null);
+                        }, 100);
                       }}
                     >
                       {item.label}
