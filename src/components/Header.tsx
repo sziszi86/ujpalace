@@ -341,16 +341,11 @@ export default function Header() {
         )}
 
         {/* Mobile Navigation Sidebar */}
+        {mobileMenuOpen && (
         <nav
           data-mobile-menu
-          className={`lg:hidden fixed top-0 left-0 h-full w-80 max-w-[85vw] bg-gradient-to-b from-poker-dark to-poker-secondary z-50 ${!isAndroidDevice ? 'transform transition-transform duration-300 ease-in-out' : ''} ${
-            mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-          } ${!mobileMenuOpen ? 'pointer-events-none' : 'pointer-events-auto'} shadow-2xl flex flex-col`}
-          style={isAndroidDevice ? {
-            height: '100dvh',
-            transform: mobileMenuOpen ? 'translateX(0)' : 'translateX(-100%)',
-            willChange: 'auto'
-          } : {
+          className="lg:hidden fixed top-0 left-0 h-full w-80 max-w-[85vw] bg-gradient-to-b from-poker-dark to-poker-secondary z-50 shadow-2xl flex flex-col"
+          style={{
             height: '100dvh'
           }}
         >
@@ -457,6 +452,7 @@ export default function Header() {
             </div>
           </div>
         </nav>
+        )}
       </div>
     </header>
   );
