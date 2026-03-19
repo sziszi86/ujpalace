@@ -70,30 +70,24 @@ export default function Banner() {
   };
 
   const formatDate = (dateString: string) => {
-    // Convert UTC time to Budapest time (Europe/Budapest)
+    // Parse date string directly - it's already in Budapest time (no timezone conversion needed)
+    // Expected format: "2025-03-20T18:00:00" or "2025-03-20 18:00:00"
+    const dateMatch = dateString.match(/^(\d{4})-(\d{2})-(\d{2})[\sT](\d{2}):(\d{2})/);
+
+    if (dateMatch) {
+      const [, year, month, day, hours, minutes] = dateMatch;
+      return `${year}.${month}.${day}. ${hours}:${minutes}`;
+    }
+
+    // Fallback: use Date object but don't apply timezone conversion
     const date = new Date(dateString);
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(date.getUTCDate()).padStart(2, '0');
+    const hours = String(date.getUTCHours()).padStart(2, '0');
+    const minutes = String(date.getUTCMinutes()).padStart(2, '0');
 
-    // Format using Hungarian locale and Budapest timezone
-    const options: Intl.DateTimeFormatOptions = {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      timeZone: 'Europe/Budapest',
-      hour12: false
-    };
-
-    const formatter = new Intl.DateTimeFormat('hu-HU', options);
-    const parts = formatter.formatToParts(date);
-
-    const year = parts.find(p => p.type === 'year')?.value || '';
-    const month = parts.find(p => p.type === 'month')?.value || '';
-    const day = parts.find(p => p.type === 'day')?.value || '';
-    const hour = parts.find(p => p.type === 'hour')?.value || '';
-    const minute = parts.find(p => p.type === 'minute')?.value || '';
-
-    return `${year}.${month}.${day}. ${hour}:${minute}`;
+    return `${year}.${month}.${day}. ${hours}:${minutes}`;
   };
 
   const formatBuyin = (amount: number) => {
