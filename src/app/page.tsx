@@ -27,47 +27,6 @@ export default function Home() {
       }
     };
     fetchAboutData();
-
-    // Counter animation function
-    const animateCounters = () => {
-      const counters = document.querySelectorAll('.counter');
-      const speed = 200; // Animation speed
-
-      const observerOptions = {
-        threshold: 0.5,
-        rootMargin: '0px 0px -100px 0px'
-      };
-
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const counter = entry.target as HTMLElement;
-            const target = parseInt(counter.getAttribute('data-target') || '0');
-            const increment = target / speed;
-            let count = 0;
-
-            const updateCount = () => {
-              if (count < target) {
-                count += increment;
-                counter.textContent = Math.ceil(count).toString();
-                setTimeout(updateCount, 1);
-              } else {
-                counter.textContent = target.toString();
-              }
-            };
-
-            updateCount();
-            observer.unobserve(counter);
-          }
-        });
-      }, observerOptions);
-
-      counters.forEach((counter) => {
-        observer.observe(counter);
-      });
-    };
-
-    animateCounters();
   }, []);
   return (
     <div>
@@ -204,77 +163,6 @@ export default function Home() {
               <div className="absolute -top-6 -right-6 w-24 h-24 bg-gradient-to-br from-poker-gold to-amber-400 rounded-full opacity-20 animate-float"></div>
               <div className="absolute -bottom-6 -left-6 w-20 h-20 bg-gradient-to-br from-poker-red to-red-500 rounded-full opacity-20 animate-float" style={{animationDelay: '1.5s'}}></div>
               <div className="absolute top-1/2 -right-3 w-12 h-12 bg-gradient-to-br from-poker-accent to-orange-200 rounded-full opacity-15 animate-bounce-subtle" style={{animationDelay: '2s'}}></div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Statistics Section - Trendy */}
-      <section className="py-20 bg-gradient-to-br from-gray-50 to-white relative overflow-hidden">
-        {/* Modern background pattern */}
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute top-20 right-32 w-32 h-32 bg-poker-primary rounded-full blur-3xl"></div>
-          <div className="absolute bottom-20 left-32 w-40 h-40 bg-poker-gold rounded-full blur-3xl"></div>
-        </div>
-        
-        <div className="container mx-auto px-4 relative">
-          <div className="text-center mb-16 animate-fade-in">
-            <h2 className="text-4xl md:text-5xl font-bold text-poker-dark mb-4">
-              Számokban a <span className="text-poker-primary">sikerünk</span>
-            </h2>
-            <div className="w-20 h-1 bg-gradient-to-r from-poker-primary to-poker-gold rounded-full mx-auto mb-4"></div>
-            <p className="text-lg text-poker-muted max-w-2xl mx-auto">
-              Büszkék vagyunk a közösségünkre és az eredményeinkre
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="text-center group">
-              <div className="bg-gradient-to-br from-poker-gold to-amber-400 text-white w-28 h-28 rounded-2xl flex items-center justify-center mx-auto mb-4 transition-all duration-300 group-hover:scale-110 group-hover:shadow-xl shadow-lg relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"></div>
-                <div className="text-center relative z-10">
-                  <span className="counter block text-2xl font-bold" data-target="500">0</span>
-                  <span className="text-lg font-medium">+</span>
-                </div>
-              </div>
-              <h3 className="text-xl font-bold text-poker-dark mb-2">Aktív játékos</h3>
-              <p className="text-poker-muted">Havonta látogató játékosok</p>
-            </div>
-            
-            <div className="text-center group">
-              <div className="bg-gradient-to-br from-poker-green to-emerald-600 text-white w-28 h-28 rounded-2xl flex items-center justify-center mx-auto mb-4 transition-all duration-300 group-hover:scale-110 group-hover:shadow-xl shadow-lg relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"></div>
-                <div className="text-center relative z-10">
-                  <span className="counter block text-2xl font-bold" data-target="20">0</span>
-                  <span className="text-lg font-medium">+</span>
-                </div>
-              </div>
-              <h3 className="text-xl font-bold text-poker-dark mb-2">Havi verseny</h3>
-              <p className="text-poker-muted">Különböző formátumú versenyek</p>
-            </div>
-            
-            <div className="text-center group">
-              <div className="bg-gradient-to-br from-poker-red to-red-600 text-white w-28 h-28 rounded-2xl flex items-center justify-center mx-auto mb-4 transition-all duration-300 group-hover:scale-110 group-hover:shadow-xl shadow-lg relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"></div>
-                <div className="text-center relative z-10">
-                  <span className="counter block text-xl font-bold" data-target="5">0</span>
-                  <span className="text-sm font-medium">M+ Ft</span>
-                </div>
-              </div>
-              <h3 className="text-xl font-bold text-poker-dark mb-2">Összdíjalap</h3>
-              <p className="text-poker-muted">Havonta kiosztott díjak</p>
-            </div>
-            
-            <div className="text-center group">
-              <div className="bg-gradient-to-br from-purple-500 to-purple-700 text-white w-28 h-28 rounded-2xl flex items-center justify-center mx-auto mb-4 transition-all duration-300 group-hover:scale-110 group-hover:shadow-xl shadow-lg relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"></div>
-                <div className="text-center relative z-10">
-                  <span className="counter block text-2xl font-bold" data-target="10">0</span>
-                  <span className="text-lg font-medium">+</span>
-                </div>
-              </div>
-              <h3 className="text-xl font-bold text-poker-dark mb-2">Év tapasztalat</h3>
-              <p className="text-poker-muted">Hosszú távú működés és tapasztalat</p>
             </div>
           </div>
         </div>
