@@ -109,22 +109,20 @@ export default function Banner() {
               style={{
                 backgroundImage: tournament.banner_image
                   ? `url(${tournament.banner_image})`
-                  : `linear-gradient(135deg, #0F3F26 0%, #1a5c3a 50%, #D4AF37 100%)`,
+                  : `url(/images/banners/001-optimized.jpg)`,
                 backgroundPosition: 'center center',
                 backgroundSize: 'cover'
               }}
             />
-            {/* Dark overlay with grid pattern for better readability */}
+            {/* Dark overlay for better text readability */}
             <div
               className="absolute inset-0 z-10"
               style={{
-                background: tournament.banner_image
-                  ? 'radial-gradient(circle at center, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.7) 100%)'
-                  : 'linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.2) 100%)'
+                background: 'radial-gradient(circle at center, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.75) 100%)'
               }}
             ></div>
             {/* Additional overlay for text readability */}
-            <div className="absolute inset-0 z-[11] bg-gradient-to-b from-black/30 via-transparent to-black/40"></div>
+            <div className="absolute inset-0 z-[11] bg-gradient-to-b from-black/40 via-black/20 to-black/50"></div>
 
             {/* Content */}
             <div className="absolute inset-0 z-20 flex items-center">

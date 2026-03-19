@@ -27,7 +27,10 @@
       "Bash(npm show:*)",
       "Bash(source:*)",
       "Bash(echo:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(identify:*)",
+      "Bash(convert:*)",
+      "Bash(magick:*)"
     ],
     "deny": [],
     "ask": []
