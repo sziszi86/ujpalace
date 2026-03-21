@@ -55,10 +55,10 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Validate file size (500KB limit for Vercel)
-    if (file.size > 500 * 1024) {
+    // Validate file size (3MB limit)
+    if (file.size > 3 * 1024 * 1024) {
       return NextResponse.json(
-        { error: 'File too large. Maximum size is 500KB' },
+        { error: 'File too large. Maximum size is 3MB' },
         { status: 400 }
       );
     }

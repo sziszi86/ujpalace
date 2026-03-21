@@ -37,7 +37,7 @@ export default function PrivacyPage() {
               </h2>
               <div className="space-y-4 text-poker-muted leading-relaxed">
                 <p>
-                  Az All In Póker Club kártyatermet üzemeltető <strong className="text-poker-dark">Pannon Póker Kft.</strong> 
+                  A Palace Poker Club kártyatermet üzemeltető <strong className="text-poker-dark">Pannon Póker Kft.</strong>
                   (9700 Szombathely, Semmelweis u. 2.) adatvédelmi tájékoztatója.
                 </p>
                 <p>

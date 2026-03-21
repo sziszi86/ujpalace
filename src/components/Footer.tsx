@@ -62,7 +62,6 @@ export default function Footer() {
             <ul className="space-y-3">
               <li><Link href="/" className="text-gray-300 hover:text-white transition-colors">Főoldal</Link></li>
               <li><Link href="/tournaments" className="text-gray-300 hover:text-white transition-colors">Versenyek</Link></li>
-              <li><Link href="/cash-games" className="text-gray-300 hover:text-white transition-colors">Cash Game</Link></li>
               <li><Link href="/about" className="text-gray-300 hover:text-white transition-colors">Rólunk</Link></li>
               <li><Link href="/gallery" className="text-gray-300 hover:text-white transition-colors">Galéria</Link></li>
               <li><Link href="/contact" className="text-gray-300 hover:text-white transition-colors">Kapcsolat</Link></li>
@@ -167,9 +166,6 @@ export default function Footer() {
               <div className="flex space-x-4">
                 <Link href="/privacy" className="text-gray-400 hover:text-white text-sm transition-colors">
                   Adatvédelmi tájékoztató
-                </Link>
-                <Link href="/terms" className="text-gray-400 hover:text-white text-sm transition-colors">
-                  Szabályzat
                 </Link>
               </div>
             </div>

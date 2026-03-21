@@ -32,15 +32,6 @@ const menuItems: MenuItem[] = [
       { id: 'tournament-list', label: 'Lista nézet', href: '/tournaments/list' },
     ],
   },
-  {
-    id: 'cash-games',
-    label: 'Cash Game',
-    href: '/cash-games',
-    children: [
-      { id: 'cash-calendar', label: 'Naptár', href: '/cash-games' },
-      { id: 'cash-list', label: 'Lista nézet', href: '/cash-games/list' },
-    ],
-  },
   { id: 'about', label: 'Rólunk', href: '/rolunk' },
   { id: 'gallery', label: 'Galéria', href: '/gallery' },
   { id: 'blog', label: 'Hírek', href: '/blog' },
