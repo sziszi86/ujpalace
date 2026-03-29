@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef, useEffect } from 'react';
+import Image from 'next/image';
 
 const SUITS = ['♠', '♥', '♦', '♣'];
 const VALUES = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
@@ -50,7 +51,10 @@ export default function TexasHoldemGame() {
   // Avatar emotions
   type AIMood = 'neutral' | 'thinking' | 'confident' | 'nervous' | 'happy' | 'angry' | 'worried';
   const [aiMood, setAiMood] = useState<AIMood>('neutral');
-  
+
+  // Hand ID to prevent stale AI actions
+  const [handId, setHandId] = useState(0);
+
   const blindTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const getBlinds = useCallback(() => {
@@ -205,6 +209,7 @@ export default function TexasHoldemGame() {
     setAiActed(false);
     setLastRaiseAmount(0);
     setAiMood('neutral'); // Reset AI mood for new hand
+    setHandId(id => id + 1); // Increment hand ID to cancel stale AI actions
     
     const { smallBlind, bigBlind } = getBlinds();
     
@@ -238,13 +243,14 @@ export default function TexasHoldemGame() {
       setPlayerActed(false); // Player posted BB but hasn't acted on raises
       setAiActed(false);
 
-      // AI (SB) acts first preflop - use ref to ensure fresh state
+      // AI (SB) acts first preflop - capture handId
+      const currentHandId = handId + 1; // Will be incremented by setHandId above
       setTimeout(() => {
-        console.log('🎲 Calling AI action from startNewGame');
-        aiAction(true);
+        console.log('🎲 Calling AI action from startNewGame, handId:', currentHandId);
+        aiAction(true, undefined, undefined, currentHandId);
       }, 1000);
     }
-  }, [createDeck, player, ai, dealer, getBlinds]);
+  }, [createDeck, player, ai, dealer, getBlinds, handId]);
 
   // Deal community cards
   const dealCommunityCards = useCallback((newPhase: GamePhase) => {
@@ -368,14 +374,27 @@ export default function TexasHoldemGame() {
   const aiAction = useCallback((
     isFirstToAct: boolean = false,
     overrideCurrentBet?: number,
-    overridePot?: number
+    overridePot?: number,
+    capturedHandId?: number
   ) => {
+    // CRITICAL: Check handId first to prevent stale actions from previous hands
+    if (capturedHandId !== undefined && capturedHandId !== handId) {
+      console.log('⚠️ AI Action skipped: stale action from previous hand', { capturedHandId, currentHandId: handId });
+      return;
+    }
+
+    // CRITICAL: Only act during active betting phases
+    const validPhases: GamePhase[] = ['preflop', 'flop', 'turn', 'river'];
+    if (!validPhases.includes(phase)) {
+      console.log('⚠️ AI Action skipped: wrong phase', { phase });
+      return;
+    }
+
     // Debug: Log why AI might skip
-    if (ai.folded || ai.allIn || phase === 'showdown' || phase === 'waiting') {
+    if (ai.folded || ai.allIn) {
       console.log('⚠️ AI Action skipped:', {
         folded: ai.folded,
         allIn: ai.allIn,
-        phase,
       });
       return;
     }
@@ -506,7 +525,7 @@ export default function TexasHoldemGame() {
         }
       }
     }, 800);
-  }, [ai, communityCards, currentBet, pot, getBlinds, phase, bettingRoundComplete, lastRaiseAmount]);
+  }, [ai, communityCards, currentBet, pot, getBlinds, phase, bettingRoundComplete, lastRaiseAmount, handId]);
 
   // Player actions - PROPER POKER LOGIC
   const handleFold = () => {
@@ -683,8 +702,16 @@ export default function TexasHoldemGame() {
     `}>
       {hidden ? (
         <>
-          <div className="text-white text-2xl md:text-3xl animate-pulse">🂠</div>
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-xl"></div>
+          <div className="relative w-full h-full flex items-center justify-center p-2">
+            <Image
+              src="/images/logo.png"
+              alt="Palace Poker"
+              width={48}
+              height={48}
+              className="object-contain opacity-90"
+            />
+          </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-xl pointer-events-none"></div>
         </>
       ) : (
         <>
