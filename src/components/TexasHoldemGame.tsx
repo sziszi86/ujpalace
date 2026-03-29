@@ -33,6 +33,7 @@ export default function TexasHoldemGame() {
   const [currentBet, setCurrentBet] = useState(0); // Highest bet in current round
   const [phase, setPhase] = useState<GamePhase>('waiting');
   const [message, setMessage] = useState('Nyomj a Játék indítása gombra!');
+  const [actionType, setActionType] = useState<'success' | 'danger' | 'warning' | 'info' | 'neutral'>('neutral');
   const [gameOver, setGameOver] = useState(false);
   const [dealer, setDealer] = useState<'player' | 'ai'>('player');
   const [betSliderValue, setBetSliderValue] = useState(20);
@@ -57,6 +58,12 @@ export default function TexasHoldemGame() {
   const handIdRef = useRef(0);
 
   const blindTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Helper to set message with visual style
+  const setActionMessage = useCallback((msg: string, type: 'success' | 'danger' | 'warning' | 'info' | 'neutral' = 'neutral') => {
+    setMessage(msg);
+    setActionType(type);
+  }, []);
 
   const getBlinds = useCallback(() => {
     const smallBlind = 5 * blindLevel;
@@ -365,17 +372,17 @@ export default function TexasHoldemGame() {
 
       if (playerStrength > aiStrength) {
         setAiMood('angry'); // Mérges mert vesztett
-        setMessage(`🎉 Nyertél! ${getHandName(playerStrength)}`);
+        setActionMessage(`🎉 NYERTÉL! ${getHandName(playerStrength)} - ${finalPot} chip!`, 'success');
         setPlayer(p => ({ ...p, chips: p.chips + finalPot }));
         setPlayerWonLastHand(true);
       } else if (aiStrength > playerStrength) {
         setAiMood('happy'); // Boldog mert nyert
-        setMessage(`❌ A gép nyert! ${getHandName(aiStrength)}`);
+        setActionMessage(`❌ A GÉP NYERT! ${getHandName(aiStrength)} - ${finalPot} chip`, 'danger');
         setAi(a => ({ ...a, chips: a.chips + finalPot }));
         setPlayerWonLastHand(false);
       } else {
         setAiMood('neutral'); // Döntetlen
-        setMessage('🤝 Döntetlen! A pot feleződik.');
+        setActionMessage(`🤝 DÖNTETLEN! A pot feleződik (${Math.floor(finalPot / 2)} chip mindenkinek)`, 'info');
         const halfPot = Math.floor(finalPot / 2);
         setPlayer(p => ({ ...p, chips: p.chips + halfPot }));
         setAi(a => ({ ...a, chips: a.chips + halfPot }));
@@ -472,7 +479,7 @@ export default function TexasHoldemGame() {
           const allInAmount = ai.chips;
           setAi(a => ({ ...a, bet: a.bet + allInAmount, chips: 0, allIn: true }));
           setPot(p => p + allInAmount);
-          setMessage('🔥 A gép ALL-IN!');
+          setActionMessage(`🔥 A GÉP ALL-IN! ${allInAmount} chip!`, 'warning');
           setPlayerTurn(true);
           return;
         }
@@ -488,7 +495,7 @@ export default function TexasHoldemGame() {
 
           setAiMood('angry'); // Mérges mert dob
           setAi(a => ({ ...a, folded: true }));
-          setMessage('❌ A gép dobott!');
+          setActionMessage(`✅ A GÉP DOBOTT! Nyertél ${finalPot} chipet!`, 'success');
           setPlayer(p => ({ ...p, chips: p.chips + finalPot }));
           setGameOver(true);
           setPhase('waiting');
@@ -517,7 +524,7 @@ export default function TexasHoldemGame() {
           setCurrentBet(totalBet);
           setPot(p => p + toAdd);
           setLastRaiseAmount(raiseAmount);
-          setMessage(`⬆️ A gép emelt: +${raiseAmount} chip`);
+          setActionMessage(`⬆️ A GÉP EMELT! +${raiseAmount} chip (összesen: ${totalBet})`, 'warning');
           setPlayerActed(false); // Player must act again
           setPlayerTurn(true);
         } else {
@@ -525,7 +532,7 @@ export default function TexasHoldemGame() {
           setAiMood(handStrength < 100 ? 'worried' : 'neutral'); // Aggódik ha gyenge kézzel call
           setAi(a => ({ ...a, bet: actualCurrentBet, chips: a.chips - toCall }));
           setPot(p => p + toCall);
-          setMessage(`✓ A gép megadta (${toCall} chip)`);
+          setActionMessage(`✓ A gép megadta (${toCall} chip)`, 'info');
           setPlayerTurn(true);
         }
       } else {
@@ -550,14 +557,14 @@ export default function TexasHoldemGame() {
           setCurrentBet(betAmount);
           setPot(p => p + betAmount);
           setLastRaiseAmount(betAmount);
-          setMessage(`💰 A gép tett: ${betAmount} chip`);
+          setActionMessage(`💰 A GÉP TETT: ${betAmount} chip`, 'warning');
           setPlayerActed(false); // Player must act
           setPlayerTurn(true);
         } else {
           // CHECK
           console.log('🤖 AI CHECK - no bet facing');
           setAiMood('neutral');
-          setMessage('✓ A gép checkelt');
+          setActionMessage('✓ A gép checkelt', 'info');
           setPlayerTurn(true);
         }
       }
@@ -571,7 +578,7 @@ export default function TexasHoldemGame() {
 
     setPlayer(p => ({ ...p, folded: true }));
     setPlayerActed(true);
-    setMessage('❌ Dobtál! A gép nyert.');
+    setActionMessage(`❌ DOBTÁL! A gép nyert ${finalPot} chipet`, 'danger');
     setAi(a => ({ ...a, chips: a.chips + finalPot }));
     setGameOver(true);
     setPhase('waiting');
@@ -684,7 +691,7 @@ export default function TexasHoldemGame() {
     setPlayer(p => ({ ...p, bet: totalBet, chips: p.chips - toAdd }));
     setCurrentBet(totalBet);
     setLastRaiseAmount(raiseAmount);
-    setMessage(`⬆️ Emeltél: +${raiseAmount} chip`);
+    setActionMessage(`⬆️ EMELTÉL! +${raiseAmount} chip (összesen: ${totalBet})`, 'warning');
     setPlayerActed(true);
     setAiActed(false); // AI must act again
     setPlayerTurn(false);
@@ -707,7 +714,7 @@ export default function TexasHoldemGame() {
       setLastRaiseAmount(raiseAmount);
     }
 
-    setMessage(`🔥 ALL-IN! (${allInAmount} chip)`);
+    setActionMessage(`🔥 ALL-IN! ${allInAmount} chip!`, 'warning');
     setPlayerActed(true);
     setPlayerTurn(false);
 
@@ -825,14 +832,25 @@ export default function TexasHoldemGame() {
 
           {/* Community Cards & Pot */}
           <div className="bg-green-800 rounded-2xl p-3 md:p-4 mb-4 border-4 border-yellow-800">
+            {/* BIG ACTION DISPLAY */}
+            <div className={`
+              text-center mb-3 p-3 md:p-4 rounded-xl font-bold text-base md:text-2xl shadow-lg
+              ${actionType === 'success' ? 'bg-green-600 text-white animate-bounce-subtle' : ''}
+              ${actionType === 'danger' ? 'bg-red-600 text-white' : ''}
+              ${actionType === 'warning' ? 'bg-yellow-500 text-gray-900 animate-pulse' : ''}
+              ${actionType === 'info' ? 'bg-blue-500 text-white' : ''}
+              ${actionType === 'neutral' ? 'bg-gray-700 text-white' : ''}
+            `}>
+              {message}
+            </div>
+
             <div className="text-center mb-3">
               <p className="text-yellow-400 text-lg md:text-xl font-bold">🏆 Pot: {pot} chip</p>
               {currentBet > 0 && (
-                <p className="text-green-300 text-sm">Aktuális tét: {currentBet} chip</p>
+                <p className="text-green-300 text-sm md:text-base">Aktuális tét: {currentBet} chip</p>
               )}
-              <p className="text-white text-xs md:text-sm font-medium">{message}</p>
               {playerTurn && !gameOver && phase !== 'waiting' && (
-                <p className="text-green-400 text-xs md:text-sm animate-pulse mt-1">👉 Te következel!</p>
+                <p className="text-green-400 text-sm md:text-lg animate-pulse mt-2 font-bold">👉 TE KÖVETKEZEL!</p>
               )}
             </div>
             
