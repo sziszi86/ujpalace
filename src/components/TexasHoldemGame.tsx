@@ -45,6 +45,7 @@ export default function TexasHoldemGame() {
   const [playerHasActed, setPlayerHasActed] = useState(false);
   const [aiHasActed, setAiHasActed] = useState(false);
   const [showRules, setShowRules] = useState(false);
+  const [playerWonLastHand, setPlayerWonLastHand] = useState(false);
   
   const blindTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -323,14 +324,17 @@ export default function TexasHoldemGame() {
       if (playerStrength > aiStrength) {
         setMessage(`🎉 Nyertél! ${getHandName(playerStrength)}`);
         setPlayer(p => ({ ...p, chips: p.chips + pot }));
+        setPlayerWonLastHand(true);
       } else if (aiStrength > playerStrength) {
         setMessage(`❌ A gép nyert! ${getHandName(aiStrength)}`);
         setAi(a => ({ ...a, chips: a.chips + pot }));
+        setPlayerWonLastHand(false);
       } else {
         setMessage('🤝 Döntetlen! A pot feleződik.');
         const halfPot = Math.floor(pot / 2);
         setPlayer(p => ({ ...p, chips: p.chips + halfPot }));
         setAi(a => ({ ...a, chips: a.chips + halfPot }));
+        setPlayerWonLastHand(false);
       }
       setGameOver(true);
       setPhase('waiting');
@@ -537,7 +541,18 @@ export default function TexasHoldemGame() {
     const totalBet = player.bet + betAmount;
     const toAdd = betAmount;
     
-    console.log('Player bet - betAmount:', betAmount, 'toAdd:', toAdd);
+    console.log('Player bet - betAmount:', betAmount, 'toAdd:', toAdd, 'player.bet:', player.bet, 'currentBet:', currentBet);
+    
+    // Must first call any outstanding bet before raising
+    if (currentBet > player.bet) {
+      // Need to call first
+      const toCall = currentBet - player.bet;
+      if (toAdd < toCall) {
+        console.log('Must call at least', toCall, 'before raising');
+        setMessage(`Előbb meg kell adnod ${toCall}-t!`);
+        return;
+      }
+    }
     
     if (toAdd >= player.chips) {
       // All-in
@@ -644,8 +659,13 @@ export default function TexasHoldemGame() {
           {/* AI */}
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center gap-2 md:gap-3">
-              <div className="w-10 h-10 md:w-12 md:h-12 bg-red-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-red-600 rounded-full flex items-center justify-center text-white font-bold text-lg relative">
                 🤖
+                {dealer === 'player' ? (
+                  <span className="absolute -top-2 -right-2 bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">BB</span>
+                ) : (
+                  <span className="absolute -top-2 -right-2 bg-yellow-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">SB</span>
+                )}
               </div>
               <div>
                 <p className="text-white font-semibold text-sm md:text-base">Gép</p>
@@ -700,8 +720,13 @@ export default function TexasHoldemGame() {
           {/* Player */}
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center gap-2 md:gap-3">
-              <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-poker-primary to-poker-secondary rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg border-2 border-white">
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-poker-primary to-poker-secondary rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg border-2 border-white relative">
                 PP
+                {dealer === 'player' ? (
+                  <span className="absolute -top-2 -right-2 bg-yellow-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">SB</span>
+                ) : (
+                  <span className="absolute -top-2 -right-2 bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">BB</span>
+                )}
               </div>
               <div>
                 <p className="text-white font-semibold text-sm md:text-base">Te</p>
@@ -724,6 +749,18 @@ export default function TexasHoldemGame() {
               <div className="space-y-3">
                 {gameOver ? (
                   <>
+                    {/* Tournament Promotion - Show when player wins */}
+                    {playerWonLastHand && (
+                      <a
+                        href="https://www.palace-poker.hu/tournaments"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block w-full py-4 px-6 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold text-lg rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all animate-pulse"
+                      >
+                        🏆 Élőben még jobb! Nézd meg versenyeinket!
+                        <span className="block text-sm font-normal mt-1 opacity-90">👉 palace-poker.hu/tournaments</span>
+                      </a>
+                    )}
                     <div className="w-full py-4 bg-gray-600/50 text-white font-bold text-center rounded-xl text-lg">
                       ⏳ Következő leosztás {player.chips > 0 && ai.chips > 0 ? `${timeUntilBlindIncrease}s múlva` : '...'}
                     </div>
