@@ -74,6 +74,33 @@ export default function TexasHoldemGame() {
     return { smallBlind, bigBlind };
   }, [blindLevel]);
 
+  // Reset entire game to start fresh
+  const resetGame = useCallback(() => {
+    setPlayer({ name: 'Játékos', chips: 500, hand: [], bet: 0, folded: false, allIn: false });
+    setAi({ name: 'Gép', chips: 500, hand: [], bet: 0, folded: false, allIn: false });
+    setPot(0);
+    setCurrentBet(0);
+    setPhase('waiting');
+    setActionMessage('Nyomj a Játék indítása gombra!', 'neutral');
+    setGameOver(false);
+    setDealer('player');
+    setBetSliderValue(20);
+    setBlindLevel(1);
+    setTimeUntilBlindIncrease(120);
+    setPlayerTurn(false);
+    setPlayerWonLastHand(false);
+    setBettingRoundComplete(false);
+    setPlayerActed(false);
+    setAiActed(false);
+    setLastRaiseAmount(0);
+    setAiMood('neutral');
+    setIsStartingHand(false);
+    handIdRef.current = 0;
+    isTransitioningPhaseRef.current = false;
+    setDeck([]);
+    setCommunityCards([]);
+  }, []);
+
   // Get AI avatar emoji and animation based on mood
   const getAIAvatar = useCallback(() => {
     const moodData = {
@@ -203,12 +230,12 @@ export default function TexasHoldemGame() {
     }
 
     if (player.chips <= 0) {
-      setMessage('❌ Játék vége! A gép nyert!');
+      setActionMessage('❌ JÁTÉK VÉGE! Elfogytak a zseton. Próbáld újra!', 'danger');
       setGameOver(true);
       return;
     }
     if (ai.chips <= 0) {
-      setMessage('🎉 Gratulálok! Nyertél!');
+      setActionMessage('🎉🎉🎉 GRATULÁLOK! Megnyerted az összes zsetont! 🏆', 'success');
       setGameOver(true);
       return;
     }
@@ -940,28 +967,52 @@ export default function TexasHoldemGame() {
               <div className="space-y-3">
                 {gameOver ? (
                   <>
-                    {playerWonLastHand && (
-                      <a
-                        href="https://www.palace-poker.hu/tournaments"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block w-full py-4 px-6 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold text-lg rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all animate-pulse"
-                      >
-                        🏆 Élőben még jobb! Nézd meg versenyeinket!
-                        <span className="block text-sm font-normal mt-1 opacity-90">👉 palace-poker.hu/tournaments</span>
-                      </a>
-                    )}
-                    <div className="w-full py-4 bg-gray-600/50 text-white font-bold text-center rounded-xl text-lg">
-                      ⏳ Következő leosztás {player.chips > 0 && ai.chips > 0 ? `${timeUntilBlindIncrease}s múlva` : '...'}
-                    </div>
-                    {player.chips > 0 && ai.chips > 0 && (
-                      <button
-                        onClick={startNewGame}
-                        disabled={isStartingHand}
-                        className="w-full py-5 md:py-4 bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-bold text-xl md:text-xl rounded-xl shadow-lg hover:shadow-2xl active:scale-95 transition-all touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        🎮 Következő leosztás most
-                      </button>
+                    {/* Game completely over - someone ran out of chips */}
+                    {(player.chips === 0 || ai.chips === 0) ? (
+                      <>
+                        {ai.chips === 0 && (
+                          <a
+                            href="https://www.palace-poker.hu/tournaments"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block w-full py-4 px-6 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold text-lg rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all animate-pulse"
+                          >
+                            🏆 Élőben még jobb! Nézd meg versenyeinket!
+                            <span className="block text-sm font-normal mt-1 opacity-90">👉 palace-poker.hu/tournaments</span>
+                          </a>
+                        )}
+                        <button
+                          onClick={resetGame}
+                          className="w-full py-5 md:py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold text-xl md:text-xl rounded-xl shadow-lg hover:shadow-2xl active:scale-95 transition-all touch-manipulation"
+                        >
+                          🔄 Új játék indítása
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        {/* Normal hand over - both players still have chips */}
+                        {playerWonLastHand && (
+                          <a
+                            href="https://www.palace-poker.hu/tournaments"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block w-full py-4 px-6 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold text-lg rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all animate-pulse"
+                          >
+                            🏆 Élőben még jobb! Nézd meg versenyeinket!
+                            <span className="block text-sm font-normal mt-1 opacity-90">👉 palace-poker.hu/tournaments</span>
+                          </a>
+                        )}
+                        <div className="w-full py-4 bg-gray-600/50 text-white font-bold text-center rounded-xl text-lg">
+                          ⏳ Következő leosztás {timeUntilBlindIncrease}s múlva
+                        </div>
+                        <button
+                          onClick={startNewGame}
+                          disabled={isStartingHand}
+                          className="w-full py-5 md:py-4 bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-bold text-xl md:text-xl rounded-xl shadow-lg hover:shadow-2xl active:scale-95 transition-all touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          🎮 Következő leosztás most
+                        </button>
+                      </>
                     )}
                   </>
                 ) : (
