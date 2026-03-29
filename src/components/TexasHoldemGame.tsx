@@ -189,10 +189,11 @@ export default function TexasHoldemGame() {
     const newDeck = createDeck();
     const playerHand = [newDeck.pop()!, newDeck.pop()!];
     const aiHand = [newDeck.pop()!, newDeck.pop()!];
-    
+
+    // CRITICAL: Use updater functions to ensure fresh state
     setDeck(newDeck);
-    setPlayer({ ...player, hand: playerHand, bet: 0, folded: false, allIn: false });
-    setAi({ ...ai, hand: aiHand, bet: 0, folded: false, allIn: false });
+    setPlayer(p => ({ ...p, hand: playerHand, bet: 0, folded: false, allIn: false }));
+    setAi(a => ({ ...a, hand: aiHand, bet: 0, folded: false, allIn: false }));
     setCommunityCards([]);
     setPot(0);
     setCurrentBet(0);
