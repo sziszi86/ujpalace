@@ -135,18 +135,29 @@ export async function POST(request: NextRequest) {
       [today]
     );
 
+    // Unique visitor check (egy IP csak egyszer számítson naponta)
+    const isUniqueVisitor = await query(
+      `SELECT COUNT(*) as count FROM analytics_page_views 
+       WHERE ip_hash = $1 AND DATE(visited_at) = $2`,
+      [ipHash, today]
+    );
+    
+    const isNewUniqueVisitor = (isUniqueVisitor.rows[0] as any)?.count === 0;
+
     if (todayStats.rows.length > 0) {
       const deviceColumn = `${deviceType}_views`;
       await query(`
         UPDATE analytics_daily_stats 
-        SET total_views = total_views + 1, ${deviceColumn} = ${deviceColumn} + 1
+        SET total_views = total_views + 1, 
+            ${deviceColumn} = ${deviceColumn} + 1,
+            unique_visitors = unique_visitors + ${isNewUniqueVisitor ? 1 : 0}
         WHERE date = $1
       `, [today]);
     } else {
       await query(`
         INSERT INTO analytics_daily_stats 
         (date, total_views, unique_visitors, mobile_views, desktop_views, tablet_views)
-        VALUES ($1, 1, 1, $2, $3, $4)
+        VALUES ($1, 1, ${isNewUniqueVisitor ? 1 : 0}, $2, $3, $4)
       `, [
         today,
         deviceType === 'mobile' ? 1 : 0,
@@ -164,14 +175,16 @@ export async function POST(request: NextRequest) {
     if (topPageExists.rows.length > 0) {
       await query(`
         UPDATE analytics_top_pages 
-        SET views = views + 1, title = $1
+        SET views = views + 1, 
+            title = $1,
+            unique_visitors = unique_visitors + ${isNewUniqueVisitor ? 1 : 0}
         WHERE path = $2 AND date = $3
       `, [title || path, path, today]);
     } else {
       await query(`
         INSERT INTO analytics_top_pages 
         (path, title, date, views, unique_visitors)
-        VALUES ($1, $2, $3, 1, 1)
+        VALUES ($1, $2, $3, 1, ${isNewUniqueVisitor ? 1 : 0})
       `, [path, title || path, today]);
     }
 

@@ -65,7 +65,6 @@ export default function SimpleAdminLayout({ children }: AdminLayoutProps) {
     { name: 'Versenyek', href: '/admin/tournaments', icon: '🏆' },
     { name: 'Cash Games', href: '/admin/cash-games', icon: '💰' },
     { name: 'Struktúrák', href: '/admin/structures', icon: '📋' },
-    { name: 'Bannerek', href: '/admin/banners', icon: '🖼️' },
     {
       name: 'Hírek',
       href: '/admin/news',

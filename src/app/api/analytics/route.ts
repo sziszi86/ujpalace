@@ -35,7 +35,7 @@ export async function GET(request: Request) {
       ORDER BY date ASC
     `, [startDateStr]);
 
-    // Top oldalak
+    // Top oldalak (kivéve /admin oldalak)
     const topPages = await query(`
       SELECT 
         path,
@@ -44,12 +44,13 @@ export async function GET(request: Request) {
         SUM(unique_visitors) as unique_visitors
       FROM analytics_top_pages
       WHERE date >= $1
+        AND path NOT LIKE '/admin%'
       GROUP BY path, title
       ORDER BY total_views DESC
       LIMIT 20
     `, [startDateStr]);
 
-    // Top versenyek (tournament oldalak)
+    // Top versenyek (tournament oldalak, kivéve /admin)
     const topTournaments = await query(`
       SELECT 
         path,
@@ -59,6 +60,7 @@ export async function GET(request: Request) {
       FROM analytics_top_pages
       WHERE date >= $1
         AND (path LIKE '/tournaments/%' OR path LIKE '/admin/tournaments/%')
+        AND path NOT LIKE '/admin%'
       GROUP BY path, title
       ORDER BY total_views DESC
       LIMIT 10

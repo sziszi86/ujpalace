@@ -85,3 +85,5 @@ backups/
 
 # Deployment files (keep deploy.js for deployment script)
 !deploy.js
+/.qwen/settings.json
+/.qwen/settings.json.orig
