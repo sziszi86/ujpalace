@@ -250,7 +250,8 @@ export default function TexasHoldemGame() {
       // AI (SB) acts first preflop
       setTimeout(() => {
         console.log('🎲 Calling AI action from startNewGame, handId:', currentHandId);
-        aiAction(true, undefined, undefined, currentHandId);
+        // Pass 'preflop' explicitly to avoid React state timing issues
+        aiAction(true, undefined, undefined, currentHandId, 'preflop');
       }, 1000);
     }
   }, [createDeck, player, ai, dealer, getBlinds]);
@@ -382,7 +383,8 @@ export default function TexasHoldemGame() {
     isFirstToAct: boolean = false,
     overrideCurrentBet?: number,
     overridePot?: number,
-    capturedHandId?: number
+    capturedHandId?: number,
+    overridePhase?: GamePhase
   ) => {
     // CRITICAL: Check handId first to prevent stale actions from previous hands
     if (capturedHandId !== undefined && capturedHandId !== handIdRef.current) {
@@ -391,9 +393,11 @@ export default function TexasHoldemGame() {
     }
 
     // CRITICAL: Only act during active betting phases
+    // Use override phase if provided (to handle React state timing in startNewGame)
+    const actualPhase = overridePhase ?? phase;
     const validPhases: GamePhase[] = ['preflop', 'flop', 'turn', 'river'];
-    if (!validPhases.includes(phase)) {
-      console.log('⚠️ AI Action skipped: wrong phase', { phase });
+    if (!validPhases.includes(actualPhase)) {
+      console.log('⚠️ AI Action skipped: wrong phase', { actualPhase, phase });
       return;
     }
 
