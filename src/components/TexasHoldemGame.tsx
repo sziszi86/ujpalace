@@ -601,17 +601,28 @@ export default function TexasHoldemGame() {
 
           {/* Betting Controls */}
           <div className="mt-4">
-            {gameOver && phase === 'waiting' ? (
+            {phase === 'waiting' ? (
               <div className="space-y-3">
-                <div className="w-full py-4 bg-gray-600/50 text-white font-bold text-center rounded-xl text-lg">
-                  ⏳ Következő leosztás {player.chips > 0 && ai.chips > 0 ? `${timeUntilBlindIncrease}s múlva` : '...'}
-                </div>
-                {player.chips > 0 && ai.chips > 0 && (
+                {gameOver ? (
+                  <>
+                    <div className="w-full py-4 bg-gray-600/50 text-white font-bold text-center rounded-xl text-lg">
+                      ⏳ Következő leosztás {player.chips > 0 && ai.chips > 0 ? `${timeUntilBlindIncrease}s múlva` : '...'}
+                    </div>
+                    {player.chips > 0 && ai.chips > 0 && (
+                      <button
+                        onClick={startNewGame}
+                        className="w-full py-4 bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-bold text-lg md:text-xl rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all"
+                      >
+                        🎮 Következő leosztás most
+                      </button>
+                    )}
+                  </>
+                ) : (
                   <button
                     onClick={startNewGame}
                     className="w-full py-4 bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-bold text-lg md:text-xl rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all"
                   >
-                    🎮 Következő leosztás most
+                    🎮 Játék indítása
                   </button>
                 )}
               </div>
