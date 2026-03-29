@@ -53,7 +53,7 @@ export default function TexasHoldemGame() {
   const [aiMood, setAiMood] = useState<AIMood>('neutral');
 
   // Hand ID to prevent stale AI actions
-  const [handId, setHandId] = useState(0);
+  const handIdRef = useRef(0);
 
   const blindTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -209,7 +209,7 @@ export default function TexasHoldemGame() {
     setAiActed(false);
     setLastRaiseAmount(0);
     setAiMood('neutral'); // Reset AI mood for new hand
-    setHandId(id => id + 1); // Increment hand ID to cancel stale AI actions
+    handIdRef.current += 1; // Increment hand ID to cancel stale AI actions
     
     const { smallBlind, bigBlind } = getBlinds();
     
@@ -243,14 +243,14 @@ export default function TexasHoldemGame() {
       setPlayerActed(false); // Player posted BB but hasn't acted on raises
       setAiActed(false);
 
-      // AI (SB) acts first preflop - capture handId
-      const currentHandId = handId + 1; // Will be incremented by setHandId above
+      // AI (SB) acts first preflop - capture current handId
+      const currentHandId = handIdRef.current;
       setTimeout(() => {
         console.log('🎲 Calling AI action from startNewGame, handId:', currentHandId);
         aiAction(true, undefined, undefined, currentHandId);
       }, 1000);
     }
-  }, [createDeck, player, ai, dealer, getBlinds, handId]);
+  }, [createDeck, player, ai, dealer, getBlinds]);
 
   // Deal community cards
   const dealCommunityCards = useCallback((newPhase: GamePhase) => {
@@ -378,8 +378,8 @@ export default function TexasHoldemGame() {
     capturedHandId?: number
   ) => {
     // CRITICAL: Check handId first to prevent stale actions from previous hands
-    if (capturedHandId !== undefined && capturedHandId !== handId) {
-      console.log('⚠️ AI Action skipped: stale action from previous hand', { capturedHandId, currentHandId: handId });
+    if (capturedHandId !== undefined && capturedHandId !== handIdRef.current) {
+      console.log('⚠️ AI Action skipped: stale action from previous hand', { capturedHandId, currentHandId: handIdRef.current });
       return;
     }
 
@@ -525,7 +525,7 @@ export default function TexasHoldemGame() {
         }
       }
     }, 800);
-  }, [ai, communityCards, currentBet, pot, getBlinds, phase, bettingRoundComplete, lastRaiseAmount, handId]);
+  }, [ai, communityCards, currentBet, pot, getBlinds, phase, bettingRoundComplete, lastRaiseAmount]);
 
   // Player actions - PROPER POKER LOGIC
   const handleFold = () => {
