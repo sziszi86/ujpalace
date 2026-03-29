@@ -44,6 +44,7 @@ export default function TexasHoldemGame() {
   const [lastRaiser, setLastRaiser] = useState<'player' | 'ai' | null>(null);
   const [playerHasActed, setPlayerHasActed] = useState(false);
   const [aiHasActed, setAiHasActed] = useState(false);
+  const [showRules, setShowRules] = useState(false);
   
   const blindTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -232,31 +233,37 @@ export default function TexasHoldemGame() {
     }
   }, [createDeck, player, ai, dealer, getBlinds]);
 
-  // Deal community cards - CRITICAL FIX: Properly deal correct number of cards
+  // Deal community cards - CRITICAL FIX: Cumulative cards (not replace)
   const dealCommunityCards = useCallback((newPhase: GamePhase) => {
     const newDeck = [...deck];
     let newCards: Card[] = [];
     
     if (newPhase === 'flop') {
-      // Deal exactly 3 cards for flop
+      // Deal exactly 3 cards for flop (total: 3)
       for (let i = 0; i < 3; i++) {
         if (newDeck.length > 0) newCards.push(newDeck.pop()!);
       }
-      console.log('Dealing FLOP:', newCards.map(c => c.value + c.suit));
+      console.log('Dealing FLOP (3 cards):', newCards.map(c => c.value + c.suit));
+      setDeck(newDeck);
+      setCommunityCards(newCards); // First 3 cards
     } else if (newPhase === 'turn') {
-      // Deal exactly 1 card for turn (4th community card total)
+      // Deal exactly 1 card for turn (total: 4)
       if (newDeck.length > 0) newCards = [newDeck.pop()!];
-      console.log('Dealing TURN:', newCards[0].value + newCards[0].suit);
+      console.log('Dealing TURN (1 card):', newCards[0].value + newCards[0].suit);
+      console.log('Community cards before turn:', communityCards.length);
+      setDeck(newDeck);
+      setCommunityCards([...communityCards, ...newCards]); // Add 1 card to existing 3 = 4 total
+      console.log('Community cards after turn:', communityCards.length + 1);
     } else if (newPhase === 'river') {
-      // Deal exactly 1 card for river (5th community card total)
+      // Deal exactly 1 card for river (total: 5)
       if (newDeck.length > 0) newCards = [newDeck.pop()!];
-      console.log('Dealing RIVER:', newCards[0].value + newCards[0].suit);
+      console.log('Dealing RIVER (1 card):', newCards[0].value + newCards[0].suit);
+      console.log('Community cards before river:', communityCards.length);
+      setDeck(newDeck);
+      setCommunityCards([...communityCards, ...newCards]); // Add 1 card to existing 4 = 5 total
+      console.log('Community cards after river:', communityCards.length + 1);
     }
-    
-    setDeck(newDeck);
-    setCommunityCards(newCards); // REPLACE the community cards array
-    console.log('Community cards now:', newCards.length, 'cards');
-  }, [deck]);
+  }, [deck, communityCards]);
 
   // Move to next phase
   const nextPhase = useCallback(() => {
@@ -802,15 +809,34 @@ export default function TexasHoldemGame() {
         </div>
 
         <div className="max-w-2xl mx-auto mt-6 bg-white/10 backdrop-blur-sm rounded-xl p-4 md:p-6 border border-white/20">
-          <h3 className="text-white font-bold text-base md:text-lg mb-2">📜 Játékszabályok</h3>
-          <ul className="text-white/80 text-xs md:text-sm space-y-1">
-            <li>• Mindkét játékos <strong>500 chippel</strong> indul</li>
-            <li>• <strong>2 titkos lap</strong> + <strong>5 közös lap</strong> (max)</li>
-            <li>• <strong>Flop:</strong> 3 lap | <strong>Turn:</strong> 1 lap | <strong>River:</strong> 1 lap</li>
-            <li>• Ha emelsz, a gépnek meg kell adnia, emelnie vagy dobnia</li>
-            <li>• Döntetlen esetén a pot <strong>feleződik</strong></li>
-            <li>• Vakok 2 percenként emelkednek (kéz között)</li>
-          </ul>
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-white font-bold text-base md:text-lg">📜 Játékszabályok</h3>
+            <button
+              onClick={() => setShowRules(!showRules)}
+              className="text-white hover:text-yellow-400 transition-colors"
+              title="Játékszabályok mutatása/elrejtése"
+            >
+              {showRules ? (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              )}
+            </button>
+          </div>
+          {showRules && (
+            <ul className="text-white/80 text-xs md:text-sm space-y-1">
+              <li>• Mindkét játékos <strong>500 chippel</strong> indul</li>
+              <li>• <strong>2 titkos lap</strong> + <strong>5 közös lap</strong> (max)</li>
+              <li>• <strong>Flop:</strong> 3 lap | <strong>Turn:</strong> 4 lap | <strong>River:</strong> 5 lap</li>
+              <li>• Ha emelsz, a gépnek meg kell adnia, emelnie vagy dobnia</li>
+              <li>• Döntetlen esetén a pot <strong>feleződik</strong></li>
+              <li>• Vakok 2 percenként emelkednek (kéz között)</li>
+            </ul>
+          )}
         </div>
       </div>
     </section>
