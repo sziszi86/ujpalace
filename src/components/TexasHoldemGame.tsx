@@ -109,6 +109,9 @@ export default function TexasHoldemGame() {
 
   // Check if betting round is complete
   const checkBettingRoundComplete = useCallback(() => {
+    if (phase === 'waiting' || phase === 'showdown') return false;
+    if (bettingRoundComplete) return false; // Már lezárult, ne hívjuk újra
+    
     // Both players must have bet the same amount
     if (player.bet !== ai.bet) return false;
     
@@ -122,8 +125,9 @@ export default function TexasHoldemGame() {
     const toCallAi = currentBet - ai.bet;
     if (toCallPlayer > 0 || toCallAi > 0) return false;
     
+    console.log('Betting round complete!');
     return true;
-  }, [player.bet, ai.bet, lastAggressor, playerHasCalled, aiHasCalled, currentBet]);
+  }, [phase, bettingRoundComplete, player.bet, ai.bet, lastAggressor, playerHasCalled, aiHasCalled, currentBet]);
 
   // Blind timer
   useEffect(() => {
@@ -257,7 +261,9 @@ export default function TexasHoldemGame() {
   const nextPhase = useCallback(() => {
     console.log('nextPhase called from:', phase);
     console.log('player.bet:', player.bet, 'ai.bet:', ai.bet);
-    console.log('lastAggressor:', lastAggressor, 'playerHasCalled:', playerHasCalled, 'aiHasCalled:', aiHasCalled);
+    
+    // Prevent infinite loop
+    if (phase === 'waiting' || phase === 'showdown') return;
     
     // Reset betting for new street
     setPlayer(p => ({ ...p, bet: 0 }));
@@ -329,18 +335,19 @@ export default function TexasHoldemGame() {
 
   // Check if we should proceed to next phase
   useEffect(() => {
-    if (phase !== 'waiting' && phase !== 'showdown' && !bettingRoundComplete) {
-      const shouldProceed = checkBettingRoundComplete();
-      if (shouldProceed) {
-        setBettingRoundComplete(true);
-        setTimeout(() => nextPhase(), 800);
-      }
+    if (bettingRoundComplete || phase === 'waiting' || phase === 'showdown') return;
+    
+    const shouldProceed = checkBettingRoundComplete();
+    if (shouldProceed) {
+      console.log('Proceeding to next phase...');
+      setBettingRoundComplete(true);
+      setTimeout(() => nextPhase(), 800);
     }
-  }, [phase, bettingRoundComplete, checkBettingRoundComplete, nextPhase]);
+  }, [bettingRoundComplete, phase, checkBettingRoundComplete, nextPhase]);
 
   // AI Action
   const aiAction = useCallback((isFirstToAct: boolean = false) => {
-    if (ai.folded || ai.allIn || phase === 'showdown' || phase === 'waiting') return;
+    if (ai.folded || ai.allIn || phase === 'showdown' || phase === 'waiting' || bettingRoundComplete) return;
     
     const handStrength = evaluateHand(ai.hand, communityCards);
     const toCall = currentBet - ai.bet;
@@ -377,7 +384,7 @@ export default function TexasHoldemGame() {
           setPot(p => p + toAdd);
           setMessage(`A gép emelt ${raiseAmount}-t`);
           setLastAggressor('ai');
-          setAiHasCalled(false); // Player must now call this raise
+          setAiHasCalled(false);
           setPlayerHasCalled(false);
           setPlayerTurn(true);
         } else {
@@ -387,17 +394,8 @@ export default function TexasHoldemGame() {
           setMessage('A gép megadta');
           setAiHasCalled(true);
           
-          // Check if round is complete
-          if (player.bet === currentBet && playerHasCalled) {
-            setBettingRoundComplete(true);
-            setTimeout(() => nextPhase(), 800);
-          } else if (lastAggressor === 'ai') {
-            // Player needs to call
-            setPlayerTurn(true);
-          } else {
-            setBettingRoundComplete(true);
-            setTimeout(() => nextPhase(), 800);
-          }
+          // Round complete - will be handled by useEffect
+          setPlayerTurn(true);
         }
       } else {
         // No bet facing - AI can check or bet
@@ -419,23 +417,17 @@ export default function TexasHoldemGame() {
             // CHECK
             setMessage('A gép checkelt');
             setAiHasCalled(true);
-            if (playerHasCalled || lastAggressor === null) {
-              setBettingRoundComplete(true);
-              setTimeout(() => nextPhase(), 800);
-            } else {
-              setPlayerTurn(true);
-            }
+            // Will be handled by useEffect
           }
         } else {
           // Check behind
           setMessage('A gép checkelt');
           setAiHasCalled(true);
-          setBettingRoundComplete(true);
-          setTimeout(() => nextPhase(), 800);
+          // Will be handled by useEffect
         }
       }
     }, 800);
-  }, [ai, communityCards, currentBet, pot, getBlinds, phase, playerHasCalled, lastAggressor, player.bet]);
+  }, [ai, communityCards, currentBet, pot, getBlinds, phase, bettingRoundComplete, lastAggressor]);
 
   // Player actions
   const handleFold = () => {
@@ -455,14 +447,7 @@ export default function TexasHoldemGame() {
     console.log('Player checks');
     setMessage('Checkeltél');
     setPlayerHasCalled(true);
-    
-    if (aiHasCalled || lastAggressor === null) {
-      setBettingRoundComplete(true);
-      setTimeout(() => nextPhase(), 800);
-    } else {
-      setPlayerTurn(false);
-      setTimeout(() => aiAction(true), 800);
-    }
+    // useEffect will handle next phase
   };
 
   const handleCall = () => {
@@ -478,23 +463,13 @@ export default function TexasHoldemGame() {
       if (ai.allIn || ai.chips === 0) {
         setBettingRoundComplete(true);
         setTimeout(() => nextPhase(), 800);
-      } else {
-        setPlayerTurn(false);
-        setTimeout(() => aiAction(false), 800);
       }
     } else {
       setPot(p => p + toCall);
       setPlayer(p => ({ ...p, bet: currentBet, chips: p.chips - toCall }));
       setMessage('Megadtad');
       setPlayerHasCalled(true);
-      
-      if (lastAggressor === 'ai' || aiHasCalled) {
-        setBettingRoundComplete(true);
-        setTimeout(() => nextPhase(), 800);
-      } else {
-        setPlayerTurn(false);
-        setTimeout(() => aiAction(false), 800);
-      }
+      // useEffect will handle next phase
     }
   };
 
