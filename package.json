@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "setup-analytics": "node scripts/setup-analytics.js"
   },
   "keywords": [],
   "author": "",
@@ -31,6 +32,7 @@
     "node-fetch": "^3.3.2",
     "nodemailer": "^6.10.1",
     "pg": "^8.16.3",
+    "plausible-tracker": "^0.3.9",
     "postcss": "^8.5.6",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",

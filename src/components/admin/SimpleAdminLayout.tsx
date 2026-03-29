@@ -60,14 +60,15 @@ export default function SimpleAdminLayout({ children }: AdminLayoutProps) {
 
   const menuItems: MenuItem[] = [
     { name: 'Dashboard', href: '/admin', icon: '📊' },
+    { name: 'Statisztikák', href: '/admin/analytics', icon: '📈' },
     { name: 'Játékosok', href: '/admin/players', icon: '👤' },
     { name: 'Versenyek', href: '/admin/tournaments', icon: '🏆' },
     { name: 'Cash Games', href: '/admin/cash-games', icon: '💰' },
     { name: 'Struktúrák', href: '/admin/structures', icon: '📋' },
     { name: 'Bannerek', href: '/admin/banners', icon: '🖼️' },
-    { 
-      name: 'Hírek', 
-      href: '/admin/news', 
+    {
+      name: 'Hírek',
+      href: '/admin/news',
       icon: '📰',
       submenu: [
         { name: 'Összes hír', href: '/admin/news', icon: '📝' },

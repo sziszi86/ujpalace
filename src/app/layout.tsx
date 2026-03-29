@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import ConditionalLayout from "@/components/ConditionalLayout";
+import AnalyticsTracker from "@/components/AnalyticsTracker";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -65,9 +66,11 @@ export default function RootLayout({
     <html lang="hu">
       <body className={inter.className}>
         <ConditionalLayout>
+          {/* Analytics Tracker - saját megoldás (PostgreSQL/Railway) */}
+          <AnalyticsTracker />
           {children}
         </ConditionalLayout>
-        
+
         {/* Structured Data */}
         <script
           type="application/ld+json"
