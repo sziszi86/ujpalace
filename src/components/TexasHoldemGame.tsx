@@ -55,6 +55,9 @@ export default function TexasHoldemGame() {
   // Hand ID to prevent stale AI actions
   const handIdRef = useRef(0);
 
+  // Prevent multiple simultaneous startNewGame calls
+  const isStartingGameRef = useRef(false);
+
   const blindTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const getBlinds = useCallback(() => {
@@ -179,6 +182,18 @@ export default function TexasHoldemGame() {
 
   // Start new hand
   const startNewGame = useCallback(() => {
+    // CRITICAL: Prevent multiple simultaneous calls with ref (phase state too slow)
+    if (isStartingGameRef.current) {
+      console.log('⚠️ startNewGame blocked: already starting new game');
+      return;
+    }
+
+    // CRITICAL: Don't start new hand if already in progress
+    if (phase !== 'waiting') {
+      console.log('⚠️ startNewGame blocked: hand already in progress', { phase });
+      return;
+    }
+
     if (player.chips <= 0) {
       setMessage('❌ Játék vége! A gép nyert!');
       setGameOver(true);
@@ -189,6 +204,9 @@ export default function TexasHoldemGame() {
       setGameOver(true);
       return;
     }
+
+    // Set flag to prevent re-entry
+    isStartingGameRef.current = true;
 
     // CRITICAL: Increment handId FIRST to invalidate any pending AI actions
     handIdRef.current += 1;
@@ -254,6 +272,11 @@ export default function TexasHoldemGame() {
         aiAction(true, undefined, undefined, currentHandId, 'preflop');
       }, 1000);
     }
+
+    // Reset flag after phase change has been processed
+    setTimeout(() => {
+      isStartingGameRef.current = false;
+    }, 500);
   }, [createDeck, player, ai, dealer, getBlinds]);
 
   // Deal community cards
