@@ -92,9 +92,9 @@ export default function TexasHoldemGame() {
     return 0;
   };
 
-  // Blind increase timer (only between hands)
+  // Blind increase timer (only between hands, after first game starts)
   useEffect(() => {
-    if (phase === 'waiting' && !gameOver) {
+    if (phase !== 'waiting' && !gameOver) {
       const timer = setInterval(() => {
         setTimeUntilBlindIncrease(prev => {
           if (prev <= 1) {
@@ -107,6 +107,8 @@ export default function TexasHoldemGame() {
       }, 1000);
       return () => clearInterval(timer);
     }
+    // Reset timer when game is not active
+    setTimeUntilBlindIncrease(60);
   }, [phase, gameOver, blindLevel]);
 
   // Start new game
@@ -475,16 +477,18 @@ export default function TexasHoldemGame() {
           🃏 Texas Hold'em Játék
         </h2>
 
-        {/* Blind Level & Timer */}
-        <div className="max-w-4xl mx-auto mb-4">
-          <div className="bg-yellow-600/90 backdrop-blur-sm rounded-xl p-3 text-center border-2 border-yellow-400">
-            <div className="flex justify-between items-center text-white flex-wrap gap-2">
-              <span className="font-bold">📊 Vak szint: {blindLevel}</span>
-              <span className="font-bold">🕐 Köv. emelés: {timeUntilBlindIncrease}s</span>
-              <span className="font-bold">💰 Vakok: {smallBlind}/{bigBlind}</span>
+        {/* Blind Level & Timer - Only show when game is active */}
+        {phase !== 'waiting' && (
+          <div className="max-w-4xl mx-auto mb-4">
+            <div className="bg-yellow-600/90 backdrop-blur-sm rounded-xl p-3 text-center border-2 border-yellow-400">
+              <div className="flex justify-between items-center text-white flex-wrap gap-2">
+                <span className="font-bold">📊 Vak szint: {blindLevel}</span>
+                <span className="font-bold">🕐 Köv. emelés: {timeUntilBlindIncrease}s</span>
+                <span className="font-bold">💰 Vakok: {smallBlind}/{bigBlind}</span>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Game Table */}
         <div className="max-w-4xl mx-auto bg-green-700 rounded-3xl shadow-2xl p-4 md:p-6 border-8 border-yellow-900">
