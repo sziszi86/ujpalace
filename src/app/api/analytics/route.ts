@@ -49,6 +49,21 @@ export async function GET(request: Request) {
       LIMIT 20
     `, [startDateStr]);
 
+    // Top versenyek (tournament oldalak)
+    const topTournaments = await query(`
+      SELECT 
+        path,
+        title,
+        SUM(views) as total_views,
+        SUM(unique_visitors) as unique_visitors
+      FROM analytics_top_pages
+      WHERE date >= $1
+        AND (path LIKE '/tournaments/%' OR path LIKE '/admin/tournaments/%')
+      GROUP BY path, title
+      ORDER BY total_views DESC
+      LIMIT 10
+    `, [startDateStr]);
+
     // Referrerek
     const referrers = await query(`
       SELECT 
@@ -69,6 +84,22 @@ export async function GET(request: Request) {
     // Tegnapelőtti statisztikák (összehasonlításhoz)
     const yesterdayStats = await query(`
       SELECT * FROM analytics_daily_stats WHERE date = CURRENT_DATE - INTERVAL '1 day'
+    `);
+
+    // Múlt heti statisztikák (last 7 days)
+    const lastWeekStats = await query(`
+      SELECT 
+        COALESCE(SUM(total_views), 0) as total_views,
+        COALESCE(SUM(unique_visitors), 0) as total_visitors
+      FROM analytics_daily_stats
+      WHERE date >= CURRENT_DATE - INTERVAL '7 days'
+    `);
+
+    // Jelenlegi látogatók (utolsó 5 percben aktív sessionök)
+    const currentOnline = await query(`
+      SELECT COUNT(DISTINCT session_id) as online_users
+      FROM analytics_page_views
+      WHERE visited_at >= NOW() - INTERVAL '5 minutes'
     `);
 
     // Eszköz megoszlás (%)
@@ -96,9 +127,15 @@ export async function GET(request: Request) {
           : 0,
         growth,
       },
+      currentOnline: (currentOnline.rows[0] as any)?.online_users || 0,
+      lastWeek: {
+        totalViews: lastWeekStats.rows[0]?.total_views || 0,
+        totalVisitors: lastWeekStats.rows[0]?.total_visitors || 0,
+      },
       deviceBreakdown,
       dailyStats: dailyStats.rows,
       topPages: topPages.rows,
+      topTournaments: topTournaments.rows,
       referrers: referrers.rows,
       today: today || null,
       yesterday: yesterday || null,

@@ -45,9 +45,19 @@ interface DashboardData {
   };
 }
 
+interface AnalyticsSummary {
+  currentOnline: number;
+  lastWeekVisitors: number;
+  topTournament?: {
+    title: string;
+    views: number;
+  };
+}
+
 
 export default function AdminDashboard() {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
+  const [analytics, setAnalytics] = useState<AnalyticsSummary | null>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchDashboardData = async () => {
@@ -64,9 +74,29 @@ export default function AdminDashboard() {
     }
   };
 
+  const fetchAnalytics = async () => {
+    try {
+      const response = await fetch('/api/analytics?days=7');
+      if (response.ok) {
+        const data = await response.json();
+        setAnalytics({
+          currentOnline: data.currentOnline || 0,
+          lastWeekVisitors: data.lastWeek?.totalVisitors || 0,
+          topTournament: data.topTournaments?.[0] ? {
+            title: data.topTournaments[0].title || data.topTournaments[0].path,
+            views: data.topTournaments[0].total_views,
+          } : undefined,
+        });
+      }
+    } catch (error) {
+      console.error('Failed to fetch analytics:', error);
+    }
+  };
+
   useEffect(() => {
     const loadData = async () => {
       await fetchDashboardData();
+      await fetchAnalytics();
       setLoading(false);
     };
     loadData();
@@ -128,6 +158,76 @@ export default function AdminDashboard() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
         <p className="text-gray-600 mt-2">Palace Poker Szombathely tartalomkezelő rendszer</p>
+      </div>
+
+      {/* Analytics Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        {/* Most Online */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-500">🔴 Most online</p>
+              <p className="text-4xl font-bold text-green-600 mt-1">
+                {analytics?.currentOnline || 0}
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                látogató (utolsó 5 percben)
+              </p>
+            </div>
+            <div className="p-3 bg-green-100 rounded-full">
+              <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        {/* Múlt heti látogatók */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-500">📊 Múlt hét (7 nap)</p>
+              <p className="text-3xl font-bold text-gray-900 mt-1">
+                {analytics?.lastWeekVisitors || 0}
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                egyedi látogató
+              </p>
+            </div>
+            <div className="p-3 bg-blue-100 rounded-full">
+              <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        {/* Legnézettebb verseny */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-500">🏆 Legnézettebb verseny</p>
+              {analytics?.topTournament ? (
+                <>
+                  <p className="text-lg font-bold text-gray-900 mt-1 truncate max-w-[180px]">
+                    {analytics.topTournament.title}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {analytics.topTournament.views} megtekintés
+                  </p>
+                </>
+              ) : (
+                <p className="text-sm text-gray-400 mt-1">Nincs adat</p>
+              )}
+            </div>
+            <div className="p-3 bg-purple-100 rounded-full">
+              <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+              </svg>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Stats Cards */}
