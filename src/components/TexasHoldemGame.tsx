@@ -461,10 +461,13 @@ export default function TexasHoldemGame() {
   };
 
   const handleCheck = () => {
+    // CRITICAL: Cannot check if facing a bet!
     if (currentBet > player.bet) {
+      console.log('Player cannot check - facing a bet of', currentBet - player.bet);
       handleCall();
       return;
     }
+    console.log('Player checks (no bet facing)');
     setMessage('Checkeltél');
     setPlayerHasActed(true);
     
@@ -771,12 +774,18 @@ export default function TexasHoldemGame() {
                   <button
                     onClick={canCheck ? handleCheck : handleCall}
                     className="py-3 bg-yellow-600 text-white font-bold rounded-lg hover:bg-yellow-700 transition-colors text-sm md:text-base"
+                    disabled={!canCheck && toCall > player.chips}
                   >
-                    {canCheck ? '✓ Check' : `↔ Megadás (${toCall})`}
+                    {canCheck 
+                      ? '✓ Check' 
+                      : toCall >= player.chips 
+                        ? '🔥 All-In' 
+                        : `↔ Megadás (${toCall})`}
                   </button>
                   <button
                     onClick={handleBet}
                     className="py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition-colors text-sm md:text-base"
+                    disabled={toCall > 0}
                   >
                     ⬆️ Emelés
                   </button>
