@@ -592,11 +592,8 @@ export default function TexasHoldemGame() {
 
     // If AI already acted, round is complete
     if (aiActed) {
-      // Both checked - proceed to next phase
-      setTimeout(() => {
-        setBettingRoundComplete(true);
-        setTimeout(() => nextPhase(), 500);
-      }, 500);
+      // Both checked - let useEffect handle nextPhase
+      setBettingRoundComplete(true);
     } else {
       // AI still needs to act
       setTimeout(() => aiAction(false), 800);
@@ -623,7 +620,6 @@ export default function TexasHoldemGame() {
 
       if (ai.allIn || ai.chips === 0) {
         setBettingRoundComplete(true);
-        setTimeout(() => nextPhase(), 800);
       } else {
         setTimeout(() => aiAction(false), 800);
       }
@@ -634,12 +630,9 @@ export default function TexasHoldemGame() {
       setPlayerActed(true);
       setPlayerTurn(false);
 
-      // If AI already acted, round complete
+      // If AI already acted, round complete - let useEffect handle nextPhase
       if (aiActed) {
-        setTimeout(() => {
-          setBettingRoundComplete(true);
-          setTimeout(() => nextPhase(), 500);
-        }, 500);
+        setBettingRoundComplete(true);
       } else {
         setTimeout(() => aiAction(false), 800);
       }
@@ -720,7 +713,6 @@ export default function TexasHoldemGame() {
 
     if (ai.allIn || ai.chips === 0) {
       setBettingRoundComplete(true);
-      setTimeout(() => nextPhase(), 800);
     } else {
       setAiActed(false); // AI must act on the all-in
       // Pass the NEW bet and pot to AI
