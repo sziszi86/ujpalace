@@ -190,6 +190,11 @@ export default function TexasHoldemGame() {
       return;
     }
 
+    // CRITICAL: Increment handId FIRST to invalidate any pending AI actions
+    handIdRef.current += 1;
+    const currentHandId = handIdRef.current;
+    console.log('🎬 Starting new hand, handId:', currentHandId);
+
     const newDeck = createDeck();
     const playerHand = [newDeck.pop()!, newDeck.pop()!];
     const aiHand = [newDeck.pop()!, newDeck.pop()!];
@@ -209,10 +214,9 @@ export default function TexasHoldemGame() {
     setAiActed(false);
     setLastRaiseAmount(0);
     setAiMood('neutral'); // Reset AI mood for new hand
-    handIdRef.current += 1; // Increment hand ID to cancel stale AI actions
-    
+
     const { smallBlind, bigBlind } = getBlinds();
-    
+
     // Post blinds
     if (dealer === 'player') {
       // Player = SB (dealer), AI = BB
@@ -223,11 +227,11 @@ export default function TexasHoldemGame() {
       setAi(a => ({ ...a, bet: aiBB, chips: a.chips - aiBB }));
       setCurrentBet(bigBlind);
       setPot(playerSB + aiBB);
-      setLastRaiseAmount(bigBlind - smallBlind); // BB raised SB by this amount
+      setLastRaiseAmount(bigBlind - smallBlind);
       setMessage(`Új leosztás - Preflop | Vakok: ${smallBlind}/${bigBlind} - Te következel (SB)!`);
       setPlayerTurn(true);
       setPlayerActed(false);
-      setAiActed(false); // AI posted blind but hasn't acted on raises
+      setAiActed(false);
     } else {
       // AI = SB (dealer), Player = BB
       const aiSB = Math.min(smallBlind, ai.chips);
@@ -240,11 +244,10 @@ export default function TexasHoldemGame() {
       setLastRaiseAmount(bigBlind - smallBlind);
       setMessage(`Új leosztás - Preflop | Vakok: ${smallBlind}/${bigBlind} - A gép következik (SB)`);
       setPlayerTurn(false);
-      setPlayerActed(false); // Player posted BB but hasn't acted on raises
+      setPlayerActed(false);
       setAiActed(false);
 
-      // AI (SB) acts first preflop - capture current handId
-      const currentHandId = handIdRef.current;
+      // AI (SB) acts first preflop
       setTimeout(() => {
         console.log('🎲 Calling AI action from startNewGame, handId:', currentHandId);
         aiAction(true, undefined, undefined, currentHandId);
@@ -331,23 +334,27 @@ export default function TexasHoldemGame() {
       }
     } else if (phase === 'river') {
       setPhase('showdown');
+
+      // CRITICAL: Capture pot value before any state changes
+      const finalPot = pot;
+
       const playerStrength = evaluateHand(player.hand, [...communityCards]);
       const aiStrength = evaluateHand(ai.hand, [...communityCards]);
-      
+
       if (playerStrength > aiStrength) {
         setAiMood('angry'); // Mérges mert vesztett
         setMessage(`🎉 Nyertél! ${getHandName(playerStrength)}`);
-        setPlayer(p => ({ ...p, chips: p.chips + pot }));
+        setPlayer(p => ({ ...p, chips: p.chips + finalPot }));
         setPlayerWonLastHand(true);
       } else if (aiStrength > playerStrength) {
         setAiMood('happy'); // Boldog mert nyert
         setMessage(`❌ A gép nyert! ${getHandName(aiStrength)}`);
-        setAi(a => ({ ...a, chips: a.chips + pot }));
+        setAi(a => ({ ...a, chips: a.chips + finalPot }));
         setPlayerWonLastHand(false);
       } else {
         setAiMood('neutral'); // Döntetlen
         setMessage('🤝 Döntetlen! A pot feleződik.');
-        const halfPot = Math.floor(pot / 2);
+        const halfPot = Math.floor(finalPot / 2);
         setPlayer(p => ({ ...p, chips: p.chips + halfPot }));
         setAi(a => ({ ...a, chips: a.chips + halfPot }));
         setPlayerWonLastHand(false);
@@ -449,10 +456,13 @@ export default function TexasHoldemGame() {
                           (random > 0.85 && handStrength < 100);
 
         if (shouldFold) {
+          // CRITICAL: Capture pot before state changes
+          const finalPot = actualPot;
+
           setAiMood('angry'); // Mérges mert dob
           setAi(a => ({ ...a, folded: true }));
           setMessage('❌ A gép dobott!');
-          setPlayer(p => ({ ...p, chips: p.chips + pot }));
+          setPlayer(p => ({ ...p, chips: p.chips + finalPot }));
           setGameOver(true);
           setPhase('waiting');
           setDealer(d => d === 'player' ? 'ai' : 'player'); // Switch dealer for next hand
@@ -529,10 +539,13 @@ export default function TexasHoldemGame() {
 
   // Player actions - PROPER POKER LOGIC
   const handleFold = () => {
+    // CRITICAL: Capture pot before state changes
+    const finalPot = pot;
+
     setPlayer(p => ({ ...p, folded: true }));
     setPlayerActed(true);
     setMessage('❌ Dobtál! A gép nyert.');
-    setAi(a => ({ ...a, chips: a.chips + pot }));
+    setAi(a => ({ ...a, chips: a.chips + finalPot }));
     setGameOver(true);
     setPhase('waiting');
     setDealer(d => d === 'player' ? 'ai' : 'player');
@@ -574,8 +587,9 @@ export default function TexasHoldemGame() {
 
     if (toCall >= player.chips) {
       // All-in call
-      setPot(p => p + player.chips);
-      setPlayer(p => ({ ...p, bet: p.bet + player.chips, chips: 0, allIn: true }));
+      const allInAmount = player.chips;
+      setPot(p => p + allInAmount);
+      setPlayer(p => ({ ...p, bet: p.bet + allInAmount, chips: 0, allIn: true }));
       setMessage('🔥 ALL-IN!');
       setPlayerActed(true);
       setPlayerTurn(false);
