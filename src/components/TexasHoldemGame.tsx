@@ -46,6 +46,10 @@ export default function TexasHoldemGame() {
   const [playerActed, setPlayerActed] = useState(false); // Has player acted in this round
   const [aiActed, setAiActed] = useState(false); // Has AI acted in this round
   const [lastRaiseAmount, setLastRaiseAmount] = useState(0); // Size of last raise for min-raise calculation
+
+  // Avatar emotions
+  type AIMood = 'neutral' | 'thinking' | 'confident' | 'nervous' | 'happy' | 'angry' | 'worried';
+  const [aiMood, setAiMood] = useState<AIMood>('neutral');
   
   const blindTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -54,6 +58,20 @@ export default function TexasHoldemGame() {
     const bigBlind = 10 * blindLevel;
     return { smallBlind, bigBlind };
   }, [blindLevel]);
+
+  // Get AI avatar emoji and animation based on mood
+  const getAIAvatar = useCallback(() => {
+    const moodData = {
+      neutral: { emoji: '🤖', color: 'from-gray-600 to-gray-700', animation: '' },
+      thinking: { emoji: '🤔', color: 'from-blue-600 to-blue-700', animation: 'animate-pulse' },
+      confident: { emoji: '😎', color: 'from-purple-600 to-purple-700', animation: 'animate-bounce-subtle' },
+      nervous: { emoji: '😰', color: 'from-yellow-600 to-orange-600', animation: 'animate-shake' },
+      happy: { emoji: '😄', color: 'from-green-600 to-emerald-600', animation: 'animate-bounce' },
+      angry: { emoji: '😠', color: 'from-red-600 to-red-700', animation: 'animate-shake' },
+      worried: { emoji: '😬', color: 'from-orange-600 to-orange-700', animation: 'animate-pulse' },
+    };
+    return moodData[aiMood];
+  }, [aiMood]);
 
   const createDeck = useCallback((): Card[] => {
     const newDeck: Card[] = [];
@@ -185,6 +203,7 @@ export default function TexasHoldemGame() {
     setPlayerActed(false);
     setAiActed(false);
     setLastRaiseAmount(0);
+    setAiMood('neutral'); // Reset AI mood for new hand
     
     const { smallBlind, bigBlind } = getBlinds();
     
@@ -306,14 +325,17 @@ export default function TexasHoldemGame() {
       const aiStrength = evaluateHand(ai.hand, [...communityCards]);
       
       if (playerStrength > aiStrength) {
+        setAiMood('angry'); // Mérges mert vesztett
         setMessage(`🎉 Nyertél! ${getHandName(playerStrength)}`);
         setPlayer(p => ({ ...p, chips: p.chips + pot }));
         setPlayerWonLastHand(true);
       } else if (aiStrength > playerStrength) {
+        setAiMood('happy'); // Boldog mert nyert
         setMessage(`❌ A gép nyert! ${getHandName(aiStrength)}`);
         setAi(a => ({ ...a, chips: a.chips + pot }));
         setPlayerWonLastHand(false);
       } else {
+        setAiMood('neutral'); // Döntetlen
         setMessage('🤝 Döntetlen! A pot feleződik.');
         const halfPot = Math.floor(pot / 2);
         setPlayer(p => ({ ...p, chips: p.chips + halfPot }));
@@ -356,7 +378,10 @@ export default function TexasHoldemGame() {
     const { bigBlind } = getBlinds();
     const potOdds = toCall > 0 ? toCall / (actualPot + toCall) : 0;
 
-    console.log('🤖 AI Action - currentBet:', actualCurrentBet, 'ai.bet:', ai.bet, 'toCall:', toCall, 'handStrength:', handStrength);
+    console.log('🤖 AI Action - currentBet:', actualCurrentBet, 'ai.bet:', ai.bet, 'toCall:', toCall, 'handStrength:', handStrength, 'isFirstToAct:', isFirstToAct);
+
+    // Show thinking animation
+    setAiMood('thinking');
 
     setTimeout(() => {
       // Mark AI as acted
@@ -364,6 +389,13 @@ export default function TexasHoldemGame() {
 
       if (toCall > 0) {
         // ============ AI FACES A BET ============
+        console.log('🤖 AI FACING BET - must call/raise/fold');
+
+        // Check if bet is big (nervous)
+        const { bigBlind } = getBlinds();
+        if (toCall > bigBlind * 3) {
+          setAiMood('nervous');
+        }
         if (ai.chips <= toCall) {
           // All-in call
           const allInAmount = ai.chips;
@@ -380,11 +412,13 @@ export default function TexasHoldemGame() {
                           (random > 0.85 && handStrength < 100);
 
         if (shouldFold) {
+          setAiMood('angry'); // Mérges mert dob
           setAi(a => ({ ...a, folded: true }));
           setMessage('❌ A gép dobott!');
           setPlayer(p => ({ ...p, chips: p.chips + pot }));
           setGameOver(true);
           setPhase('waiting');
+          setDealer(d => d === 'player' ? 'ai' : 'player'); // Switch dealer for next hand
           return;
         }
 
@@ -404,6 +438,7 @@ export default function TexasHoldemGame() {
           const totalBet = actualCurrentBet + raiseAmount;
           const toAdd = totalBet - ai.bet;
 
+          setAiMood('confident'); // Magabiztos mert emel
           setAi(a => ({ ...a, bet: totalBet, chips: a.chips - toAdd }));
           setCurrentBet(totalBet);
           setPot(p => p + toAdd);
@@ -413,6 +448,7 @@ export default function TexasHoldemGame() {
           setPlayerTurn(true);
         } else {
           // CALL
+          setAiMood(handStrength < 100 ? 'worried' : 'neutral'); // Aggódik ha gyenge kézzel call
           setAi(a => ({ ...a, bet: actualCurrentBet, chips: a.chips - toCall }));
           setPot(p => p + toCall);
           setMessage(`✓ A gép megadta (${toCall} chip)`);
@@ -435,6 +471,7 @@ export default function TexasHoldemGame() {
 
           const betAmount = Math.min(Math.floor(actualPot * betMultiplier + bigBlind), ai.chips);
 
+          setAiMood(handStrength >= 200 ? 'confident' : 'neutral'); // Magabiztos ha jó kézzel bet
           setAi(a => ({ ...a, bet: betAmount, chips: a.chips - betAmount }));
           setCurrentBet(betAmount);
           setPot(p => p + betAmount);
@@ -444,6 +481,8 @@ export default function TexasHoldemGame() {
           setPlayerTurn(true);
         } else {
           // CHECK
+          console.log('🤖 AI CHECK - no bet facing');
+          setAiMood('neutral');
           setMessage('✓ A gép checkelt');
           setPlayerTurn(true);
         }
@@ -612,13 +651,32 @@ export default function TexasHoldemGame() {
   };
 
   const CardComponent = ({ card, hidden = false }: { card: Card; hidden?: boolean }) => (
-    <div className={`w-10 h-14 md:w-14 md:h-20 bg-white rounded-lg shadow-lg border-2 border-gray-300 flex flex-col items-center justify-center ${hidden ? 'bg-gradient-to-br from-blue-600 to-blue-800' : ''}`}>
+    <div className={`
+      w-12 h-16 md:w-16 md:h-24
+      rounded-xl
+      flex flex-col items-center justify-center
+      transform transition-all duration-200
+      hover:scale-110 hover:-translate-y-1
+      relative
+      ${hidden
+        ? 'bg-gradient-to-br from-blue-700 via-blue-600 to-indigo-700 shadow-xl border-2 border-blue-400'
+        : 'bg-white shadow-2xl border-2 border-gray-200'
+      }
+    `}>
       {hidden ? (
-        <div className="text-white text-xl">🂠</div>
+        <>
+          <div className="text-white text-2xl md:text-3xl animate-pulse">🂠</div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-xl"></div>
+        </>
       ) : (
         <>
-          <span className={`text-sm md:text-lg font-bold ${card.color}`}>{card.value}</span>
-          <span className={`text-lg md:text-xl ${card.color}`}>{card.suit}</span>
+          <span className={`text-base md:text-2xl font-extrabold ${card.color} drop-shadow-sm`}>
+            {card.value}
+          </span>
+          <span className={`text-xl md:text-3xl ${card.color} drop-shadow-sm`}>
+            {card.suit}
+          </span>
+          <div className="absolute inset-0 bg-gradient-to-b from-white/30 to-transparent rounded-xl pointer-events-none"></div>
         </>
       )}
     </div>
@@ -639,9 +697,14 @@ export default function TexasHoldemGame() {
       }}></div>
 
       <div className="container mx-auto px-4 relative z-10">
-        <h2 className="text-3xl md:text-4xl font-bold text-white text-center mb-4">
-          🃏 Texas Hold'em Játék
-        </h2>
+        <div className="text-center mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">
+            🃏 Texas Hold'em Gyakorlás
+          </h2>
+          <p className="text-yellow-300 text-sm md:text-base font-semibold animate-pulse">
+            Készülj fel az esti versenyeinkre! 🏆
+          </p>
+        </div>
 
         {gameOver && phase === 'waiting' && player.chips > 0 && ai.chips > 0 && (
           <div className="max-w-4xl mx-auto mb-4">
@@ -659,12 +722,12 @@ export default function TexasHoldemGame() {
           {/* AI */}
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center gap-2 md:gap-3">
-              <div className="w-10 h-10 md:w-12 md:h-12 bg-red-600 rounded-full flex items-center justify-center text-white font-bold text-lg relative">
-                🤖
+              <div className={`w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br ${getAIAvatar().color} rounded-full flex items-center justify-center text-white font-bold text-2xl md:text-3xl relative shadow-lg border-2 border-white ${getAIAvatar().animation} transition-all duration-300`}>
+                {getAIAvatar().emoji}
                 {dealer === 'player' ? (
-                  <span className="absolute -top-2 -right-2 bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">BB</span>
+                  <span className="absolute -top-2 -right-2 bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full font-bold shadow-md">BB</span>
                 ) : (
-                  <span className="absolute -top-2 -right-2 bg-yellow-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">SB</span>
+                  <span className="absolute -top-2 -right-2 bg-yellow-500 text-white text-xs px-2 py-0.5 rounded-full font-bold shadow-md">SB</span>
                 )}
               </div>
               <div>
@@ -774,7 +837,7 @@ export default function TexasHoldemGame() {
                     {player.chips > 0 && ai.chips > 0 && (
                       <button
                         onClick={startNewGame}
-                        className="w-full py-4 bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-bold text-lg md:text-xl rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all"
+                        className="w-full py-5 md:py-4 bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-bold text-xl md:text-xl rounded-xl shadow-lg hover:shadow-2xl active:scale-95 transition-all touch-manipulation"
                       >
                         🎮 Következő leosztás most
                       </button>
@@ -783,14 +846,14 @@ export default function TexasHoldemGame() {
                 ) : (
                   <button
                     onClick={startNewGame}
-                    className="w-full py-4 bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-bold text-lg md:text-xl rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all"
+                    className="w-full py-5 md:py-4 bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-bold text-xl md:text-xl rounded-xl shadow-lg hover:shadow-2xl active:scale-95 transition-all touch-manipulation"
                   >
                     🎮 Játék indítása
                   </button>
                 )}
               </div>
             ) : !playerTurn ? (
-              <div className="w-full py-4 bg-gray-600/50 text-white font-bold text-center rounded-xl">
+              <div className="w-full py-5 md:py-4 bg-gray-600/50 text-white font-bold text-center rounded-xl text-lg md:text-base">
                 ⏳ A gép gondolkozik...
               </div>
             ) : (
@@ -805,9 +868,9 @@ export default function TexasHoldemGame() {
                   </div>
                 )}
 
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3">
-                  <label className="text-white text-sm font-semibold block mb-2">
-                    {toCall > 0 ? 'Emelés mérete' : 'Tét mérete'}: <span className="text-yellow-400">{betSliderValue} chip</span>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 md:p-3">
+                  <label className="text-white text-base md:text-sm font-semibold block mb-3 md:mb-2">
+                    {toCall > 0 ? 'Emelés mérete' : 'Tét mérete'}: <span className="text-yellow-400 text-lg md:text-base">{betSliderValue} chip</span>
                     {toCall > 0 && <span className="text-xs text-white/70 ml-2">(min: {minBetAmount})</span>}
                   </label>
                   <input
@@ -817,19 +880,19 @@ export default function TexasHoldemGame() {
                     step={bigBlind}
                     value={betSliderValue}
                     onChange={(e) => setBetSliderValue(Number(e.target.value))}
-                    className="w-full h-3 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-yellow-500"
+                    className="w-full h-4 md:h-3 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-yellow-500 touch-manipulation"
                     disabled={!playerTurn}
                   />
-                  <div className="flex justify-between text-xs text-white/70 mt-1">
+                  <div className="flex justify-between text-sm md:text-xs text-white/70 mt-2 md:mt-1">
                     <span>{Math.max(minBetAmount, bigBlind)}</span>
                     <span>{maxBet}</span>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
                   <button
                     onClick={handleFold}
-                    className="py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-colors text-sm md:text-base"
+                    className="py-4 md:py-3 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 active:scale-95 transition-all text-base md:text-base shadow-lg touch-manipulation"
                   >
                     ❌ Dobás
                   </button>
@@ -837,14 +900,14 @@ export default function TexasHoldemGame() {
                   {canCheck ? (
                     <button
                       onClick={handleCheck}
-                      className="py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors text-sm md:text-base"
+                      className="py-4 md:py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 active:scale-95 transition-all text-base md:text-base shadow-lg touch-manipulation"
                     >
                       ✓ Check
                     </button>
                   ) : (
                     <button
                       onClick={handleCall}
-                      className="py-3 bg-yellow-600 text-white font-bold rounded-lg hover:bg-yellow-700 transition-colors text-sm md:text-base"
+                      className="py-4 md:py-3 bg-yellow-600 text-white font-bold rounded-xl hover:bg-yellow-700 active:scale-95 transition-all text-base md:text-base shadow-lg disabled:opacity-50 touch-manipulation"
                       disabled={toCall > player.chips}
                     >
                       {toCall >= player.chips
@@ -855,7 +918,7 @@ export default function TexasHoldemGame() {
 
                   <button
                     onClick={handleBetOrRaise}
-                    className="py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition-colors text-sm md:text-base disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="py-4 md:py-3 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 active:scale-95 transition-all text-base md:text-base shadow-lg disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
                     disabled={minBetAmount >= player.chips}
                   >
                     {toCall > 0 ? '⬆️ Emelés' : '💰 Tét'}
@@ -863,7 +926,7 @@ export default function TexasHoldemGame() {
 
                   <button
                     onClick={handleAllIn}
-                    className="py-3 bg-purple-600 text-white font-bold rounded-lg hover:bg-purple-700 transition-colors text-sm md:text-base"
+                    className="py-4 md:py-3 bg-purple-600 text-white font-bold rounded-xl hover:bg-purple-700 active:scale-95 transition-all text-base md:text-base shadow-lg touch-manipulation"
                   >
                     🔥 ALL-IN
                   </button>
@@ -892,14 +955,55 @@ export default function TexasHoldemGame() {
             </button>
           </div>
           {showRules && (
-            <ul className="text-white/80 text-xs md:text-sm space-y-1">
-              <li>• Mindkét játékos <strong>500 chippel</strong> indul</li>
-              <li>• <strong>2 titkos lap</strong> + <strong>5 közös lap</strong> (max)</li>
-              <li>• <strong>Flop:</strong> 3 lap | <strong>Turn:</strong> 4 lap | <strong>River:</strong> 5 lap</li>
-              <li>• Ha emelsz, a gépnek meg kell adnia, emelnie vagy dobnia</li>
-              <li>• Döntetlen esetén a pot <strong>feleződik</strong></li>
-              <li>• Vakok 2 percenként emelkednek (kéz között)</li>
-            </ul>
+            <div className="text-white/90 text-xs md:text-sm space-y-3">
+              <div>
+                <h4 className="font-bold text-yellow-300 mb-1">🎯 Játék Célja:</h4>
+                <p>Nyerd meg az összes chipet! A legjobb 5 lapos kombináció győz a 2 saját + 5 közös lapból.</p>
+              </div>
+
+              <div>
+                <h4 className="font-bold text-yellow-300 mb-1">🃏 Játékmenet:</h4>
+                <ul className="space-y-1 ml-4">
+                  <li>• <strong>Preflop:</strong> 2 saját lap kiosztása, vakok befizetése (SB/BB)</li>
+                  <li>• <strong>Flop:</strong> 3 közös lap felfordítása, licitkör</li>
+                  <li>• <strong>Turn:</strong> 4. közös lap, újabb licitkör</li>
+                  <li>• <strong>River:</strong> 5. közös lap, utolsó licitkör</li>
+                  <li>• <strong>Showdown:</strong> Lapok felfordítása, legjobb kéz nyer</li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="font-bold text-yellow-300 mb-1">💰 Licit Opciók:</h4>
+                <ul className="space-y-1 ml-4">
+                  <li>• <strong>Check:</strong> Passz (ha nincs tét előtted)</li>
+                  <li>• <strong>Megadás (Call):</strong> Beszállás a jelenlegi tétbe</li>
+                  <li>• <strong>Emelés (Raise):</strong> Tét növelése</li>
+                  <li>• <strong>Dobás (Fold):</strong> Feladás, lapjaid eldobása</li>
+                  <li>• <strong>All-In:</strong> Összes chiped beszállása</li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="font-bold text-yellow-300 mb-1">🏆 Lapkombinációk (Erősségi sorrend):</h4>
+                <ul className="space-y-1 ml-4">
+                  <li>• <strong>Royal Flush:</strong> 10-J-Q-K-A azonos színben</li>
+                  <li>• <strong>Straight Flush:</strong> 5 lap sorban, azonos színben</li>
+                  <li>• <strong>Póker (Four of a Kind):</strong> 4 ugyanolyan érték</li>
+                  <li>• <strong>Full House:</strong> 3 + 2 ugyanolyan érték</li>
+                  <li>• <strong>Flush (Flöss):</strong> 5 lap azonos színben</li>
+                  <li>• <strong>Straight (Sor):</strong> 5 lap sorban</li>
+                  <li>• <strong>Drill (Three of a Kind):</strong> 3 ugyanolyan érték</li>
+                  <li>• <strong>Két Pár:</strong> 2x2 ugyanolyan érték</li>
+                  <li>• <strong>Pár:</strong> 2 ugyanolyan érték</li>
+                  <li>• <strong>Magas lap:</strong> Legmagasabb lap dönt</li>
+                </ul>
+              </div>
+
+              <div className="bg-white/10 p-3 rounded-lg border border-yellow-400/30">
+                <p className="text-yellow-300 font-semibold">💡 Tipp:</p>
+                <p>A vakok 2 percenként emelkednek - ez pontosan úgy működik mint az élő versenyeinken! Gyere el és teszteld tudásodat élőben! 🎰</p>
+              </div>
+            </div>
           )}
         </div>
       </div>

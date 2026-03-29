@@ -380,6 +380,10 @@ body {
     animation: fadeInUp 0.8s ease-out forwards;
   }
 
+  .animate-shake {
+    animation: shake 0.5s ease-in-out infinite;
+  }
+
   .poker-card {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
@@ -557,5 +561,20 @@ body {
   }
   100% {
     transform: translateY(-8px) scale(1.02);
+  }
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0) rotate(0deg);
+  }
+  25% {
+    transform: translateX(-3px) rotate(-2deg);
+  }
+  50% {
+    transform: translateX(3px) rotate(2deg);
+  }
+  75% {
+    transform: translateX(-3px) rotate(-2deg);
   }
 }
