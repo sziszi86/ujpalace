@@ -9,6 +9,11 @@ export default function AnalyticsTracker() {
   const pathname = usePathname();
 
   useEffect(() => {
+    // Ne kövessük az admin oldalakat
+    if (pathname.startsWith('/admin')) {
+      return;
+    }
+
     const screenWidth = typeof window !== 'undefined' ? window.screen.width : null;
     const screenHeight = typeof window !== 'undefined' ? window.screen.height : null;
     const referrer = typeof document !== 'undefined' ? document.referrer : null;
