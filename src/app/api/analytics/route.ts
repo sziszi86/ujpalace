@@ -66,7 +66,7 @@ export async function GET(request: Request) {
       LIMIT 10
     `, [startDateStr]);
 
-    // Referrerek
+    // Referrerek kategorizálva
     const referrers = await query(`
       SELECT 
         referrer_domain,
@@ -77,6 +77,30 @@ export async function GET(request: Request) {
       ORDER BY total_views DESC
       LIMIT 15
     `, [startDateStr]);
+
+    // Referrer kategóriák
+    const referrerCategories = {
+      social: 0,
+      search: 0,
+      direct: 0,
+      other: 0,
+    };
+
+    const socialDomains = ['facebook.com', 'www.facebook.com', 'm.facebook.com', 'instagram.com', 'tiktok.com', 'twitter.com', 'x.com', 'linkedin.com', 'pinterest.com', 'reddit.com'];
+    const searchDomains = ['google.com', 'www.google.com', 'google.hu', 'bing.com', 'yahoo.com', 'duckduckgo.com', 'ecosia.org'];
+
+    referrers.rows.forEach((ref: any) => {
+      const domain = ref.referrer_domain.toLowerCase();
+      if (socialDomains.some(d => domain.includes(d))) {
+        referrerCategories.social += ref.total_views;
+      } else if (searchDomains.some(d => domain.includes(d))) {
+        referrerCategories.search += ref.total_views;
+      } else if (domain === 'direct' || domain === '(direct)') {
+        referrerCategories.direct += ref.total_views;
+      } else {
+        referrerCategories.other += ref.total_views;
+      }
+    });
 
     // Mai statisztikák
     const todayStats = await query(`
@@ -139,6 +163,7 @@ export async function GET(request: Request) {
       topPages: topPages.rows,
       topTournaments: topTournaments.rows,
       referrers: referrers.rows,
+      referrerCategories,
       today: today || null,
       yesterday: yesterday || null,
     });

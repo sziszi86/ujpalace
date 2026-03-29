@@ -44,6 +44,12 @@ interface AnalyticsData {
     referrer_domain: string;
     total_views: number;
   }>;
+  referrerCategories: {
+    social: number;
+    search: number;
+    direct: number;
+    other: number;
+  };
   today: any;
   yesterday: any;
 }
@@ -336,30 +342,112 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Referrers */}
-      <div className="bg-white rounded-lg shadow">
-        <div className="p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900">🔗 Források</h2>
-        </div>
-        <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {data.referrers.map((ref, i) => (
-              <div
-                key={ref.referrer_domain}
-                className="flex items-center justify-between p-3 bg-gray-50 rounded hover:bg-gray-100 transition-colors"
-              >
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">
-                    {ref.referrer_domain}
-                  </p>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        {/* Referrer Categories */}
+        <div className="bg-white rounded-lg shadow">
+          <div className="p-6 border-b border-gray-200">
+            <h2 className="text-xl font-semibold text-gray-900">🔍 Forrás kategóriák</h2>
+          </div>
+          <div className="p-6">
+            <div className="space-y-4">
+              {/* Facebook / Social */}
+              <div className="flex items-center justify-between p-3 bg-blue-50 rounded">
+                <div className="flex items-center">
+                  <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center mr-3">
+                    <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900">Facebook / Social</p>
+                    <p className="text-xs text-gray-500">Facebook, Instagram, TikTok, stb.</p>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm font-bold text-gray-900">{ref.total_views}</p>
-                </div>
+                <p className="text-xl font-bold text-blue-600">{data.referrerCategories?.social || 0}</p>
               </div>
-            ))}
-            {data.referrers.length === 0 && (
-              <p className="text-gray-500 text-center py-4 col-span-full">Nincs külső forrás adat</p>
-            )}
+
+              {/* Google / Kereső */}
+              <div className="flex items-center justify-between p-3 bg-green-50 rounded">
+                <div className="flex items-center">
+                  <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center mr-3">
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900">Google / Kereső</p>
+                    <p className="text-xs text-gray-500">Organikus keresés</p>
+                  </div>
+                </div>
+                <p className="text-xl font-bold text-green-600">{data.referrerCategories?.search || 0}</p>
+              </div>
+
+              {/* Direkt */}
+              <div className="flex items-center justify-between p-3 bg-purple-50 rounded">
+                <div className="flex items-center">
+                  <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center mr-3">
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900">Közvetlen</p>
+                    <p className="text-xs text-gray-500">Közvetlen látogatók</p>
+                  </div>
+                </div>
+                <p className="text-xl font-bold text-purple-600">{data.referrerCategories?.direct || 0}</p>
+              </div>
+
+              {/* Egyéb */}
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                <div className="flex items-center">
+                  <div className="w-10 h-10 bg-gray-400 rounded-full flex items-center justify-center mr-3">
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900">Egyéb</p>
+                    <p className="text-xs text-gray-500">Más hivatkozások</p>
+                  </div>
+                </div>
+                <p className="text-xl font-bold text-gray-600">{data.referrerCategories?.other || 0}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Top Referrers */}
+        <div className="bg-white rounded-lg shadow">
+          <div className="p-6 border-b border-gray-200">
+            <h2 className="text-xl font-semibold text-gray-900">🔗 Top hivatkozások</h2>
+          </div>
+          <div className="p-6">
+            <div className="space-y-3">
+              {data.referrers && data.referrers.length > 0 ? (
+                data.referrers.slice(0, 8).map((ref, i) => (
+                  <div
+                    key={ref.referrer_domain}
+                    className="flex items-center justify-between p-3 bg-gray-50 rounded hover:bg-gray-100 transition-colors"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {ref.referrer_domain}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-bold text-gray-900">{ref.total_views}</p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500 text-center py-8">
+                  📭 Még nincs hivatkozás adat
+                  <br/>
+                  <span className="text-xs">A látogatók majd itt jelennek meg</span>
+                </p>
+              )}
+            </div>
           </div>
         </div>
       </div>
