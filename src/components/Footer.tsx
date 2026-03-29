@@ -161,7 +161,7 @@ export default function Footer() {
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6 mb-4 md:mb-0">
               <p className="text-gray-400 text-sm">
-                © 2025 Palace Poker Szombathely. Minden jog fenntartva.
+                © 2026 Palace Poker Szombathely. Minden jog fenntartva.
               </p>
               <div className="flex space-x-4">
                 <Link href="/privacy" className="text-gray-400 hover:text-white text-sm transition-colors">
@@ -171,7 +171,7 @@ export default function Footer() {
             </div>
             <div className="flex items-center space-x-2">
               <span className="text-gray-400 text-sm">Powered by</span>
-              <span className="text-poker-gold font-semibold text-sm">Salamon Szilard</span>
+              <a href="https://www.crealpha.at/hu"><span className="text-poker-gold font-semibold text-sm">Crealpha</span></a>
             </div>
           </div>
         </div>
