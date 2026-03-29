@@ -237,8 +237,11 @@ export default function TexasHoldemGame() {
       setPlayerActed(false); // Player posted BB but hasn't acted on raises
       setAiActed(false);
 
-      // AI (SB) acts first preflop
-      setTimeout(() => aiAction(true), 1000);
+      // AI (SB) acts first preflop - use ref to ensure fresh state
+      setTimeout(() => {
+        console.log('🎲 Calling AI action from startNewGame');
+        aiAction(true);
+      }, 1000);
     }
   }, [createDeck, player, ai, dealer, getBlinds]);
 
@@ -366,7 +369,21 @@ export default function TexasHoldemGame() {
     overrideCurrentBet?: number,
     overridePot?: number
   ) => {
-    if (ai.folded || ai.allIn || phase === 'showdown' || phase === 'waiting' || bettingRoundComplete) return;
+    // Debug: Log why AI might skip
+    if (ai.folded || ai.allIn || phase === 'showdown' || phase === 'waiting') {
+      console.log('⚠️ AI Action skipped:', {
+        folded: ai.folded,
+        allIn: ai.allIn,
+        phase,
+      });
+      return;
+    }
+
+    // Don't check bettingRoundComplete on first action of new round
+    if (bettingRoundComplete && !isFirstToAct) {
+      console.log('⚠️ AI Action skipped: betting round already complete');
+      return;
+    }
 
     // Use override values if provided (to handle React state timing)
     const actualCurrentBet = overrideCurrentBet ?? currentBet;
