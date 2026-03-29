@@ -3,6 +3,8 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import ConditionalLayout from "@/components/ConditionalLayout";
 import AnalyticsTracker from "@/components/AnalyticsTracker";
+import LoadingScreen from "@/components/LoadingScreen";
+import { Suspense } from "react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -65,38 +67,40 @@ export default function RootLayout({
   return (
     <html lang="hu">
       <body className={inter.className}>
-        <ConditionalLayout>
-          {/* Analytics Tracker - saját megoldás (PostgreSQL/Railway) */}
-          <AnalyticsTracker />
-          {children}
-        </ConditionalLayout>
+        <Suspense fallback={<LoadingScreen />}>
+          <ConditionalLayout>
+            {/* Analytics Tracker - saját megoldás (PostgreSQL/Railway) */}
+            <AnalyticsTracker />
+            {children}
+          </ConditionalLayout>
 
-        {/* Structured Data */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "LocalBusiness",
-              "name": "Palace Poker Szombathely",
-              "description": "Kiváló pókerterem Szombathelyen minden szintű játékos számára",
-              "address": {
-                "@type": "PostalAddress",
-                "streetAddress": "Semmelweis u. 2.",
-                "addressLocality": "Szombathely",
-                "postalCode": "9700",
-                "addressCountry": "HU"
-              },
-              "telephone": "+36 30 971 5832",
-              "email": "palacepoker kukac hotmail.hu",
-              "openingHours": "Mo-Su 18:00-06:00",
-              "url": "https://palace-poker.hu",
-              "priceRange": "$$",
-              "servesCuisine": "Entertainment",
-              "acceptsReservations": true
-            }),
-          }}
-        />
+          {/* Structured Data */}
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "LocalBusiness",
+                "name": "Palace Poker Szombathely",
+                "description": "Kiváló pókerterem Szombathelyen minden szintű játékos számára",
+                "address": {
+                  "@type": "PostalAddress",
+                  "streetAddress": "Semmelweis u. 2.",
+                  "addressLocality": "Szombathely",
+                  "postalCode": "9700",
+                  "addressCountry": "HU"
+                },
+                "telephone": "+36 30 971 5832",
+                "email": "palacepoker kukac hotmail.hu",
+                "openingHours": "Mo-Su 18:00-06:00",
+                "url": "https://palace-poker.hu",
+                "priceRange": "$$",
+                "servesCuisine": "Entertainment",
+                "acceptsReservations": true
+              }),
+            }}
+          />
+        </Suspense>
       </body>
     </html>
   );
