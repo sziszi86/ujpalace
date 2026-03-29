@@ -57,6 +57,9 @@ export default function TexasHoldemGame() {
   // Hand ID to prevent stale AI actions
   const handIdRef = useRef(0);
 
+  // Prevent duplicate nextPhase calls
+  const isTransitioningPhaseRef = useRef(false);
+
   const blindTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Helper to set message with visual style
@@ -308,11 +311,20 @@ export default function TexasHoldemGame() {
 
   // Move to next phase - CRITICAL: Only called when betting round is complete
   const nextPhase = useCallback(() => {
+    // CRITICAL: Prevent duplicate calls with ref
+    if (isTransitioningPhaseRef.current) {
+      console.log('⚠️ nextPhase blocked: already transitioning');
+      return;
+    }
+
     console.log('nextPhase called from:', phase);
     console.log('player.bet:', player.bet, 'ai.bet:', ai.bet);
-    
+
     // Prevent infinite loop
     if (phase === 'waiting' || phase === 'showdown') return;
+
+    // Set flag
+    isTransitioningPhaseRef.current = true;
     
     // Reset betting for new street
     setPlayer(p => ({ ...p, bet: 0 }));
@@ -322,6 +334,9 @@ export default function TexasHoldemGame() {
     setPlayerActed(false);
     setAiActed(false);
     setLastRaiseAmount(0);
+
+    // Reset phase transition flag
+    isTransitioningPhaseRef.current = false;
     
     if (phase === 'preflop') {
       dealCommunityCards('flop');
@@ -588,19 +603,20 @@ export default function TexasHoldemGame() {
   const handleCheck = () => {
     const toCall = currentBet - player.bet;
     if (toCall > 0) {
-      setMessage('⚠️ Nem checkelhetsz - tét van az asztalon!');
+      setActionMessage('⚠️ Nem checkelhetsz - tét van az asztalon!', 'warning');
       return;
     }
 
     console.log('✓ Player checks');
-    setMessage('✓ Checkeltél');
+    setActionMessage('✓ Checkeltél', 'info');
     setPlayerActed(true);
     setPlayerTurn(false);
 
     // If AI already acted, round is complete
     if (aiActed) {
-      // Both checked - let useEffect handle nextPhase
+      // Both checked - proceed to next phase
       setBettingRoundComplete(true);
+      setTimeout(() => nextPhase(), 800);
     } else {
       // AI still needs to act
       setTimeout(() => aiAction(false), 800);
@@ -627,19 +643,21 @@ export default function TexasHoldemGame() {
 
       if (ai.allIn || ai.chips === 0) {
         setBettingRoundComplete(true);
+        setTimeout(() => nextPhase(), 800);
       } else {
         setTimeout(() => aiAction(false), 800);
       }
     } else {
       setPot(p => p + toCall);
       setPlayer(p => ({ ...p, bet: currentBet, chips: p.chips - toCall }));
-      setMessage(`✓ Megadtad (${toCall} chip)`);
+      setActionMessage(`✓ Megadtad (${toCall} chip)`, 'info');
       setPlayerActed(true);
       setPlayerTurn(false);
 
-      // If AI already acted, round complete - let useEffect handle nextPhase
+      // If AI already acted, round complete
       if (aiActed) {
         setBettingRoundComplete(true);
+        setTimeout(() => nextPhase(), 800);
       } else {
         setTimeout(() => aiAction(false), 800);
       }
@@ -720,6 +738,7 @@ export default function TexasHoldemGame() {
 
     if (ai.allIn || ai.chips === 0) {
       setBettingRoundComplete(true);
+      setTimeout(() => nextPhase(), 800);
     } else {
       setAiActed(false); // AI must act on the all-in
       // Pass the NEW bet and pot to AI
@@ -897,6 +916,11 @@ export default function TexasHoldemGame() {
                 <p className="text-yellow-400 font-bold text-sm md:text-base">{player.chips} chip</p>
                 {player.bet > 0 && (
                   <p className="text-green-400 text-xs">Tét: {player.bet}</p>
+                )}
+                {communityCards.length >= 3 && player.hand.length === 2 && (
+                  <p className="text-cyan-400 text-xs md:text-sm font-bold mt-1">
+                    {getHandName(evaluateHand(player.hand, communityCards))}
+                  </p>
                 )}
               </div>
             </div>
