@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Banner from "@/components/Banner";
 import FeaturedOffers from "@/components/FeaturedOffers";
+import CashGameHero from "@/components/CashGameHero";
 
 interface AboutData {
   opening_hours?: string;
@@ -36,45 +37,8 @@ export default function Home() {
       {/* Featured Offers Section */}
       <FeaturedOffers />
 
-      {/* Cash Game Announcement Section */}
-      <section className="py-12 bg-gradient-to-r from-poker-primary via-poker-secondary to-poker-primary relative overflow-hidden">
-        {/* Animated background elements */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-4 left-10 text-6xl animate-float text-white">♠</div>
-          <div className="absolute top-8 right-16 text-5xl animate-float text-white" style={{animationDelay: '0.5s'}}>♥</div>
-          <div className="absolute bottom-6 left-20 text-5xl animate-float text-white" style={{animationDelay: '1s'}}>♣</div>
-          <div className="absolute bottom-4 right-10 text-6xl animate-float text-white" style={{animationDelay: '1.5s'}}>♦</div>
-        </div>
-
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="text-center animate-scale-in">
-            <div className="inline-block mb-6">
-              <div className="bg-white/20 backdrop-blur-sm px-8 py-4 rounded-2xl border-4 border-white/40 shadow-2xl transform hover:scale-105 transition-all duration-300">
-                <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-2 tracking-tight">
-                  MINDEN JÁTÉKNAP
-                </h2>
-                <div className="flex items-center justify-center gap-4 mt-4">
-                  <div className="h-1 w-16 bg-poker-gold rounded-full animate-pulse"></div>
-                  <p className="text-3xl md:text-4xl lg:text-5xl font-bold text-poker-gold animate-pulse">
-                    CASH GAME
-                  </p>
-                  <div className="h-1 w-16 bg-poker-gold rounded-full animate-pulse"></div>
-                </div>
-                <p className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mt-4">
-                  NYITÁSTÓL!!!
-                </p>
-              </div>
-            </div>
-
-            <div className="max-w-3xl mx-auto mt-8">
-              <p className="text-white text-lg md:text-xl font-medium bg-white/10 backdrop-blur-sm px-6 py-4 rounded-xl border border-white/20">
-                Várunk minden nap cash game asztalainknál a nyitástól kezdve!
-                Különböző tétlimitekkel és barátságos légkörrel!
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Cash Game Hero Section - New Design */}
+      <CashGameHero />
 
       {/* About Section - Trendy Design */}
       <section className="py-20 bg-white relative overflow-hidden">
