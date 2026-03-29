@@ -402,7 +402,9 @@ export default function TexasHoldemGame() {
     }
 
     // Debug: Log why AI might skip
-    if (ai.folded || ai.allIn) {
+    // CRITICAL: Skip folded/allIn check if this is from startNewGame (capturedHandId present)
+    // because state hasn't updated yet from previous hand
+    if (!capturedHandId && (ai.folded || ai.allIn)) {
       console.log('⚠️ AI Action skipped:', {
         folded: ai.folded,
         allIn: ai.allIn,
