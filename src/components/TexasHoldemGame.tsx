@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 // Card suits and values
 const SUITS = ['♠', '♥', '♦', '♣'];
@@ -38,9 +38,7 @@ export default function TexasHoldemGame() {
   const [blindLevel, setBlindLevel] = useState(1);
   const [timeUntilBlindIncrease, setTimeUntilBlindIncrease] = useState(60);
   const [playerTurn, setPlayerTurn] = useState(false);
-  const [lastAggressor, setLastAggressor] = useState<'player' | 'ai' | null>(null);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const blindTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const [phaseBetComplete, setPhaseBetComplete] = useState(false);
 
   // Blind levels
   const getBlinds = useCallback(() => {
@@ -69,7 +67,7 @@ export default function TexasHoldemGame() {
     return newDeck;
   }, []);
 
-  // Evaluate hand strength (simplified)
+  // Evaluate hand strength
   const evaluateHand = (hand: Card[], community: Card[]): number => {
     const allCards = [...hand, ...community];
     if (allCards.length < 5) return 0;
@@ -94,10 +92,10 @@ export default function TexasHoldemGame() {
     return 0;
   };
 
-  // Blind increase timer
+  // Blind increase timer (only between hands)
   useEffect(() => {
-    if (phase !== 'waiting' && !gameOver) {
-      blindTimerRef.current = setInterval(() => {
+    if (phase === 'waiting' && !gameOver) {
+      const timer = setInterval(() => {
         setTimeUntilBlindIncrease(prev => {
           if (prev <= 1) {
             setBlindLevel(l => l + 1);
@@ -107,25 +105,9 @@ export default function TexasHoldemGame() {
           return prev - 1;
         });
       }, 1000);
-    }
-    
-    return () => {
-      if (blindTimerRef.current) clearInterval(blindTimerRef.current);
-    };
-  }, [phase, gameOver, blindLevel]);
-
-  // Update timer display
-  useEffect(() => {
-    if (phase !== 'waiting' && !gameOver) {
-      const timer = setInterval(() => {
-        setTimeUntilBlindIncrease(prev => {
-          if (prev <= 1) return 60;
-          return prev - 1;
-        });
-      }, 1000);
       return () => clearInterval(timer);
     }
-  }, [phase, gameOver]);
+  }, [phase, gameOver, blindLevel]);
 
   // Start new game
   const startNewGame = useCallback(() => {
@@ -152,46 +134,140 @@ export default function TexasHoldemGame() {
     setCurrentBet(0);
     setPhase('preflop');
     setGameOver(false);
+    setPhaseBetComplete(false);
     
     const { smallBlind, bigBlind } = getBlinds();
     
-    // Post blinds
+    // Post blinds - Small blind posts first, Big blind posts second
     if (dealer === 'player') {
+      // Player is SB, AI is BB
       const playerSB = Math.min(smallBlind, player.chips);
       const aiBB = Math.min(bigBlind, ai.chips);
       setPlayer(p => ({ ...p, bet: playerSB, chips: p.chips - playerSB }));
       setAi(a => ({ ...a, bet: aiBB, chips: a.chips - aiBB }));
       setCurrentBet(bigBlind);
       setPot(playerSB + aiBB);
-      setMessage(`Kisvak: ${smallBlind} | Nagyvak: ${bigBlind} - Tegyen tétet!`);
-      setPlayerTurn(true);
-      setLastAggressor('ai');
+      setMessage(`Preflop - Kisvak: ${smallBlind} | Nagyvak: ${bigBlind} - Tegyen tétet!`);
+      setPlayerTurn(true); // SB acts first preflop
     } else {
+      // AI is SB, Player is BB
       const aiSB = Math.min(smallBlind, ai.chips);
       const playerBB = Math.min(bigBlind, player.chips);
       setAi(a => ({ ...a, bet: aiSB, chips: a.chips - aiSB }));
       setPlayer(p => ({ ...p, bet: playerBB, chips: p.chips - playerBB }));
       setCurrentBet(bigBlind);
       setPot(aiSB + playerBB);
-      setMessage(`Kisvak: ${smallBlind} | Nagyvak: ${bigBlind} - A gép következik`);
+      setMessage(`Preflop - Kisvak: ${smallBlind} | Nagyvak: ${bigBlind} - A gép következik`);
       setPlayerTurn(false);
-      setLastAggressor('player');
       setTimeout(aiAction, 1000);
     }
   }, [createDeck, player, ai, dealer, getBlinds]);
 
-  // Deal community cards
-  const dealCommunityCards = useCallback((count: number) => {
+  // Deal community cards based on phase
+  const dealCommunityCards = useCallback((newPhase: GamePhase) => {
     const newDeck = [...deck];
     const newCards: Card[] = [];
-    for (let i = 0; i < count; i++) {
+    
+    if (newPhase === 'flop') {
+      // Deal 3 cards for flop
+      for (let i = 0; i < 3; i++) {
+        if (newDeck.length > 0) {
+          newCards.push(newDeck.pop()!);
+        }
+      }
+    } else if (newPhase === 'turn' || newPhase === 'river') {
+      // Deal 1 card for turn and river
       if (newDeck.length > 0) {
         newCards.push(newDeck.pop()!);
       }
     }
+    
     setDeck(newDeck);
     setCommunityCards(prev => [...prev, ...newCards]);
   }, [deck]);
+
+  // Move to next betting phase or showdown
+  const nextPhase = useCallback(() => {
+    // Reset bets for new phase
+    setPlayer(p => ({ ...p, bet: 0 }));
+    setAi(a => ({ ...a, bet: 0 }));
+    setCurrentBet(0);
+    setPhaseBetComplete(false);
+    
+    if (phase === 'preflop') {
+      // Deal Flop (3 cards)
+      dealCommunityCards('flop');
+      setPhase('flop');
+      setMessage('Flop - 3 közös lap kiosztva. Jöhet a licit!');
+      // BB acts first postflop
+      if (dealer === 'player') {
+        setPlayerTurn(false);
+        setTimeout(aiAction, 1000);
+      } else {
+        setPlayerTurn(true);
+        setMessage('Flop - Te következel!');
+      }
+    } else if (phase === 'flop') {
+      // Deal Turn (1 card)
+      dealCommunityCards('turn');
+      setPhase('turn');
+      setMessage('Turn - 4. közös lap kiosztva. Jöhet a licit!');
+      if (dealer === 'player') {
+        setPlayerTurn(false);
+        setTimeout(aiAction, 1000);
+      } else {
+        setPlayerTurn(true);
+        setMessage('Turn - Te következel!');
+      }
+    } else if (phase === 'turn') {
+      // Deal River (1 card)
+      dealCommunityCards('river');
+      setPhase('river');
+      setMessage('River - 5. közös lap kiosztva. Utolsó licitkör!');
+      if (dealer === 'player') {
+        setPlayerTurn(false);
+        setTimeout(aiAction, 1000);
+      } else {
+        setPlayerTurn(true);
+        setMessage('River - Te következel!');
+      }
+    } else if (phase === 'river') {
+      // Showdown
+      setPhase('showdown');
+      const playerStrength = evaluateHand(player.hand, [...communityCards]);
+      const aiStrength = evaluateHand(ai.hand, [...communityCards]);
+      
+      let winMessage = '';
+      if (playerStrength > aiStrength) {
+        winMessage = getHandName(playerStrength);
+        setMessage(`🎉 Nyertél! ${winMessage}`);
+        setPlayer(p => ({ ...p, chips: p.chips + pot }));
+      } else if (aiStrength > playerStrength) {
+        winMessage = getHandName(aiStrength);
+        setMessage(`❌ A gép nyert! ${winMessage}`);
+        setAi(a => ({ ...a, chips: a.chips + pot }));
+      } else {
+        setMessage('🤝 Döntetlen! A pot feleződik.');
+        const halfPot = Math.floor(pot / 2);
+        setPlayer(p => ({ ...p, chips: p.chips + halfPot }));
+        setAi(a => ({ ...a, chips: a.chips + halfPot }));
+      }
+      setGameOver(true);
+      setPhase('waiting');
+      // Switch dealer for next hand
+      setDealer(d => d === 'player' ? 'ai' : 'player');
+    }
+  }, [phase, dealCommunityCards, player, ai, communityCards, pot, dealer]);
+
+  const getHandName = (strength: number): string => {
+    if (strength >= 700) return '(Póker)';
+    if (strength >= 600) return '(Full)';
+    if (strength >= 500) return '(Flöss)';
+    if (strength >= 300) return '(Drill)';
+    if (strength >= 200) return '(Két pár)';
+    if (strength >= 100) return '(Pár)';
+    return '(Magas lap)';
+  };
 
   // AI Action
   const aiAction = useCallback(() => {
@@ -200,28 +276,40 @@ export default function TexasHoldemGame() {
     const handStrength = evaluateHand(ai.hand, communityCards);
     const toCall = currentBet - ai.bet;
     const random = Math.random();
-    const { smallBlind, bigBlind } = getBlinds();
+    const { bigBlind } = getBlinds();
     
     setTimeout(() => {
+      // Check if AI can act
+      if (phaseBetComplete) {
+        // Betting round complete, move to next phase
+        nextPhase();
+        return;
+      }
+
       // AI decision logic
       const shouldRaise = handStrength >= 100 || (random > 0.7 && handStrength >= 50);
       const shouldCall = toCall <= bigBlind || random > 0.6;
       
       if (ai.chips <= toCall) {
         // AI is all-in
-        setAi(a => ({ ...a, bet: a.bet + a.chips, chips: 0, allIn: true }));
-        setPot(p => p + ai.chips);
-        setMessage('A gép all-in!');
-        if (lastAggressor === 'ai') {
-          nextPhase();
-        } else {
-          setPlayerTurn(true);
-          setMessage('A gép all-in! Megadja vagy dobja?');
-        }
+        const allInAmount = ai.chips;
+        setAi(a => ({ ...a, bet: a.bet + allInAmount, chips: 0, allIn: true }));
+        setPot(p => p + allInAmount);
+        setMessage('A gép ALL-IN!');
+        setPlayerTurn(true);
+        setMessage('A gép all-in! Megadja vagy dobja?');
         return;
       }
       
-      if (shouldRaise && ai.chips > toCall + bigBlind) {
+      if (shouldRaise && ai.chips > toCall + bigBlind && toCall === 0) {
+        // Bet (not raise, since player checked)
+        const betAmount = Math.min(bigBlind * 2, ai.chips);
+        setAi(a => ({ ...a, bet: betAmount, chips: a.chips - betAmount }));
+        setCurrentBet(betAmount);
+        setPot(p => p + betAmount);
+        setMessage(`A gép tett ${betAmount}-t`);
+        setPlayerTurn(true);
+      } else if (shouldRaise && ai.chips > toCall + bigBlind) {
         // Raise
         const raiseAmount = Math.min(bigBlind * 2, ai.chips - toCall);
         const totalBet = currentBet + raiseAmount;
@@ -230,15 +318,17 @@ export default function TexasHoldemGame() {
         setCurrentBet(totalBet);
         setPot(p => p + toAdd);
         setMessage(`A gép emelt ${raiseAmount}-t`);
-        setLastAggressor('ai');
         setPlayerTurn(true);
       } else if (shouldCall || toCall === 0) {
         // Call or check
-        setAi(a => ({ ...a, bet: currentBet, chips: a.chips - toCall }));
+        setAi(a => ({ ...a, bet: ai.bet + toCall, chips: a.chips - toCall }));
         setPot(p => p + toCall);
         setMessage(toCall === 0 ? 'A gép checkelt' : 'A gép megadta');
-        if (lastAggressor === 'ai' || toCall === 0) {
-          nextPhase();
+        
+        // Check if betting round is complete
+        if (player.bet === ai.bet + toCall || toCall === 0) {
+          setPhaseBetComplete(true);
+          setTimeout(() => nextPhase(), 800);
         } else {
           setPlayerTurn(true);
         }
@@ -251,78 +341,7 @@ export default function TexasHoldemGame() {
         setPhase('waiting');
       }
     }, 800);
-  }, [ai, communityCards, currentBet, pot, getBlinds, lastAggressor, phase]);
-
-  // Next phase
-  const nextPhase = useCallback(() => {
-    setPlayer(p => ({ ...p, bet: 0 }));
-    setAi(a => ({ ...a, bet: 0 }));
-    setCurrentBet(0);
-    setLastAggressor(null);
-    setPlayerTurn(dealer === 'ai'); // Big blind acts first postflop
-    
-    setTimeout(() => {
-      if (phase === 'preflop') {
-        dealCommunityCards(3);
-        setPhase('flop');
-        setMessage('Flop - Jöhet a tét');
-        if (dealer === 'ai') {
-          setPlayerTurn(true);
-        } else {
-          setTimeout(aiAction, 1000);
-        }
-      } else if (phase === 'flop') {
-        dealCommunityCards(1);
-        setPhase('turn');
-        setMessage('Turn - Jöhet a tét');
-        if (dealer === 'ai') {
-          setPlayerTurn(true);
-        } else {
-          setTimeout(aiAction, 1000);
-        }
-      } else if (phase === 'turn') {
-        dealCommunityCards(1);
-        setPhase('river');
-        setMessage('River - Utolsó lehetőség');
-        if (dealer === 'ai') {
-          setPlayerTurn(true);
-        } else {
-          setTimeout(aiAction, 1000);
-        }
-      } else if (phase === 'river') {
-        setPhase('showdown');
-        const playerStrength = evaluateHand(player.hand, communityCards);
-        const aiStrength = evaluateHand(ai.hand, communityCards);
-        
-        if (playerStrength > aiStrength) {
-          const winMessage = getHandName(playerStrength);
-          setMessage(`🎉 Nyertél! ${winMessage}`);
-          setPlayer(p => ({ ...p, chips: p.chips + pot }));
-        } else if (aiStrength > playerStrength) {
-          const winMessage = getHandName(aiStrength);
-          setMessage(`❌ A gép nyert! ${winMessage}`);
-          setAi(a => ({ ...a, chips: a.chips + pot }));
-        } else {
-          setMessage('🤝 Döntetlen! A pot feleződik.');
-          setPlayer(p => ({ ...p, chips: p.chips + Math.floor(pot / 2) }));
-          setAi(a => ({ ...a, chips: a.chips + Math.floor(pot / 2) }));
-        }
-        setGameOver(true);
-        setPhase('waiting');
-        setDealer(d => d === 'player' ? 'ai' : 'player');
-      }
-    }, 500);
-  }, [phase, dealCommunityCards, player, ai, communityCards, pot, dealer, aiAction]);
-
-  const getHandName = (strength: number): string => {
-    if (strength >= 700) return '(Póker)';
-    if (strength >= 600) return '(Full)';
-    if (strength >= 500) return '(Flöss)';
-    if (strength >= 300) return '(Drill)';
-    if (strength >= 200) return '(Két pár)';
-    if (strength >= 100) return '(Pár)';
-    return '(Magas lap)';
-  };
+  }, [ai, communityCards, currentBet, pot, getBlinds, phase, phaseBetComplete, player.bet, nextPhase]);
 
   // Player actions
   const handleFold = () => {
@@ -339,11 +358,16 @@ export default function TexasHoldemGame() {
       return;
     }
     setMessage('Checkeltél');
-    setLastAggressor(null);
-    if (phase !== 'preflop' || dealer === 'player') {
-      setTimeout(aiAction, 800);
+    // Check if AI has already checked
+    if (ai.bet === 0 && phase !== 'preflop') {
+      setPhaseBetComplete(true);
+      setTimeout(() => nextPhase(), 800);
+    } else if (ai.bet === player.bet) {
+      setPhaseBetComplete(true);
+      setTimeout(() => nextPhase(), 800);
     } else {
-      nextPhase();
+      setPlayerTurn(false);
+      setTimeout(aiAction, 800);
     }
   };
 
@@ -352,20 +376,25 @@ export default function TexasHoldemGame() {
     if (toCall >= player.chips) {
       // All-in
       setPot(p => p + player.chips);
-      setPlayer(p => ({ ...p, bet: p.bet + p.chips, chips: 0, allIn: true }));
+      setPlayer(p => ({ ...p, bet: p.bet + player.chips, chips: 0, allIn: true }));
       setMessage('All-in!');
-      if (lastAggressor === 'player') {
-        nextPhase();
+      if (ai.bet === player.bet + player.chips || ai.allIn) {
+        setPhaseBetComplete(true);
+        setTimeout(() => nextPhase(), 800);
       } else {
+        setPlayerTurn(false);
         setTimeout(aiAction, 800);
       }
     } else {
       setPot(p => p + toCall);
       setPlayer(p => ({ ...p, bet: currentBet, chips: p.chips - toCall }));
       setMessage('Megadtad');
-      if (lastAggressor === 'player') {
-        nextPhase();
+      // Check if betting round is complete
+      if (player.chips - toCall === 0 || player.bet + toCall === ai.bet) {
+        setPhaseBetComplete(true);
+        setTimeout(() => nextPhase(), 800);
       } else {
+        setPlayerTurn(false);
         setTimeout(aiAction, 800);
       }
     }
@@ -373,33 +402,45 @@ export default function TexasHoldemGame() {
 
   const handleBet = () => {
     const betAmount = betSliderValue;
-    const totalBet = currentBet + betAmount;
-    const toAdd = totalBet - player.bet;
+    const totalBet = player.bet + betAmount;
+    const toAdd = betAmount;
     
     if (toAdd >= player.chips) {
       // All-in
       setPot(p => p + player.chips);
-      setPlayer(p => ({ ...p, bet: p.bet + p.chips, chips: 0, allIn: true }));
+      setPlayer(p => ({ ...p, bet: player.bet + player.chips, chips: 0, allIn: true }));
       setCurrentBet(player.bet + player.chips);
       setMessage('All-in!');
-      setTimeout(aiAction, 800);
+      if (ai.allIn || ai.chips === 0) {
+        setPhaseBetComplete(true);
+        setTimeout(() => nextPhase(), 800);
+      } else {
+        setPlayerTurn(false);
+        setTimeout(aiAction, 800);
+      }
     } else {
       setPot(p => p + toAdd);
       setPlayer(p => ({ ...p, bet: totalBet, chips: p.chips - toAdd }));
       setCurrentBet(totalBet);
       setMessage(`Emeltél ${betAmount}-t`);
-      setLastAggressor('player');
+      setPlayerTurn(false);
       setTimeout(aiAction, 800);
     }
   };
 
   const handleAllIn = () => {
-    setPot(p => p + player.chips);
-    setPlayer(p => ({ ...p, bet: p.bet + p.chips, chips: 0, allIn: true }));
-    setCurrentBet(player.bet + player.chips);
-    setMessage('All-in!');
-    setLastAggressor('player');
-    setTimeout(aiAction, 800);
+    const allInAmount = player.chips;
+    setPot(p => p + allInAmount);
+    setPlayer(p => ({ ...p, bet: p.bet + allInAmount, chips: 0, allIn: true }));
+    setCurrentBet(player.bet + allInAmount);
+    setMessage(`All-in! (${allInAmount} chip)`);
+    if (ai.allIn || ai.chips === 0) {
+      setPhaseBetComplete(true);
+      setTimeout(() => nextPhase(), 800);
+    } else {
+      setPlayerTurn(false);
+      setTimeout(aiAction, 800);
+    }
   };
 
   // Card component
@@ -420,7 +461,6 @@ export default function TexasHoldemGame() {
   const toCall = currentBet - player.bet;
   const canCheck = toCall === 0;
   const maxBet = player.chips;
-  const minBet = bigBlind;
 
   return (
     <section className="py-12 bg-gradient-to-b from-green-900 to-green-800 relative overflow-hidden">
@@ -438,7 +478,7 @@ export default function TexasHoldemGame() {
         {/* Blind Level & Timer */}
         <div className="max-w-4xl mx-auto mb-4">
           <div className="bg-yellow-600/90 backdrop-blur-sm rounded-xl p-3 text-center border-2 border-yellow-400">
-            <div className="flex justify-between items-center text-white">
+            <div className="flex justify-between items-center text-white flex-wrap gap-2">
               <span className="font-bold">📊 Vak szint: {blindLevel}</span>
               <span className="font-bold">🕐 Köv. emelés: {timeUntilBlindIncrease}s</span>
               <span className="font-bold">💰 Vakok: {smallBlind}/{bigBlind}</span>
@@ -549,7 +589,7 @@ export default function TexasHoldemGame() {
                   </label>
                   <input
                     type="range"
-                    min={minBet}
+                    min={bigBlind}
                     max={maxBet}
                     step={5}
                     value={betSliderValue}
@@ -558,7 +598,7 @@ export default function TexasHoldemGame() {
                     disabled={!playerTurn}
                   />
                   <div className="flex justify-between text-xs text-white/70 mt-1">
-                    <span>{minBet}</span>
+                    <span>{bigBlind}</span>
                     <span>{maxBet}</span>
                   </div>
                 </div>
@@ -600,8 +640,8 @@ export default function TexasHoldemGame() {
           <h3 className="text-white font-bold text-base md:text-lg mb-2">📜 Játékszabályok</h3>
           <ul className="text-white/80 text-xs md:text-sm space-y-1">
             <li>• Mindkét játékos <strong>500 chippel</strong> indul</li>
-            <li>• Vakok <strong>percenként emelkednek</strong> (gyorsítja a játékot)</li>
-            <li>• A játék addig tart, amíg valakinek el nem fogynak a chipjei</li>
+            <li>• Vakok <strong>percenként emelkednek</strong> (csak kéz között)</li>
+            <li>• <strong>Flop:</strong> 3 közös lap | <strong>Turn:</strong> 1 lap | <strong>River:</strong> 1 lap</li>
             <li>• Döntetlen esetén a pot <strong>feleződik</strong></li>
             <li>• Használd a csúszkát a tét méretének beállításához</li>
             <li>• Sorrend: Magas lap → Pár → Két pár → Drill → Flöss → Full → Póker</li>
