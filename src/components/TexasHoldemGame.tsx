@@ -129,7 +129,7 @@ export default function TexasHoldemGame() {
     const newDeck = createDeck();
     const playerHand = [newDeck.pop()!, newDeck.pop()!];
     const aiHand = [newDeck.pop()!, newDeck.pop()!];
-    
+
     setDeck(newDeck);
     setPlayer({ ...player, hand: playerHand, bet: 0, folded: false, allIn: false });
     setAi({ ...ai, hand: aiHand, bet: 0, folded: false, allIn: false });
@@ -139,9 +139,9 @@ export default function TexasHoldemGame() {
     setPhase('preflop');
     setGameOver(false);
     setPhaseBetComplete(false);
-    
+
     const { smallBlind, bigBlind } = getBlinds();
-    
+
     // Post blinds - Small blind posts first, Big blind posts second
     if (dealer === 'player') {
       // Player is SB, AI is BB
@@ -163,7 +163,21 @@ export default function TexasHoldemGame() {
       setPot(aiSB + playerBB);
       setMessage(`Új leosztás - Preflop - Kisvak: ${smallBlind} | Nagyvak: ${bigBlind} - A gép következik`);
       setPlayerTurn(false);
-      setTimeout(() => aiAction(), 1500);
+      // AI (SB) needs to complete or check - will be handled by aiAction
+      setTimeout(() => {
+        // AI completes the bet to big blind
+        const toCall = bigBlind - aiSB;
+        if (toCall > 0 && ai.chips >= toCall) {
+          setAi(a => ({ ...a, bet: bigBlind, chips: a.chips - toCall }));
+          setPot(p => p + toCall);
+          setMessage('A gép megadta. Te következel!');
+          setPlayerTurn(true);
+        } else {
+          // AI checks (already posted enough)
+          setMessage('A gép checkelt. Te következel!');
+          setPlayerTurn(true);
+        }
+      }, 1500);
     }
   }, [createDeck, player, ai, dealer, getBlinds]);
 
