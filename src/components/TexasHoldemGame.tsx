@@ -339,16 +339,24 @@ export default function TexasHoldemGame() {
   }, [bettingRoundComplete, phase, checkBettingRoundComplete, nextPhase]);
 
   // AI Action - SENIOR POKER STRATEGY
-  const aiAction = useCallback((isFirstToAct: boolean = false) => {
+  const aiAction = useCallback((
+    isFirstToAct: boolean = false,
+    overrideCurrentBet?: number,
+    overridePot?: number
+  ) => {
     if (ai.folded || ai.allIn || phase === 'showdown' || phase === 'waiting' || bettingRoundComplete) return;
 
+    // Use override values if provided (to handle React state timing)
+    const actualCurrentBet = overrideCurrentBet ?? currentBet;
+    const actualPot = overridePot ?? pot;
+
     const handStrength = evaluateHand(ai.hand, communityCards);
-    const toCall = currentBet - ai.bet;
+    const toCall = actualCurrentBet - ai.bet;
     const random = Math.random();
     const { bigBlind } = getBlinds();
-    const potOdds = toCall > 0 ? toCall / (pot + toCall) : 0;
+    const potOdds = toCall > 0 ? toCall / (actualPot + toCall) : 0;
 
-    console.log('🤖 AI Action - toCall:', toCall, 'handStrength:', handStrength, 'potOdds:', potOdds);
+    console.log('🤖 AI Action - currentBet:', actualCurrentBet, 'ai.bet:', ai.bet, 'toCall:', toCall, 'handStrength:', handStrength);
 
     setTimeout(() => {
       // Mark AI as acted
@@ -393,7 +401,7 @@ export default function TexasHoldemGame() {
           if (handStrength >= 300) raiseMultiplier = 2.5; // Trips+
 
           const raiseAmount = Math.min(bigBlind * raiseMultiplier, lastRaiseAmount * 2, ai.chips - toCall);
-          const totalBet = currentBet + raiseAmount;
+          const totalBet = actualCurrentBet + raiseAmount;
           const toAdd = totalBet - ai.bet;
 
           setAi(a => ({ ...a, bet: totalBet, chips: a.chips - toAdd }));
@@ -405,7 +413,7 @@ export default function TexasHoldemGame() {
           setPlayerTurn(true);
         } else {
           // CALL
-          setAi(a => ({ ...a, bet: currentBet, chips: a.chips - toCall }));
+          setAi(a => ({ ...a, bet: actualCurrentBet, chips: a.chips - toCall }));
           setPot(p => p + toCall);
           setMessage(`✓ A gép megadta (${toCall} chip)`);
           setPlayerTurn(true);
@@ -425,7 +433,7 @@ export default function TexasHoldemGame() {
           if (handStrength >= 500) betMultiplier = 1; // Bigger with strong hands
           if (handStrength >= 300) betMultiplier = 0.75;
 
-          const betAmount = Math.min(Math.floor(pot * betMultiplier + bigBlind), ai.chips);
+          const betAmount = Math.min(Math.floor(actualPot * betMultiplier + bigBlind), ai.chips);
 
           setAi(a => ({ ...a, bet: betAmount, chips: a.chips - betAmount }));
           setCurrentBet(betAmount);
@@ -559,25 +567,29 @@ export default function TexasHoldemGame() {
       return;
     }
 
-    setPot(p => p + toAdd);
+    const raiseAmount = totalBet - currentBet;
+    const newPot = pot + toAdd;
+
+    setPot(newPot);
     setPlayer(p => ({ ...p, bet: totalBet, chips: p.chips - toAdd }));
     setCurrentBet(totalBet);
-    const raiseAmount = totalBet - currentBet;
     setLastRaiseAmount(raiseAmount);
     setMessage(`⬆️ Emeltél: +${raiseAmount} chip`);
     setPlayerActed(true);
     setAiActed(false); // AI must act again
     setPlayerTurn(false);
 
-    setTimeout(() => aiAction(false), 800);
+    // Pass the NEW bet and pot to AI so it sees the updated values
+    setTimeout(() => aiAction(false, totalBet, newPot), 800);
   };
 
   const handleAllIn = () => {
     const allInAmount = player.chips;
     const newTotalBet = player.bet + allInAmount;
     const raiseAmount = newTotalBet - currentBet;
+    const newPot = pot + allInAmount;
 
-    setPot(p => p + allInAmount);
+    setPot(newPot);
     setPlayer(p => ({ ...p, bet: newTotalBet, chips: 0, allIn: true }));
     setCurrentBet(newTotalBet);
 
@@ -594,7 +606,8 @@ export default function TexasHoldemGame() {
       setTimeout(() => nextPhase(), 800);
     } else {
       setAiActed(false); // AI must act on the all-in
-      setTimeout(() => aiAction(false), 800);
+      // Pass the NEW bet and pot to AI
+      setTimeout(() => aiAction(false, newTotalBet, newPot), 800);
     }
   };
 
