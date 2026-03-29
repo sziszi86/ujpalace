@@ -94,22 +94,24 @@ export default function TexasHoldemGame() {
 
   // Blind increase timer (only between hands, after first game starts)
   useEffect(() => {
-    if (phase !== 'waiting' && !gameOver) {
+    if (gameOver && phase === 'waiting' && player.chips > 0 && ai.chips > 0) {
       const timer = setInterval(() => {
         setTimeUntilBlindIncrease(prev => {
           if (prev <= 1) {
             setBlindLevel(l => l + 1);
             setMessage(`⚠️ Vakok emelkednek: ${5 * (blindLevel + 1)}/${10 * (blindLevel + 1)}`);
-            return 60;
+            return 120; // 2 minutes between blind increases
           }
           return prev - 1;
         });
       }, 1000);
       return () => clearInterval(timer);
     }
-    // Reset timer when game is not active
-    setTimeUntilBlindIncrease(60);
-  }, [phase, gameOver, blindLevel]);
+    // Reset timer when game is active
+    if (phase !== 'waiting') {
+      setTimeUntilBlindIncrease(120);
+    }
+  }, [phase, gameOver, player.chips, ai.chips, blindLevel]);
 
   // Start new game
   const startNewGame = useCallback(() => {
@@ -149,7 +151,7 @@ export default function TexasHoldemGame() {
       setAi(a => ({ ...a, bet: aiBB, chips: a.chips - aiBB }));
       setCurrentBet(bigBlind);
       setPot(playerSB + aiBB);
-      setMessage(`Preflop - Kisvak: ${smallBlind} | Nagyvak: ${bigBlind} - Tegyen tétet!`);
+      setMessage(`Új leosztás - Preflop - Kisvak: ${smallBlind} | Nagyvak: ${bigBlind} - Tegyen tétet!`);
       setPlayerTurn(true); // SB acts first preflop
     } else {
       // AI is SB, Player is BB
@@ -159,11 +161,23 @@ export default function TexasHoldemGame() {
       setPlayer(p => ({ ...p, bet: playerBB, chips: p.chips - playerBB }));
       setCurrentBet(bigBlind);
       setPot(aiSB + playerBB);
-      setMessage(`Preflop - Kisvak: ${smallBlind} | Nagyvak: ${bigBlind} - A gép következik`);
+      setMessage(`Új leosztás - Preflop - Kisvak: ${smallBlind} | Nagyvak: ${bigBlind} - A gép következik`);
       setPlayerTurn(false);
-      setTimeout(aiAction, 1000);
+      setTimeout(() => aiAction(), 1500);
     }
   }, [createDeck, player, ai, dealer, getBlinds]);
+
+  // Auto-start next hand after showdown
+  useEffect(() => {
+    if (gameOver && phase === 'waiting') {
+      const timer = setTimeout(() => {
+        if (player.chips > 0 && ai.chips > 0) {
+          startNewGame();
+        }
+      }, 2500); // 2.5 second delay before next hand
+      return () => clearTimeout(timer);
+    }
+  }, [gameOver, phase, player.chips, ai.chips, startNewGame]);
 
   // Deal community cards based on phase
   const dealCommunityCards = useCallback((newPhase: GamePhase) => {
@@ -477,8 +491,8 @@ export default function TexasHoldemGame() {
           🃏 Texas Hold'em Játék
         </h2>
 
-        {/* Blind Level & Timer - Only show when game is active */}
-        {phase !== 'waiting' && (
+        {/* Blind Level & Timer - Only show between hands */}
+        {gameOver && phase === 'waiting' && player.chips > 0 && ai.chips > 0 && (
           <div className="max-w-4xl mx-auto mb-4">
             <div className="bg-yellow-600/90 backdrop-blur-sm rounded-xl p-3 text-center border-2 border-yellow-400">
               <div className="flex justify-between items-center text-white flex-wrap gap-2">
@@ -573,13 +587,20 @@ export default function TexasHoldemGame() {
 
           {/* Betting Controls */}
           <div className="mt-4">
-            {gameOver || phase === 'waiting' ? (
-              <button
-                onClick={startNewGame}
-                className="w-full py-4 bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-bold text-lg md:text-xl rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all"
-              >
-                🎮 {phase === 'waiting' ? 'Játék indítása' : 'Új játék'}
-              </button>
+            {gameOver && phase === 'waiting' ? (
+              <div className="space-y-3">
+                <div className="w-full py-4 bg-gray-600/50 text-white font-bold text-center rounded-xl text-lg">
+                  ⏳ Következő leosztás {player.chips > 0 && ai.chips > 0 ? `${timeUntilBlindIncrease}s múlva` : '...'}
+                </div>
+                {player.chips > 0 && ai.chips > 0 && (
+                  <button
+                    onClick={startNewGame}
+                    className="w-full py-4 bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-bold text-lg md:text-xl rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all"
+                  >
+                    🎮 Következő leosztás most
+                  </button>
+                )}
+              </div>
             ) : !playerTurn ? (
               <div className="w-full py-4 bg-gray-600/50 text-white font-bold text-center rounded-xl">
                 ⏳ A gép gondolkozik...
@@ -644,9 +665,10 @@ export default function TexasHoldemGame() {
           <h3 className="text-white font-bold text-base md:text-lg mb-2">📜 Játékszabályok</h3>
           <ul className="text-white/80 text-xs md:text-sm space-y-1">
             <li>• Mindkét játékos <strong>500 chippel</strong> indul</li>
-            <li>• Vakok <strong>percenként emelkednek</strong> (csak kéz között)</li>
+            <li>• Vakok <strong>2 percenként emelkednek</strong> (csak kéz között)</li>
             <li>• <strong>Flop:</strong> 3 közös lap | <strong>Turn:</strong> 1 lap | <strong>River:</strong> 1 lap</li>
             <li>• Döntetlen esetén a pot <strong>feleződik</strong></li>
+            <li>• A következő leosztás <strong>automatikusan indul</strong> 2.5 másodperc múlva</li>
             <li>• Használd a csúszkát a tét méretének beállításához</li>
             <li>• Sorrend: Magas lap → Pár → Két pár → Drill → Flöss → Full → Póker</li>
           </ul>
