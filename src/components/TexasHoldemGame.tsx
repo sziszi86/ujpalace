@@ -41,6 +41,7 @@ export default function TexasHoldemGame() {
   const [playerTurn, setPlayerTurn] = useState(false);
   const [showRules, setShowRules] = useState(false);
   const [playerWonLastHand, setPlayerWonLastHand] = useState(false);
+  const [isStartingHand, setIsStartingHand] = useState(false);
 
   // Betting round state - SIMPLIFIED for proper poker
   const [bettingRoundComplete, setBettingRoundComplete] = useState(false);
@@ -54,9 +55,6 @@ export default function TexasHoldemGame() {
 
   // Hand ID to prevent stale AI actions
   const handIdRef = useRef(0);
-
-  // Prevent multiple simultaneous startNewGame calls
-  const isStartingGameRef = useRef(false);
 
   const blindTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -182,8 +180,8 @@ export default function TexasHoldemGame() {
 
   // Start new hand
   const startNewGame = useCallback(() => {
-    // CRITICAL: Prevent multiple simultaneous calls with ref (phase state too slow)
-    if (isStartingGameRef.current) {
+    // CRITICAL: Prevent multiple simultaneous calls
+    if (isStartingHand) {
       console.log('⚠️ startNewGame blocked: already starting new game');
       return;
     }
@@ -206,7 +204,7 @@ export default function TexasHoldemGame() {
     }
 
     // Set flag to prevent re-entry
-    isStartingGameRef.current = true;
+    setIsStartingHand(true);
 
     // CRITICAL: Increment handId FIRST to invalidate any pending AI actions
     handIdRef.current += 1;
@@ -273,11 +271,11 @@ export default function TexasHoldemGame() {
       }, 1000);
     }
 
-    // Reset flag after phase change has been processed
+    // Reset flag after state updates are done
     setTimeout(() => {
-      isStartingGameRef.current = false;
-    }, 500);
-  }, [createDeck, player, ai, dealer, getBlinds]);
+      setIsStartingHand(false);
+    }, 100);
+  }, [createDeck, player, ai, dealer, getBlinds, isStartingHand, phase]);
 
   // Deal community cards
   const dealCommunityCards = useCallback((newPhase: GamePhase) => {
@@ -925,7 +923,8 @@ export default function TexasHoldemGame() {
                     {player.chips > 0 && ai.chips > 0 && (
                       <button
                         onClick={startNewGame}
-                        className="w-full py-5 md:py-4 bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-bold text-xl md:text-xl rounded-xl shadow-lg hover:shadow-2xl active:scale-95 transition-all touch-manipulation"
+                        disabled={isStartingHand}
+                        className="w-full py-5 md:py-4 bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-bold text-xl md:text-xl rounded-xl shadow-lg hover:shadow-2xl active:scale-95 transition-all touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         🎮 Következő leosztás most
                       </button>
@@ -934,7 +933,8 @@ export default function TexasHoldemGame() {
                 ) : (
                   <button
                     onClick={startNewGame}
-                    className="w-full py-5 md:py-4 bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-bold text-xl md:text-xl rounded-xl shadow-lg hover:shadow-2xl active:scale-95 transition-all touch-manipulation"
+                    disabled={isStartingHand}
+                    className="w-full py-5 md:py-4 bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-bold text-xl md:text-xl rounded-xl shadow-lg hover:shadow-2xl active:scale-95 transition-all touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     🎮 Játék indítása
                   </button>
