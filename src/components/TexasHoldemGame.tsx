@@ -331,7 +331,7 @@ export default function TexasHoldemGame() {
     }
   }, [phase, dealCommunityCards, player, ai, communityCards, pot, dealer]);
 
-  // AI Action - FIXED chip calculation
+  // AI Action - FIXED: AI cannot check when facing a bet
   const aiAction = useCallback((isFirstToAct: boolean = false) => {
     if (ai.folded || ai.allIn || phase === 'showdown' || phase === 'waiting') return;
     
@@ -340,11 +340,14 @@ export default function TexasHoldemGame() {
     const random = Math.random();
     const { bigBlind } = getBlinds();
     
-    console.log('AI Action - toCall:', toCall, 'currentBet:', currentBet, 'ai.bet:', ai.bet);
+    console.log('AI Action - toCall:', toCall, 'currentBet:', currentBet, 'ai.bet:', ai.bet, 'isFirstToAct:', isFirstToAct);
     
     setTimeout(() => {
+      // CRITICAL: Check if AI is facing a bet
       if (toCall > 0) {
-        // AI faces a bet - must call, raise, or fold (CANNOT check)
+        // AI MUST call, raise, or fold - CANNOT CHECK!
+        console.log('AI faces a bet of', toCall, '- cannot check!');
+        
         if (ai.chips <= toCall) {
           // AI is all-in
           const allInAmount = ai.chips;
@@ -408,8 +411,11 @@ export default function TexasHoldemGame() {
           setPhase('waiting');
         }
       } else {
-        // No bet facing - AI can check or bet
+        // No bet facing (toCall === 0) - AI can check or bet
+        console.log('AI can check or bet (toCall = 0)');
+        
         if (isFirstToAct || (!playerHasActed && lastRaiser !== 'player')) {
+          // AI is first to act or player checked
           if (handStrength >= 100 && ai.chips > bigBlind * 2) {
             // BET
             const betAmount = Math.min(bigBlind * 2, ai.chips);
@@ -436,7 +442,7 @@ export default function TexasHoldemGame() {
             }
           }
         } else {
-          // Check behind
+          // Check behind (player already checked)
           setMessage('A gép checkelt');
           setAiHasActed(true);
           setTimeout(() => nextPhase(), 800);
