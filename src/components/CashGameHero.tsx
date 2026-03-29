@@ -134,23 +134,7 @@ export default function CashGameHero() {
             </div>
           </div>
 
-          {/* CTA Buttons */}
-          <div className="flex flex-wrap justify-center gap-4 mt-8 md:mt-10">
-            <a
-              href="/cash-games"
-              className="group px-8 py-4 bg-gradient-to-r from-poker-gold to-orange-500 text-white font-bold rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 flex items-center gap-2"
-            >
-              <span>📅</span>
-              <span>Naptár megtekintése</span>
-              <span className="group-hover:translate-x-1 transition-transform">→</span>
-            </a>
-            <a
-              href="/cash-games/list"
-              className="px-8 py-4 bg-white/10 backdrop-blur-sm text-white font-bold rounded-xl border-2 border-white/30 hover:bg-white/20 transform hover:scale-105 transition-all duration-300"
-            >
-              📋 Asztalok
-            </a>
-          </div>
+          {/* No CTA Buttons - removed */}
         </div>
       </div>
 

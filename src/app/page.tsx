@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Banner from "@/components/Banner";
 import FeaturedOffers from "@/components/FeaturedOffers";
 import CashGameHero from "@/components/CashGameHero";
+import TexasHoldemGame from "@/components/TexasHoldemGame";
 
 interface AboutData {
   opening_hours?: string;
@@ -39,6 +40,9 @@ export default function Home() {
 
       {/* Cash Game Hero Section - New Design */}
       <CashGameHero />
+
+      {/* Texas Hold'em Mini Game */}
+      <TexasHoldemGame />
 
       {/* About Section - Trendy Design */}
       <section className="py-20 bg-white relative overflow-hidden">
