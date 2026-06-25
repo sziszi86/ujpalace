@@ -124,8 +124,8 @@ export default function NewTournamentPage() {
     e.preventDefault();
     setLoading(true);
 
-    // Validáció: Struktúra kötelező
-    if (!formData.structure) {
+    // Validáció: Struktúra kötelező, de csak ha nem szünet
+    if (!formData.isClosure && !formData.structure) {
       showAlert('A struktúra kiválasztása kötelező!', 'error');
       setLoading(false);
       return;
@@ -139,16 +139,16 @@ export default function NewTournamentPage() {
         longDescription: formData.longDescription,
         date: formData.date,
         time: formData.time,
-        buyIn: parseInt(formData.buyIn) || 0,
+        buyIn: formData.isClosure ? 0 : (parseInt(formData.buyIn) || 0),
         rebuyPrice: parseInt(formData.rebuyPrice) || 0,
         rebuyChips: parseInt(formData.rebuyChips) || 0,
         addonPrice: parseInt(formData.addonPrice) || 0,
         addonChips: parseInt(formData.addonChips) || 0,
         guarantee: parseInt(formData.guarantee) || 0,
-        structure: formData.structure,
+        structure: formData.isClosure ? 'ZÁRVA' : formData.structure,
         category: formData.category,
         venue: 'Palace Poker Szombathely',
-        startingChips: parseInt(formData.startingChips) || 0,
+        startingChips: formData.isClosure ? 0 : (parseInt(formData.startingChips) || 0),
         image: formData.imageUrl,
         specialNotes: formData.specialNotes,
         featured: formData.featured,
@@ -362,7 +362,7 @@ export default function NewTournamentPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Buy-in (Ft) *
+                Buy-in (Ft) {!formData.isClosure && '*'}
               </label>
               <input
                 type="number"
@@ -370,7 +370,9 @@ export default function NewTournamentPage() {
                 value={formData.buyIn}
                 onChange={handleInputChange}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-poker-primary admin-input"
-                required
+                required={!formData.isClosure}
+                disabled={formData.isClosure}
+                placeholder={formData.isClosure ? "Nem szükséges szünet esetén" : ""}
               />
             </div>
 
@@ -473,17 +475,18 @@ export default function NewTournamentPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Struktúra *
+                Struktúra {!formData.isClosure && '*'}
               </label>
               <select
                 name="structure"
                 value={formData.structure}
                 onChange={handleInputChange}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-poker-primary admin-input"
-                required
+                required={!formData.isClosure}
+                disabled={formData.isClosure}
               >
-                <option value="">Válassz struktúrát...</option>
-                {structures.map((structure) => (
+                <option value="">{formData.isClosure ? "Nem szükséges szünet esetén" : "Válassz struktúrát..."}</option>
+                {!formData.isClosure && structures.map((structure) => (
                   <option key={structure.id} value={structure.name}>
                     {structure.name} - {structure.description}
                   </option>
@@ -505,6 +508,8 @@ export default function NewTournamentPage() {
                 value={formData.startingChips}
                 onChange={handleInputChange}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-poker-primary admin-input"
+                disabled={formData.isClosure}
+                placeholder={formData.isClosure ? "Nem szükséges szünet esetén" : ""}
               />
             </div>
 

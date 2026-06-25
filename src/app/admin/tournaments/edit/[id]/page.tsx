@@ -252,8 +252,8 @@ export default function EditTournamentPage() {
     console.log('🔍 FormData:', formData);
     setSaving(true);
 
-    // Validáció: Struktúra kötelező
-    if (!formData.structure) {
+    // Validáció: Struktúra kötelező, de csak ha nem szünet
+    if (!formData.isClosure && !formData.structure) {
       showAlert('A struktúra kiválasztása kötelező!', 'error');
       setSaving(false);
       return;
@@ -274,20 +274,20 @@ export default function EditTournamentPage() {
         date: tournamentDateTime,
         tournament_date: tournamentDateTime,
         tournament_time: formData.time,
-        buyin_amount: parseInt(formData.buyIn) || 0,
-        buy_in: parseInt(formData.buyIn) || 0,
-        entry_fee: parseInt(formData.entryFee) || 0,
+        buyin_amount: formData.isClosure ? 0 : (parseInt(formData.buyIn) || 0),
+        buy_in: formData.isClosure ? 0 : (parseInt(formData.buyIn) || 0),
+        entry_fee: formData.isClosure ? 0 : (parseInt(formData.entryFee) || 0),
         rebuy_price: parseInt(formData.rebuyPrice) || 0,
         rebuy_chips: parseInt(formData.rebuyChips) || 0,
         rebuy_count: isNaN(parseInt(formData.rebuyCount)) ? 0 : parseInt(formData.rebuyCount),
         rebuy_amounts: formData.rebuyAmounts || '',
         addon_price: parseInt(formData.addonPrice) || 0,
         addon_chips: parseInt(formData.addonChips) || 0,
-        structure: formData.structure,
+        structure: formData.isClosure ? 'ZÁRVA' : formData.structure,
         category: formData.category,
         venue: formData.venue,
-        starting_chips: parseInt(formData.startingChips) || 0,
-        startingChips: parseInt(formData.startingChips) || 0,
+        starting_chips: formData.isClosure ? 0 : (parseInt(formData.startingChips) || 0),
+        startingChips: formData.isClosure ? 0 : (parseInt(formData.startingChips) || 0),
         starting_chips_note: formData.startingChipsNote || '',
         startingChipsNote: formData.startingChipsNote || '',
         image_url: formData.imageUrl,
@@ -366,7 +366,7 @@ export default function EditTournamentPage() {
         rebuyChips: parseInt(formData.rebuyChips) || 0,
         addonPrice: parseInt(formData.addonPrice) || 0,
         addonChips: parseInt(formData.addonChips) || 0,
-        structure: formData.structure,
+        structure: formData.isClosure ? 'ZÁRVA' : formData.structure,
         category: formData.category,
         venue: formData.venue,
         startingChips: parseInt(formData.startingChips) || 0,
@@ -432,7 +432,7 @@ export default function EditTournamentPage() {
         rebuyChips: parseInt(formData.rebuyChips) || 0,
         addonPrice: parseInt(formData.addonPrice) || 0,
         addonChips: parseInt(formData.addonChips) || 0,
-        structure: formData.structure,
+        structure: formData.isClosure ? 'ZÁRVA' : formData.structure,
         category: formData.category,
         venue: formData.venue,
         startingChips: parseInt(formData.startingChips) || 0,

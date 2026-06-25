@@ -244,7 +244,8 @@ export default function TournamentDetailPage() {
               )}
             </div>
 
-            {/* Tournament Structure */}
+            {/* Tournament Structure - Only show if not a closure */}
+            {!tournament.is_closure ? (
             <div className="card-modern p-8 mb-8">
               <h2 className="text-2xl font-bold text-poker-dark mb-6">Verseny struktúra</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -382,6 +383,17 @@ export default function TournamentDetailPage() {
                 </div>
               )}
             </div>
+            ) : (
+              /* Show closure notice instead of tournament structure */
+              <div className="card-modern p-8 mb-8 bg-red-50 border-2 border-red-200">
+                <div className="text-center">
+                  <div className="text-6xl mb-4">🚫</div>
+                  <h2 className="text-3xl font-bold text-red-700 mb-4">Zárvatartás</h2>
+                  <p className="text-xl text-red-600">Ezen a napon nem tartunk versenyeket!</p>
+                  <p className="text-lg text-red-500 mt-2">A terem zárva tart.</p>
+                </div>
+              </div>
+            )}
 
             {/* Special Notes */}
             {tournament.special_notes && (
