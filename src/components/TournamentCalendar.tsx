@@ -312,7 +312,8 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
       title: tournament.title,
       time: tournament.time || tournament.tournament_time,
       type: 'tournament',
-      isInactive: tournament.status === 'inactive'
+      isInactive: tournament.status === 'inactive',
+      isClosure: tournament.is_closure || false
     }));
   };
 
@@ -569,18 +570,21 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
                   <div className="space-y-1">
                     {events.slice(0, selectedView === 'mobile' ? 3 : selectedView === 'week' ? 4 : 2).map(event => {
                       const isInactive = (event as any).isInactive;
+                      const isClosure = (event as any).isClosure;
                       return (
                         <Link
                           key={event.id}
                           href={(event as any).type === 'cash-game' ? `/cash-games/${event.id}` : `/tournaments/${event.id}`}
                           className={`block p-2 rounded transition-colors ${
-                            isInactive
-                              ? 'bg-gray-100/50 hover:bg-gray-200/50 text-gray-400 hover:text-gray-500 opacity-50'
-                              : 'bg-poker-primary/10 hover:bg-poker-primary/20 text-poker-dark hover:text-poker-primary'
+                            isClosure
+                              ? 'bg-red-100 hover:bg-red-200 text-red-700 hover:text-red-800 border border-red-300'
+                              : isInactive
+                                ? 'bg-gray-100/50 hover:bg-gray-200/50 text-gray-400 hover:text-gray-500 opacity-50'
+                                : 'bg-poker-primary/10 hover:bg-poker-primary/20 text-poker-dark hover:text-poker-primary'
                           } ${selectedView === 'mobile' ? 'text-sm min-h-10' : 'text-xs md:text-sm min-h-8 md:min-h-auto'}`}
                         >
                           <div className={`font-medium truncate ${selectedView === 'mobile' ? 'text-sm' : 'text-xs md:text-sm'} ${isInactive ? 'line-through' : ''}`}>
-                            {event.time}
+                            {isClosure ? '🚫' : event.time}
                           </div>
                           <div className={`truncate ${selectedView === 'mobile' ? 'text-sm' : 'text-xs md:text-sm'}`}>
                             {event.title}

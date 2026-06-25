@@ -39,6 +39,7 @@ interface TournamentFormData {
   visibleFrom: string;
   visibleUntil: string;
   featured: boolean;
+  isClosure: boolean;
   status: 'upcoming' | 'cancelled' | 'inactive';
   guarantee: string;
 }
@@ -83,6 +84,7 @@ export default function EditTournamentPage() {
     visibleFrom: new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0],
     visibleUntil: '',
     featured: false,
+    isClosure: false,
     status: 'upcoming',
     guarantee: '',
   });
@@ -181,6 +183,7 @@ export default function EditTournamentPage() {
               ? toDateString(rawVisibleUntil)
               : dateValue || '',
             featured: tournament.featured || false,
+            isClosure: tournament.is_closure || false,
             status: tournament.status || 'upcoming',
             guarantee: numToStr(tournament.guarantee),
           });
@@ -291,6 +294,7 @@ export default function EditTournamentPage() {
         image: formData.imageUrl,
         special_notes: formData.specialNotes,
         featured: formData.featured,
+        is_closure: formData.isClosure,
         status: formData.status,
         max_players: 80,
         maxPlayers: 80,
@@ -369,6 +373,7 @@ export default function EditTournamentPage() {
         image: formData.imageUrl,
         specialNotes: formData.specialNotes,
         featured: formData.featured,
+        is_closure: formData.isClosure,
         status: 'upcoming' as const,
         maxPlayers: 80,
         currentPlayers: 0,
@@ -434,6 +439,7 @@ export default function EditTournamentPage() {
         image: formData.imageUrl,
         specialNotes: formData.specialNotes,
         featured: formData.featured,
+        is_closure: formData.isClosure,
         status: newStatus,
         maxPlayers: 80,
         currentPlayers: 0,
@@ -851,7 +857,7 @@ export default function EditTournamentPage() {
 
 
 
-            <div className="md:col-span-2">
+            <div>
               <label className="flex items-center">
                 <input
                   type="checkbox"
@@ -862,6 +868,22 @@ export default function EditTournamentPage() {
                 />
                 <span className="ml-2 text-sm text-gray-700">Kiemelt verseny</span>
               </label>
+            </div>
+            
+            <div>
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  name="isClosure"
+                  checked={formData.isClosure}
+                  onChange={handleInputChange}
+                  className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
+                />
+                <span className="ml-2 text-sm text-gray-700">🚫 Szünet/Zárvatartás</span>
+              </label>
+              <p className="text-xs text-gray-500 mt-1 ml-6">
+                Jelölje be, ha ez a nap zárvatartást jelöl (nem valódi verseny)
+              </p>
             </div>
           </div>
         </div>

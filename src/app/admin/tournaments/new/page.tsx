@@ -43,6 +43,7 @@ interface TournamentFormData {
   visibleFrom: string;
   visibleUntil: string;
   featured: boolean;
+  isClosure: boolean;
 }
 
 export default function NewTournamentPage() {
@@ -72,6 +73,7 @@ export default function NewTournamentPage() {
     visibleFrom: new Date().toISOString().split('T')[0],
     visibleUntil: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0], // másnap
     featured: false,
+    isClosure: false,
   });
 
   // Load structures from API
@@ -150,6 +152,7 @@ export default function NewTournamentPage() {
         image: formData.imageUrl,
         specialNotes: formData.specialNotes,
         featured: formData.featured,
+        isClosure: formData.isClosure,
         status: 'upcoming',
         maxPlayers: 80,
         currentPlayers: 0,
@@ -506,7 +509,7 @@ export default function NewTournamentPage() {
             </div>
 
 
-            <div className="md:col-span-2">
+            <div>
               <label className="flex items-center">
                 <input
                   type="checkbox"
@@ -517,6 +520,22 @@ export default function NewTournamentPage() {
                 />
                 <span className="ml-2 text-sm text-gray-700">Kiemelt verseny</span>
               </label>
+            </div>
+            
+            <div>
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  name="isClosure"
+                  checked={formData.isClosure}
+                  onChange={handleInputChange}
+                  className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
+                />
+                <span className="ml-2 text-sm text-gray-700">🚫 Szünet/Zárvatartás</span>
+              </label>
+              <p className="text-xs text-gray-500 mt-1 ml-6">
+                Jelölje be, ha ez a nap zárvatartást jelöl (nem valódi verseny)
+              </p>
             </div>
           </div>
         </div>

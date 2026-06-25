@@ -177,11 +177,15 @@ export default function TournamentListPage() {
         {!loading && (
           <div className="space-y-4">
             {sortedTournaments.map((tournament) => (
-              <div key={tournament.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+              <div key={tournament.id} className={`rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 ${tournament.is_closure ? 'bg-red-50 border-2 border-red-200' : 'bg-white'}`}>
                 <div className="flex flex-col lg:flex-row">
                   {/* Tournament Image */}
                   <div className="lg:w-1/4">
-                    {tournament.image ? (
+                    {tournament.is_closure ? (
+                      <div className="h-48 lg:h-full bg-gradient-to-br from-red-400 via-red-500 to-red-600 flex items-center justify-center">
+                        <span className="text-6xl text-white">🚫</span>
+                      </div>
+                    ) : tournament.image ? (
                       <div 
                         className="h-48 lg:h-full bg-cover bg-center relative"
                         style={{backgroundImage: `url(${tournament.image})`}}
@@ -201,18 +205,26 @@ export default function TournamentListPage() {
                       <div className="mb-4 lg:mb-0">
                         <div className="flex items-center mb-2">
                           <h2 className="text-2xl font-bold text-poker-dark mr-3">{tournament.title}</h2>
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(tournament.status)}`}>
-                            {getStatusText(tournament.status)}
-                          </span>
-                          {tournament.category && (
-                            <span className="ml-2 px-3 py-1 bg-poker-gold text-poker-dark text-xs font-bold rounded-full">
-                              {tournament.category}
+                          {tournament.is_closure ? (
+                            <span className="px-3 py-1 bg-red-500 text-white text-xs font-semibold rounded-full">
+                              Zárvatartás
                             </span>
-                          )}
-                          {tournament.featured && (
-                            <span className="ml-2 px-3 py-1 bg-poker-red text-white text-xs font-bold rounded-full">
-                              ⭐ Kiemelt
-                            </span>
+                          ) : (
+                            <>
+                              <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(tournament.status)}`}>
+                                {getStatusText(tournament.status)}
+                              </span>
+                              {tournament.category && (
+                                <span className="ml-2 px-3 py-1 bg-poker-gold text-poker-dark text-xs font-bold rounded-full">
+                                  {tournament.category}
+                                </span>
+                              )}
+                              {tournament.featured && (
+                                <span className="ml-2 px-3 py-1 bg-poker-red text-white text-xs font-bold rounded-full">
+                                  ⭐ Kiemelt
+                                </span>
+                              )}
+                            </>
                           )}
                         </div>
                         <p className="text-gray-600 mb-3">{tournament.description}</p>
@@ -220,29 +232,34 @@ export default function TournamentListPage() {
                     </div>
 
                     {/* Tournament Details Grid */}
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
-                      <div className="text-center p-3 bg-gray-50 rounded-lg">
-                        <p className="text-xs text-black mb-1">Dátum</p>
-                        <p className="font-bold text-sm text-poker-dark">{formatDate(tournament.tournament_date || tournament.date)}</p>
-                        <p className="text-xs text-gray-600">{tournament.tournament_time || tournament.time}</p>
-                      </div>
-                      <div className="text-center p-3 bg-gray-50 rounded-lg">
-                        <p className="text-xs text-black mb-1">Buy-in / nevezési díj</p>
-                        <p className="font-bold text-sm text-poker-primary">{formatCurrency(Number(tournament.buy_in || tournament.buyIn))}</p>
-                        {(tournament.starting_chips || tournament.startingChips) && (
-                          <p className="text-xs text-gray-600">{formatChips(Number(tournament.starting_chips || tournament.startingChips || 0))}</p>
-                        )}
-                      </div>
-                      <div className="text-center p-3 bg-gray-50 rounded-lg">
-                        <p className="text-xs text-black mb-1">Jelentkezők</p>
-                        <p className="font-bold text-sm text-poker-dark">
-                          {tournament.currentPlayers || tournament.current_players || 0}/{tournament.maxPlayers || tournament.max_players || '∞'}
+                    {tournament.is_closure ? (
+                      <div className="bg-red-100 border border-red-300 rounded-lg p-4 mb-4">
+                        <p className="text-red-800 font-semibold text-center">
+                          🚨 Ezen a napon zárva tartunk! 🚨
                         </p>
-                        <p className="text-xs text-gray-600">{tournament.structure}</p>
+                        <p className="text-red-700 text-center mt-2">
+                          Dátum: {formatDate(tournament.tournament_date || tournament.date)}
+                        </p>
                       </div>
-                    </div>
+                    ) : (
+                      <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div className="text-center p-3 bg-gray-50 rounded-lg">
+                          <p className="text-xs text-black mb-1">Dátum</p>
+                          <p className="font-bold text-sm text-poker-dark">{formatDate(tournament.tournament_date || tournament.date)}</p>
+                          <p className="text-xs text-gray-600">{tournament.tournament_time || tournament.time}</p>
+                        </div>
+                        <div className="text-center p-3 bg-gray-50 rounded-lg">
+                          <p className="text-xs text-black mb-1">Buy-in / nevezési díj</p>
+                          <p className="font-bold text-sm text-poker-primary">{formatCurrency(Number(tournament.buy_in || tournament.buyIn))}</p>
+                          {(tournament.starting_chips || tournament.startingChips) && (
+                            <p className="text-xs text-gray-600">{formatChips(Number(tournament.starting_chips || tournament.startingChips || 0))}</p>
+                          )}
+                        </div>
+                      </div>
+                    )}
 
                     {/* Additional Details */}
+                    {!tournament.is_closure && (
                     <div className="flex flex-wrap gap-2 mb-4">
                       {tournament.rebuyPrice && (
                         <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
@@ -267,8 +284,10 @@ export default function TournamentListPage() {
                         </span>
                       )}
                     </div>
+                    )}
 
                     {/* Action Button */}
+                    {!tournament.is_closure ? (
                     <div className="flex flex-col sm:flex-row gap-3 justify-end">
                       <a 
                         href="tel:+36309715832"
@@ -284,6 +303,11 @@ export default function TournamentListPage() {
                         </button>
                       </Link>
                     </div>
+                    ) : (
+                      <div className="text-center">
+                        <p className="text-gray-500 italic">Szünet/zárvatartás - Nincs nevezzés</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
