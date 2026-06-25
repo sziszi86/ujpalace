@@ -87,3 +87,4 @@ backups/
 !deploy.js
 /.qwen/settings.json
 /.qwen/settings.json.orig
+/SZUNET_ZARVATARTAS_MUKODES.md

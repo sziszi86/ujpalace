@@ -56,6 +56,8 @@ export interface Tournament {
   // Admin visibility fields
   visibleFrom?: string;
   visibleUntil?: string;
+  // Closure/holiday marker
+  is_closure?: boolean;
 }
 
 export interface CashGame {
