@@ -40,9 +40,22 @@ export default function TournamentListPage() {
         
         if (response.ok) {
           const tournamentData = await response.json();
-          // Only show active tournaments (status !== 'inactive')
-          const activeTournaments = tournamentData.filter((tournament: Tournament) => 
-            tournament.status !== 'inactive'
+          // Only show active AND upcoming tournaments:
+          // - status !== 'inactive' excludes expired tournaments
+          // - date >= today excludes any past-dated tournament that may still
+          //   linger (e.g. one with visible_until = NULL that never expired)
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          const isUpcoming = (tournament: Tournament) => {
+            const raw = tournament.tournament_date || tournament.date;
+            if (!raw) return false;
+            const datePart = raw.includes('T') ? raw.split('T')[0] : raw;
+            const [year, month, day] = datePart.split('-').map(Number);
+            if (!year || !month || !day) return false;
+            return new Date(year, month - 1, day) >= today;
+          };
+          const activeTournaments = tournamentData.filter((tournament: Tournament) =>
+            tournament.status !== 'inactive' && isUpcoming(tournament)
           );
           setTournaments(activeTournaments);
         } else {

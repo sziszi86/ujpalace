@@ -317,6 +317,26 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
     }));
   };
 
+  // Returns true if the tournament's date is today or in the future (local date comparison)
+  const isUpcomingTournament = (tournament: Tournament): boolean => {
+    const raw = tournament.date || tournament.tournament_date;
+    if (!raw) return false;
+    const datePart = raw.includes('T') ? raw.split('T')[0] : raw;
+    const [year, month, day] = datePart.split('-').map(Number);
+    if (!year || !month || !day) return false;
+    const tournamentDate = new Date(year, month - 1, day);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return tournamentDate >= today;
+  };
+
+  // List view only shows genuinely upcoming tournaments (not past/expired ones).
+  // The calendar/week views still use the full `tournaments` list so past events
+  // remain visible (faded) on their own date cells.
+  const upcomingTournaments = tournaments.filter(
+    tournament => tournament.status !== 'inactive' && isUpcomingTournament(tournament)
+  );
+
   const getDayOfWeek = (date: Date) => {
     return ['Vas', 'Hét', 'Ked', 'Sze', 'Csü', 'Pén', 'Szo'][date.getDay()];
   };
@@ -627,12 +647,12 @@ export default function TournamentCalendar({ showCashGames = true, onlyShowCashG
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-poker-primary mx-auto"></div>
                     <p className="mt-4 text-poker-muted">Versenyek betöltése...</p>
                   </div>
-                ) : tournaments.length === 0 ? (
+                ) : upcomingTournaments.length === 0 ? (
                   <div className="col-span-3 text-center py-8">
                     <p className="text-poker-muted">Jelenleg nincsenek közelgő versenyek.</p>
                   </div>
                 ) : (
-                  tournaments.map(tournament => (
+                  upcomingTournaments.map(tournament => (
                     <div key={tournament.id} className="relative">
                       {/* Calendar Button */}
                       <button
