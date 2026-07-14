@@ -30,7 +30,8 @@
       "Bash(npx tsc:*)",
       "Bash(identify:*)",
       "Bash(convert:*)",
-      "Bash(magick:*)"
+      "Bash(magick:*)",
+      "Bash(break)"
     ],
     "deny": [],
     "ask": []
