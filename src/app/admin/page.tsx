@@ -76,7 +76,10 @@ export default function AdminDashboard() {
 
   const fetchAnalytics = async () => {
     try {
-      const response = await fetch('/api/analytics?days=7');
+      const response = await fetch('/api/analytics?days=7', {
+        cache: 'no-store', signal: AbortSignal.timeout(8000),
+        headers: { Authorization: `Bearer ${localStorage.getItem('authToken') || ''}` },
+      });
       if (response.ok) {
         const data = await response.json();
         setAnalytics({
@@ -87,8 +90,9 @@ export default function AdminDashboard() {
             views: data.topTournaments[0].total_views,
           } : undefined,
         });
-      }
+      } else { setAnalytics(null); }
     } catch (error) {
+      setAnalytics(null);
       console.error('Failed to fetch analytics:', error);
     }
   };
@@ -96,10 +100,12 @@ export default function AdminDashboard() {
   useEffect(() => {
     const loadData = async () => {
       await fetchDashboardData();
-      await fetchAnalytics();
       setLoading(false);
     };
     loadData();
+    void fetchAnalytics();
+    const interval = setInterval(() => { if (document.visibilityState === 'visible') void fetchAnalytics(); }, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleResetTotals = async () => {
@@ -160,6 +166,7 @@ export default function AdminDashboard() {
         <p className="text-gray-600 mt-2">Palace Poker Szombathely tartalomkezelő rendszer</p>
       </div>
 
+      {!analytics && <p role="status" className="mb-4 text-sm text-amber-800">A látogatottsági mérés még nem érhető el. A hiányzó szám nem jelent nulla látogatót.</p>}
       {/* Analytics Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         {/* Most Online */}
@@ -168,7 +175,7 @@ export default function AdminDashboard() {
             <div>
               <p className="text-sm font-medium text-gray-500">🔴 Most online</p>
               <p className="text-4xl font-bold text-green-600 mt-1">
-                {analytics?.currentOnline || 0}
+                {analytics?.currentOnline ?? '–'}
               </p>
               <p className="text-xs text-gray-500 mt-1">
                 látogató (utolsó 5 percben)
@@ -187,12 +194,12 @@ export default function AdminDashboard() {
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-500">📊 Múlt hét (7 nap)</p>
+              <p className="text-sm font-medium text-gray-500">📊 Utolsó 7 nap</p>
               <p className="text-3xl font-bold text-gray-900 mt-1">
-                {analytics?.lastWeekVisitors || 0}
+                {analytics?.lastWeekVisitors ?? '–'}
               </p>
               <p className="text-xs text-gray-500 mt-1">
-                egyedi látogató
+                mért böngésző
               </p>
             </div>
             <div className="p-3 bg-blue-100 rounded-full">
@@ -470,9 +477,7 @@ export default function AdminDashboard() {
                   <p className="text-sm font-medium text-gray-900">Weboldal</p>
                   <p className="text-xs text-black">
                     Online ({dashboardData.systemStatus.website.uptime})
-                    {dashboardData.systemStatus.website.currentVisitors !== undefined && (
-                      <> • {dashboardData.systemStatus.website.currentVisitors} aktív látogató</>
-                    )}
+                    {analytics && (<> • {analytics.currentOnline} aktív látogató</>)}
                   </p>
                 </div>
               </div>

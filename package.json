@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "setup-analytics": "node scripts/setup-analytics.js"
+    "setup-analytics": "node scripts/setup-analytics.js",
+    "setup-analytics-v2": "node scripts/setup-analytics-v2.cjs",
+    "test:analytics": "node --test scripts/analytics.test.cjs"
   },
   "keywords": [],
   "author": "",

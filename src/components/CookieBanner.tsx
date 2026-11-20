@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { ANALYTICS_CONSENT_KEY, ANALYTICS_SETTINGS_EVENT, saveAnalyticsConsent } from '@/lib/analytics-client';
 
 interface CookieBannerProps {
   onAccept?: () => void;
@@ -12,20 +13,16 @@ export default function CookieBanner({ onAccept, onDecline }: CookieBannerProps)
   const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
-    // Check if user has already made a choice
-    const cookieConsent = localStorage.getItem('cookie-consent');
-    if (!cookieConsent) {
-      // Show banner after a short delay for better UX
-      setTimeout(() => {
-        setIsVisible(true);
-        setIsAnimating(true);
-      }, 1500);
-    }
+    const show = () => { setIsVisible(true); setIsAnimating(true); };
+    let hasChoice = false;
+    try { hasChoice = !!localStorage.getItem(ANALYTICS_CONSENT_KEY); } catch { /* Show a usable banner even without storage. */ }
+    const timer = !hasChoice ? setTimeout(show, 1500) : undefined;
+    window.addEventListener(ANALYTICS_SETTINGS_EVENT, show);
+    return () => { clearTimeout(timer); window.removeEventListener(ANALYTICS_SETTINGS_EVENT, show); };
   }, []);
 
   const handleAccept = () => {
-    localStorage.setItem('cookie-consent', 'accepted');
-    localStorage.setItem('cookie-consent-date', new Date().toISOString());
+    saveAnalyticsConsent('accepted');
     setIsAnimating(false);
     setTimeout(() => {
       setIsVisible(false);
@@ -34,8 +31,7 @@ export default function CookieBanner({ onAccept, onDecline }: CookieBannerProps)
   };
 
   const handleDecline = () => {
-    localStorage.setItem('cookie-consent', 'declined');
-    localStorage.setItem('cookie-consent-date', new Date().toISOString());
+    saveAnalyticsConsent('declined');
     setIsAnimating(false);
     setTimeout(() => {
       setIsVisible(false);
@@ -85,13 +81,11 @@ export default function CookieBanner({ onAccept, onDecline }: CookieBannerProps)
             {/* Message */}
             <div className="text-center mb-8">
               <p className="text-black leading-relaxed mb-4">
-                A Palace Poker weboldalunk sütiket használ a legjobb felhasználói élmény biztosítása érdekében. 
-                A sütik segítenek személyre szabni a tartalmat és elemezni a forgalmat.
+                Engedélyezi a látogatottság mérését? Egy véletlen böngészőazonosító segítségével számoljuk a látogatókat és az oldalmegtekintéseket. Az azonosítót legfeljebb 90 napig tároljuk a böngészőben.
               </p>
               <div className="bg-poker-light/50 rounded-xl p-4 border border-poker-primary/10">
                 <p className="text-sm text-black">
-                  <strong className="text-black">Fontos:</strong> Csak a működéshez szükséges sütiket használjuk. 
-                  Személyes adatokat nem gyűjtünk harmadik félnek.
+                  <strong className="text-black">Ön dönt:</strong> Az analitika csak elfogadás után indul. Elutasítás esetén is használhatja az oldalt. A mérési adatok saját adatbázisunkba kerülnek.
                 </p>
               </div>
             </div>
@@ -106,7 +100,7 @@ export default function CookieBanner({ onAccept, onDecline }: CookieBannerProps)
                   <svg className="w-5 h-5 mr-2 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  Elfogadás
+                  Analitika engedélyezése
                 </span>
               </button>
               
@@ -118,7 +112,7 @@ export default function CookieBanner({ onAccept, onDecline }: CookieBannerProps)
                   <svg className="w-5 h-5 mr-2 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
-                  Elutasítás
+                  Csak szükséges
                 </span>
               </button>
             </div>
@@ -130,7 +124,7 @@ export default function CookieBanner({ onAccept, onDecline }: CookieBannerProps)
                 <a href="/privacy" className="text-poker-primary hover:text-poker-secondary transition-colors underline">
                   Adatvédelmi szabályzatunkat
                 </a>.
-                Bármikor módosíthatja beállításait.
+                Beállításait a lábléc „Sütibeállítások” gombjával módosíthatja.
               </p>
             </div>
           </div>

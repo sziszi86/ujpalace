@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { ANALYTICS_SETTINGS_EVENT } from '@/lib/analytics-client';
 import { useState, useEffect } from 'react';
 
 interface AboutData {
@@ -167,6 +168,9 @@ export default function Footer() {
                 <Link href="/privacy" className="text-gray-400 hover:text-white text-sm transition-colors">
                   Adatvédelmi tájékoztató
                 </Link>
+                <button type="button" onClick={() => window.dispatchEvent(new Event(ANALYTICS_SETTINGS_EVENT))} className="text-gray-400 hover:text-white text-sm transition-colors">
+                  Sütibeállítások
+                </button>
               </div>
             </div>
             <div className="flex items-center space-x-2">

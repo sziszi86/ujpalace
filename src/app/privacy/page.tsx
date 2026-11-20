@@ -174,7 +174,7 @@ export default function PrivacyPage() {
                     </div>
                     <div className="border-l-4 border-gray-300 pl-4">
                       <h4 className="font-semibold text-poker-dark">Analitikai sütik</h4>
-                      <p className="text-sm text-poker-muted">Látogatói statisztikák és oldal teljesítmény mérése.</p>
+                      <p className="text-sm text-poker-muted">Csak az Ön engedélyével mérjük az oldal látogatottságát. Egy véletlen böngészőazonosítót tárolunk a böngésző helyi tárhelyén legfeljebb 90 napig. Saját adatbázisunkban az oldal útvonalát, megtekintési időpontját, eszköztípusát, a belépési forrás domainjét és az esetleges UTM kampányadatokat rögzítjük. A mérés nem tárol nyers IP-címet vagy teljes hivatkozó URL-t. A részletes oldalmegtekintéseket a mai és az azt megelőző 90 naptári napra tartjuk meg. A régebbi adatok és a már nem hivatkozott látogatásazonosítók takarítását a rendszer naponta, mérési esemény érkezésekor végzi. A hozzájárulást a lábléc Sütibeállítások gombjával bármikor visszavonhatja; ez leállítja a további mérést és eltávolítja a böngészőazonosítót.</p>
                     </div>
                   </div>
                 </div>

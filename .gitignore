@@ -75,6 +75,7 @@ fresh*.js
 *.sql
 !migrate-to-postgresql.sql
 !src/lib/analytics-migration.sql
+!src/lib/analytics-v2-migration.sql
 !Railway-Setup-Guide.md
 maintenance.html
 import-database.php

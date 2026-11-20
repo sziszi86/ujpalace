@@ -4,7 +4,6 @@ import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import VisitorTracker from '@/components/VisitorTracker';
 import CookieBanner from '@/components/CookieBanner';
 import AgeVerificationModal from '@/components/AgeVerificationModal';
 
@@ -44,7 +43,6 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
   // Frontend oldalakon teljes layout a header-rel és footer-rel
   return (
     <div className="min-h-screen flex flex-col">
-      <VisitorTracker />
       <Header />
       <main className="flex-1">
         {children}
